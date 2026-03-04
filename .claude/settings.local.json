@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__mcp-for-unity-server__create_script",
+      "mcp__mcp-for-unity-server__refresh_unity",
+      "mcp__mcp-for-unity-server__read_console",
+      "mcp__mcp-for-unity-server__batch_execute",
+      "mcp__mcp-for-unity-server__manage_scriptable_object",
+      "mcp__mcp-for-unity-server__manage_script",
+      "mcp__mcp-for-unity-server__script_apply_edits",
+      "mcp__mcp-for-unity-server__delete_script",
+      "mcp__mcp-for-unity-server__manage_asset",
+      "mcp__mcp-for-unity-server__manage_gameobject",
+      "mcp__mcp-for-unity-server__manage_scene",
+      "mcp__mcp-for-unity-server__manage_components",
+      "mcp__mcp-for-unity-server__manage_texture",
+      "mcp__mcp-for-unity-server__manage_prefabs",
+      "mcp__mcp-for-unity-server__manage_editor",
+      "mcp__mcp-for-unity-server__apply_text_edits",
+      "mcp__mcp-for-unity-server__find_gameobjects",
+      "mcp__mcp-for-unity-server__get_sha"
+    ]
+  }
+}
