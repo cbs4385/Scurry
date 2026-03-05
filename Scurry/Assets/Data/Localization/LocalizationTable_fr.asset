@@ -128,8 +128,68 @@ MonoBehaviour:
   - key: card.shinycoin.name
     value: "Pi\xE8ce brillante"
   - key: card.scoutrat.ability
+    value: "+1 valeur de nourriture collect\xE9e"
+  - key: card.nimblerat.ability
     value: "Ignore la premi\xE8re tuile de danger"
   - key: card.brawlerrat.ability
     value: "Aucun d\xE9g\xE2t en cas de victoire au combat"
+  - key: card.guardrat.ability
+    value: "+1 valeur d'abri collect\xE9"
   - key: card.packrat.ability
     value: "+1 capacit\xE9 de transport"
+  - key: card.scavengerrat.name
+    value: Rat Fouineur
+  - key: card.scavengerrat.ability
+    value: "+1 valeur de nourriture collect\xE9e"
+  - key: card.tunnelrat.name
+    value: Rat des Tunnels
+  - key: card.tunnelrat.ability
+    value: "Ignore la premi\xE8re tuile de danger"
+  - key: card.healerrat.name
+    value: "Rat Gu\xE9risseur"
+  - key: card.healerrat.ability
+    value: "Soigne un alli\xE9 bless\xE9 adjacent"
+  - key: card.sapperrat.name
+    value: Rat Sapeur
+  - key: card.sapperrat.ability
+    value: "D\xE9sarme les pi\xE8ges adjacents"
+  - key: card.foragerrat.name
+    value: Rat Cueilleur
+  - key: card.foragerrat.ability
+    value: "+1 capacit\xE9 de transport"
+  - key: card.berserkerrat.name
+    value: Rat Berserk
+  - key: card.berserkerrat.ability
+    value: +2 combat mais ne peut pas transporter
+  - key: card.shadowrat.name
+    value: "Rat de l'Ombre"
+  - key: card.shadowrat.ability
+    value: "Ignore la premi\xE8re patrouille ennemie"
+  - key: card.elderrat.name
+    value: Rat Ancien
+  - key: card.elderrat.ability
+    value: Tous les alli\xE9s gagnent +1 combat ce tour
+  - key: card.berrybush.name
+    value: Buisson de Baies
+  - key: card.grainstash.name
+    value: "R\xE9serve de Grain"
+  - key: card.cheesewedge.name
+    value: Morceau de Fromage
+  - key: card.feastscraps.name
+    value: Restes de Festin
+  - key: card.leafcanopy.name
+    value: "Canop\xE9e de Feuilles"
+  - key: card.hollowlog.name
+    value: Tronc Creux
+  - key: card.stoneburrow.name
+    value: Terrier de Pierre
+  - key: card.thornshield.name
+    value: "Bouclier d'\xC9pines"
+  - key: card.rustynail.name
+    value: "Clou Rouill\xE9"
+  - key: card.copperring.name
+    value: Anneau de Cuivre
+  - key: card.silverthimble.name
+    value: "D\xE9 \xE0 Coudre d'Argent"
+  - key: card.goldbutton.name
+    value: "Bouton d'Or"

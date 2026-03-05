@@ -2,6 +2,24 @@
 
 All notable changes to Scurry: Tales of the Rat Pack will be documented in this file.
 
+## [0.4.0] - 2026-03-05
+
+### Added
+- Card pool expanded from 10 to 30 cards (8 new heroes + 12 new resources)
+- 5 new SpecialAbility enum values: HealAlly, TrapDisarm, Frenzy, StealthMove, RallyAll (placeholder — logic in future session)
+- 8 new hero cards: Scavenger Rat, Tunnel Rat, Healer Rat, Sapper Rat, Forager Rat, Berserker Rat, Shadow Rat, Elder Rat
+- 12 new resource cards across all 4 types: Berry Bush, Grain Stash, Cheese Wedge, Feast Scraps (Food); Leaf Canopy, Hollow Log, Stone Burrow (Shelter); Thorn Shield, Rusty Nail (Equipment); Copper Ring, Silver Thimble, Gold Button (Currency)
+- Localization keys for all 20 new cards in 5 languages (en/fr/de/it/es) — 89 total entries per table
+- Scrollable card list in deck building UI (ScrollRect + Mask)
+- Card detail panel on hover during deck building showing name, type/rarity, stats, and ability description
+- Rarity color coding in detail panel (white/green/blue/purple)
+
+### Fixed
+- Deck build UI overflow with 30 cards — converted to proper ScrollRect
+- ScrollRect drag blocked by EventTrigger on card rows — replaced with lightweight IPointerEnterHandler/IPointerExitHandler
+- Missing localization keys: card.guardrat.ability, card.nimblerat.ability added to all 5 languages
+- Incorrect ability text: card.scoutrat.ability corrected from "Ignores first hazard tile" to "+1 food value on collection"
+
 ## [0.3.0] - 2026-03-05
 
 ### Added

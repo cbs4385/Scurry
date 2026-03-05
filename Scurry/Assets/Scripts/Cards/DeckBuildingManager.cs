@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using TMPro;
 using Scurry.Data;
 using Scurry.Core;
@@ -18,6 +19,12 @@ namespace Scurry.Cards
         private Button confirmButton;
         private readonly Dictionary<CardDefinitionSO, int> selectedCounts = new Dictionary<CardDefinitionSO, int>();
         private readonly List<TextMeshProUGUI> countLabels = new List<TextMeshProUGUI>();
+        private GameObject detailPanel;
+        private Image detailSwatch;
+        private TextMeshProUGUI detailName;
+        private TextMeshProUGUI detailType;
+        private TextMeshProUGUI detailStats;
+        private TextMeshProUGUI detailAbility;
 
         private void Awake()
         {
@@ -114,19 +121,52 @@ namespace Scurry.Cards
             subTmp.alignment = TextAlignmentOptions.Center;
             subTmp.color = new Color(0.7f, 0.7f, 0.7f);
 
-            // Scrollable card list area
-            var scrollAreaGO = new GameObject("ScrollArea", typeof(RectTransform));
+            // Card detail panel — right side
+            CreateDetailPanel(deckBuildPanel.transform);
+
+            // Scrollable card list area — left side
+            var scrollAreaGO = new GameObject("ScrollArea", typeof(RectTransform), typeof(ScrollRect), typeof(Image));
             scrollAreaGO.transform.SetParent(deckBuildPanel.transform, false);
-            var scrollRect = scrollAreaGO.GetComponent<RectTransform>();
-            scrollRect.anchorMin = new Vector2(0.1f, 0.15f);
-            scrollRect.anchorMax = new Vector2(0.9f, 0.85f);
-            scrollRect.sizeDelta = Vector2.zero;
+            var scrollAreaRect = scrollAreaGO.GetComponent<RectTransform>();
+            scrollAreaRect.anchorMin = new Vector2(0.02f, 0.15f);
+            scrollAreaRect.anchorMax = new Vector2(0.55f, 0.85f);
+            scrollAreaRect.sizeDelta = Vector2.zero;
+            scrollAreaGO.GetComponent<Image>().color = new Color(0, 0, 0, 0.01f); // near-transparent, needed for scroll input
+            var scrollComp = scrollAreaGO.GetComponent<ScrollRect>();
+            scrollComp.horizontal = false;
+            scrollComp.vertical = true;
+            scrollComp.movementType = ScrollRect.MovementType.Clamped;
+            scrollComp.scrollSensitivity = 30f;
+
+            // Viewport with mask
+            var viewportGO = new GameObject("Viewport", typeof(RectTransform), typeof(Image), typeof(Mask));
+            viewportGO.transform.SetParent(scrollAreaGO.transform, false);
+            var viewportRect = viewportGO.GetComponent<RectTransform>();
+            viewportRect.anchorMin = Vector2.zero;
+            viewportRect.anchorMax = Vector2.one;
+            viewportRect.sizeDelta = Vector2.zero;
+            viewportGO.GetComponent<Image>().color = new Color(0, 0, 0, 0.01f); // required by Mask
+            viewportGO.GetComponent<Mask>().showMaskGraphic = false;
+            scrollComp.viewport = viewportRect;
+
+            // Content container
+            var contentGO = new GameObject("Content", typeof(RectTransform));
+            contentGO.transform.SetParent(viewportGO.transform, false);
+            var contentRect = contentGO.GetComponent<RectTransform>();
+            contentRect.anchorMin = new Vector2(0, 1);
+            contentRect.anchorMax = new Vector2(1, 1);
+            contentRect.pivot = new Vector2(0.5f, 1);
+            scrollComp.content = contentRect;
 
             // Create card entries
             var cards = deckManager.AllCards;
             Debug.Log($"[DeckBuildingManager] ShowDeckBuildUI: displaying {cards.Length} available cards");
             float entryHeight = 50f;
             float spacing = 5f;
+
+            // Set content height based on card count
+            float totalHeight = cards.Length * (entryHeight + spacing);
+            contentRect.sizeDelta = new Vector2(0, totalHeight);
 
             for (int i = 0; i < cards.Length; i++)
             {
@@ -138,7 +178,7 @@ namespace Scurry.Cards
 
                 // Entry row background
                 var rowGO = new GameObject($"Row_{card.cardName}", typeof(RectTransform), typeof(Image));
-                rowGO.transform.SetParent(scrollAreaGO.transform, false);
+                rowGO.transform.SetParent(contentGO.transform, false);
                 var rowRect = rowGO.GetComponent<RectTransform>();
                 rowRect.anchorMin = new Vector2(0, 1);
                 rowRect.anchorMax = new Vector2(1, 1);
@@ -203,6 +243,10 @@ namespace Scurry.Cards
                 CreateCardButton(rowGO.transform, Loc.Get("ui.deckbuild.max"), new Vector2(0.90f, 0.15f), new Vector2(0.98f, 0.85f),
                     new Color(0.3f, 0.3f, 0.6f), () => AdjustCount(cards[cardIndex], maxCopies, cardIndex, true));
 
+                // Hover triggers for detail panel (lightweight — does not block ScrollRect drag)
+                var hover = rowGO.AddComponent<CardRowHover>();
+                hover.Init(card, ShowCardDetail, HideCardDetail);
+
                 Debug.Log($"[DeckBuildingManager] ShowDeckBuildUI: card row '{card.cardName}' — rarity={card.rarity}, maxCopies={maxCopies}");
             }
 
@@ -249,6 +293,158 @@ namespace Scurry.Cards
             confirmButton.interactable = false;
 
             Debug.Log("[DeckBuildingManager] ShowDeckBuildUI: deck build UI complete");
+        }
+
+        private void CreateDetailPanel(Transform parent)
+        {
+            Debug.Log("[DeckBuildingManager] CreateDetailPanel: building card detail panel");
+            detailPanel = new GameObject("CardDetailPanel", typeof(RectTransform), typeof(Image));
+            detailPanel.transform.SetParent(parent, false);
+            var panelRect = detailPanel.GetComponent<RectTransform>();
+            panelRect.anchorMin = new Vector2(0.58f, 0.15f);
+            panelRect.anchorMax = new Vector2(0.98f, 0.85f);
+            panelRect.sizeDelta = Vector2.zero;
+            detailPanel.GetComponent<Image>().color = new Color(0.1f, 0.1f, 0.15f, 0.95f);
+
+            // Large color swatch (card preview)
+            var swatchGO = new GameObject("DetailSwatch", typeof(RectTransform), typeof(Image));
+            swatchGO.transform.SetParent(detailPanel.transform, false);
+            var swatchRect = swatchGO.GetComponent<RectTransform>();
+            swatchRect.anchorMin = new Vector2(0.15f, 0.55f);
+            swatchRect.anchorMax = new Vector2(0.85f, 0.92f);
+            swatchRect.sizeDelta = Vector2.zero;
+            detailSwatch = swatchGO.GetComponent<Image>();
+            detailSwatch.color = Color.gray;
+
+            // Card name on the swatch
+            var nameGO = new GameObject("DetailName", typeof(RectTransform), typeof(TextMeshProUGUI));
+            nameGO.transform.SetParent(swatchGO.transform, false);
+            var nameRect = nameGO.GetComponent<RectTransform>();
+            nameRect.anchorMin = new Vector2(0, 0.6f);
+            nameRect.anchorMax = new Vector2(1, 1);
+            nameRect.sizeDelta = Vector2.zero;
+            detailName = nameGO.GetComponent<TextMeshProUGUI>();
+            detailName.fontSize = 22;
+            detailName.fontStyle = FontStyles.Bold;
+            detailName.alignment = TextAlignmentOptions.Center;
+            detailName.color = Color.black;
+
+            // Stats text on the swatch
+            var statsOnSwatchGO = new GameObject("DetailSwatchStats", typeof(RectTransform), typeof(TextMeshProUGUI));
+            statsOnSwatchGO.transform.SetParent(swatchGO.transform, false);
+            var sosRect = statsOnSwatchGO.GetComponent<RectTransform>();
+            sosRect.anchorMin = new Vector2(0, 0);
+            sosRect.anchorMax = new Vector2(1, 0.5f);
+            sosRect.sizeDelta = Vector2.zero;
+            detailStats = statsOnSwatchGO.GetComponent<TextMeshProUGUI>();
+            detailStats.fontSize = 20;
+            detailStats.alignment = TextAlignmentOptions.Center;
+            detailStats.color = Color.black;
+
+            // Type + rarity line below the swatch
+            var typeGO = new GameObject("DetailType", typeof(RectTransform), typeof(TextMeshProUGUI));
+            typeGO.transform.SetParent(detailPanel.transform, false);
+            var typeRect = typeGO.GetComponent<RectTransform>();
+            typeRect.anchorMin = new Vector2(0.05f, 0.42f);
+            typeRect.anchorMax = new Vector2(0.95f, 0.52f);
+            typeRect.sizeDelta = Vector2.zero;
+            detailType = typeGO.GetComponent<TextMeshProUGUI>();
+            detailType.fontSize = 16;
+            detailType.alignment = TextAlignmentOptions.Center;
+            detailType.color = new Color(0.7f, 0.7f, 0.7f);
+
+            // Ability / description text
+            var abilityGO = new GameObject("DetailAbility", typeof(RectTransform), typeof(TextMeshProUGUI));
+            abilityGO.transform.SetParent(detailPanel.transform, false);
+            var abilityRect = abilityGO.GetComponent<RectTransform>();
+            abilityRect.anchorMin = new Vector2(0.08f, 0.05f);
+            abilityRect.anchorMax = new Vector2(0.92f, 0.40f);
+            abilityRect.sizeDelta = Vector2.zero;
+            detailAbility = abilityGO.GetComponent<TextMeshProUGUI>();
+            detailAbility.fontSize = 16;
+            detailAbility.alignment = TextAlignmentOptions.Top;
+            detailAbility.color = Color.white;
+            detailAbility.textWrappingMode = TextWrappingModes.Normal;
+
+            // Start hidden — show "hover over a card" hint
+            ShowDetailHint();
+            Debug.Log("[DeckBuildingManager] CreateDetailPanel: complete");
+        }
+
+        private void ShowDetailHint()
+        {
+            if (detailSwatch != null) detailSwatch.color = new Color(0.2f, 0.2f, 0.25f);
+            if (detailName != null) detailName.text = "";
+            if (detailStats != null) detailStats.text = "";
+            if (detailType != null) detailType.text = "";
+            if (detailAbility != null)
+            {
+                detailAbility.text = "<i>Hover over a card to see details</i>";
+                detailAbility.color = new Color(0.5f, 0.5f, 0.5f);
+            }
+        }
+
+        private void ShowCardDetail(CardDefinitionSO card)
+        {
+            if (card == null || detailPanel == null) return;
+            Debug.Log($"[DeckBuildingManager] ShowCardDetail: card='{card.cardName}', type={card.cardType}, rarity={card.rarity}");
+
+            string displayName = !string.IsNullOrEmpty(card.localizationKey)
+                ? Loc.Get(card.localizationKey + ".name") : card.cardName;
+
+            // Swatch color
+            detailSwatch.color = card.placeholderColor;
+
+            // Name on swatch
+            detailName.text = displayName;
+
+            // Stats on swatch
+            if (card.cardType == CardType.Hero)
+                detailStats.text = Loc.Format("card.stat.hero", card.movement, card.combat, card.carryCapacity);
+            else
+                detailStats.text = Loc.Format("card.stat.resource", card.resourceType, card.value);
+
+            // Type + rarity line
+            string rarityColor = card.rarity switch
+            {
+                CardRarity.Common => "#AAAAAA",
+                CardRarity.Uncommon => "#55CC55",
+                CardRarity.Rare => "#5599FF",
+                CardRarity.Legendary => "#FF9922",
+                _ => "#FFFFFF"
+            };
+            detailType.text = $"{card.cardType}  |  <color={rarityColor}>{card.rarity}</color>";
+            detailType.richText = true;
+
+            // Ability / description
+            string abilityText = "";
+            if (card.cardType == CardType.Hero)
+            {
+                if (card.specialAbility != SpecialAbility.None)
+                {
+                    string abilityLoc = !string.IsNullOrEmpty(card.localizationKey)
+                        ? Loc.Get(card.localizationKey + ".ability") : "";
+                    if (string.IsNullOrEmpty(abilityLoc) || abilityLoc.StartsWith("?"))
+                        abilityLoc = card.specialAbility.ToString();
+                    abilityText = $"<b>Ability:</b> {card.specialAbility}\n{abilityLoc}";
+                }
+                abilityText += $"\n\n<b>Movement:</b> {card.movement}\n<b>Combat:</b> {card.combat}\n<b>Carry:</b> {card.carryCapacity}";
+            }
+            else
+            {
+                abilityText = $"<b>Resource Type:</b> {card.resourceType}\n<b>Value:</b> {card.value}";
+            }
+            abilityText += $"\n\n<b>Max Copies:</b> {GetMaxCopies(card.rarity)}";
+
+            detailAbility.text = abilityText;
+            detailAbility.richText = true;
+            detailAbility.color = Color.white;
+        }
+
+        private void HideCardDetail()
+        {
+            Debug.Log("[DeckBuildingManager] HideCardDetail");
+            ShowDetailHint();
         }
 
         private void CreateCardButton(Transform parent, string label, Vector2 anchorMin, Vector2 anchorMax, Color color, UnityEngine.Events.UnityAction onClick)
@@ -350,5 +546,22 @@ namespace Scurry.Cards
             deckBuildPanel.SetActive(false);
             EventBus.OnDeckBuildComplete?.Invoke(selectedDeck);
         }
+    }
+
+    public class CardRowHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+    {
+        private CardDefinitionSO card;
+        private System.Action<CardDefinitionSO> onEnter;
+        private System.Action onExit;
+
+        public void Init(CardDefinitionSO card, System.Action<CardDefinitionSO> onEnter, System.Action onExit)
+        {
+            this.card = card;
+            this.onEnter = onEnter;
+            this.onExit = onExit;
+        }
+
+        public void OnPointerEnter(PointerEventData eventData) => onEnter?.Invoke(card);
+        public void OnPointerExit(PointerEventData eventData) => onExit?.Invoke();
     }
 }

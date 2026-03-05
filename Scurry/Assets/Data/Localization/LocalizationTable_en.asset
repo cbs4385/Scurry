@@ -128,8 +128,68 @@ MonoBehaviour:
   - key: card.shinycoin.name
     value: Shiny Coin
   - key: card.scoutrat.ability
+    value: +1 food value on collection
+  - key: card.nimblerat.ability
     value: Ignores first hazard tile
   - key: card.brawlerrat.ability
     value: No damage on combat win
+  - key: card.guardrat.ability
+    value: +1 shelter value on collection
   - key: card.packrat.ability
     value: +1 carry capacity
+  - key: card.scavengerrat.name
+    value: Scavenger Rat
+  - key: card.scavengerrat.ability
+    value: +1 food value on collection
+  - key: card.tunnelrat.name
+    value: Tunnel Rat
+  - key: card.tunnelrat.ability
+    value: Ignores first hazard tile
+  - key: card.healerrat.name
+    value: Healer Rat
+  - key: card.healerrat.ability
+    value: Heals one adjacent wounded ally
+  - key: card.sapperrat.name
+    value: Sapper Rat
+  - key: card.sapperrat.ability
+    value: Disarms traps on adjacent tiles
+  - key: card.foragerrat.name
+    value: Forager Rat
+  - key: card.foragerrat.ability
+    value: +1 carry capacity
+  - key: card.berserkerrat.name
+    value: Berserker Rat
+  - key: card.berserkerrat.ability
+    value: +2 combat but cannot carry
+  - key: card.shadowrat.name
+    value: Shadow Rat
+  - key: card.shadowrat.ability
+    value: Ignores first enemy patrol tile
+  - key: card.elderrat.name
+    value: Elder Rat
+  - key: card.elderrat.ability
+    value: All allies gain +1 combat this turn
+  - key: card.berrybush.name
+    value: Berry Bush
+  - key: card.grainstash.name
+    value: Grain Stash
+  - key: card.cheesewedge.name
+    value: Cheese Wedge
+  - key: card.feastscraps.name
+    value: Feast Scraps
+  - key: card.leafcanopy.name
+    value: Leaf Canopy
+  - key: card.hollowlog.name
+    value: Hollow Log
+  - key: card.stoneburrow.name
+    value: Stone Burrow
+  - key: card.thornshield.name
+    value: Thorn Shield
+  - key: card.rustynail.name
+    value: Rusty Nail
+  - key: card.copperring.name
+    value: Copper Ring
+  - key: card.silverthimble.name
+    value: Silver Thimble
+  - key: card.goldbutton.name
+    value: Gold Button

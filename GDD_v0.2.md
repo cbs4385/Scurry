@@ -325,6 +325,14 @@ Zone 1 (The Wilds) fully playable as a single-zone run with art, enemies, a boss
 - Card art (placeholder or first-pass illustrations)
 - Hero special abilities that trigger during Phase 2
 
+### M1.3b — Resource Type Effects
+- Implement distinct gameplay effects for each resource type per §5.1:
+  - **Food**: collected value goes to Food Stockpile (spent at Healing steps or auto-heals if no Healing step)
+  - **Shelter**: adjacency defense bonus scales with shelter card value (value > 1 provides stronger defense)
+  - **Equipment**: hero gains temporary combat bonus equal to Equipment value for the current Gathering phase; stacks with multiple equipment
+  - **Currency**: collected to Currency Stockpile (spent in Shops)
+- Add gathering notification for equipment pickup
+
 ### M1.4 — Zone 1 Enemies
 - Define and implement Zone 1 enemy types (§7.1 Enemies — currently empty in GDD)
 - Enemy variety: different strengths, movement patterns, and behaviours

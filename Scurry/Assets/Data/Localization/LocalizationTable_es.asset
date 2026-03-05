@@ -128,8 +128,68 @@ MonoBehaviour:
   - key: card.shinycoin.name
     value: Moneda brillante
   - key: card.scoutrat.ability
+    value: +1 valor de comida al recolectar
+  - key: card.nimblerat.ability
     value: Ignora la primera casilla de peligro
   - key: card.brawlerrat.ability
     value: "Sin da\xF1o al ganar combate"
+  - key: card.guardrat.ability
+    value: +1 valor de refugio al recolectar
   - key: card.packrat.ability
     value: +1 capacidad de carga
+  - key: card.scavengerrat.name
+    value: "Rata Carro\xF1era"
+  - key: card.scavengerrat.ability
+    value: +1 valor de comida al recolectar
+  - key: card.tunnelrat.name
+    value: "Rata de T\xFAnel"
+  - key: card.tunnelrat.ability
+    value: Ignora la primera casilla de peligro
+  - key: card.healerrat.name
+    value: Rata Sanadora
+  - key: card.healerrat.ability
+    value: Cura un aliado herido adyacente
+  - key: card.sapperrat.name
+    value: Rata Zapadora
+  - key: card.sapperrat.ability
+    value: Desarma trampas adyacentes
+  - key: card.foragerrat.name
+    value: Rata Recolectora
+  - key: card.foragerrat.ability
+    value: +1 capacidad de carga
+  - key: card.berserkerrat.name
+    value: Rata Berserker
+  - key: card.berserkerrat.ability
+    value: +2 combate pero no puede cargar
+  - key: card.shadowrat.name
+    value: Rata Sombra
+  - key: card.shadowrat.ability
+    value: Ignora la primera patrulla enemiga
+  - key: card.elderrat.name
+    value: Rata Anciana
+  - key: card.elderrat.ability
+    value: Todos los aliados +1 combate este turno
+  - key: card.berrybush.name
+    value: Arbusto de Bayas
+  - key: card.grainstash.name
+    value: Reserva de Grano
+  - key: card.cheesewedge.name
+    value: Trozo de Queso
+  - key: card.feastscraps.name
+    value: "Restos del Fest\xEDn"
+  - key: card.leafcanopy.name
+    value: Dosel de Hojas
+  - key: card.hollowlog.name
+    value: Tronco Hueco
+  - key: card.stoneburrow.name
+    value: Madriguera de Piedra
+  - key: card.thornshield.name
+    value: Escudo de Espinas
+  - key: card.rustynail.name
+    value: Clavo Oxidado
+  - key: card.copperring.name
+    value: Anillo de Cobre
+  - key: card.silverthimble.name
+    value: Dedal de Plata
+  - key: card.goldbutton.name
+    value: "Bot\xF3n de Oro"

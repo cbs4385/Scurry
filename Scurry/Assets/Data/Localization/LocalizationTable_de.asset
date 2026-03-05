@@ -128,8 +128,68 @@ MonoBehaviour:
   - key: card.shinycoin.name
     value: "Gl\xE4nzende M\xFCnze"
   - key: card.scoutrat.ability
+    value: +1 Nahrungswert beim Sammeln
+  - key: card.nimblerat.ability
     value: Ignoriert erste Gefahrenkachel
   - key: card.brawlerrat.ability
     value: Kein Schaden bei Kampfsieg
+  - key: card.guardrat.ability
+    value: +1 Unterschlupfwert beim Sammeln
   - key: card.packrat.ability
     value: "+1 Tragekapazit\xE4t"
+  - key: card.scavengerrat.name
+    value: Sammelratte
+  - key: card.scavengerrat.ability
+    value: +1 Nahrungswert beim Sammeln
+  - key: card.tunnelrat.name
+    value: Tunnelratte
+  - key: card.tunnelrat.ability
+    value: Ignoriert erstes Gefahrenfeld
+  - key: card.healerrat.name
+    value: Heilerratte
+  - key: card.healerrat.ability
+    value: "Heilt einen verwundeten Verb\xFCndeten"
+  - key: card.sapperrat.name
+    value: Sappeurratte
+  - key: card.sapperrat.ability
+    value: "Entsch\xE4rft Fallen auf Nachbarfeldern"
+  - key: card.foragerrat.name
+    value: Sammlerratte
+  - key: card.foragerrat.ability
+    value: "+1 Tragekapazit\xE4t"
+  - key: card.berserkerrat.name
+    value: Berserkerratte
+  - key: card.berserkerrat.ability
+    value: "+2 Kampf, kann aber nicht tragen"
+  - key: card.shadowrat.name
+    value: Schattenratte
+  - key: card.shadowrat.ability
+    value: Ignoriert erste Feindpatrouille
+  - key: card.elderrat.name
+    value: "\xC4ltestenratte"
+  - key: card.elderrat.ability
+    value: "Alle Verb\xFCndeten erhalten +1 Kampf"
+  - key: card.berrybush.name
+    value: Beerenstrauch
+  - key: card.grainstash.name
+    value: Kornvorrat
+  - key: card.cheesewedge.name
+    value: "K\xE4sekeil"
+  - key: card.feastscraps.name
+    value: Festreste
+  - key: card.leafcanopy.name
+    value: "Bl\xE4tterdach"
+  - key: card.hollowlog.name
+    value: Hohler Stamm
+  - key: card.stoneburrow.name
+    value: Steinbau
+  - key: card.thornshield.name
+    value: Dornenschild
+  - key: card.rustynail.name
+    value: Rostiger Nagel
+  - key: card.copperring.name
+    value: Kupferring
+  - key: card.silverthimble.name
+    value: Silberfingerhut
+  - key: card.goldbutton.name
+    value: Goldknopf

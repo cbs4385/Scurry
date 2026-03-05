@@ -128,8 +128,68 @@ MonoBehaviour:
   - key: card.shinycoin.name
     value: Moneta luccicante
   - key: card.scoutrat.ability
+    value: +1 valore cibo alla raccolta
+  - key: card.nimblerat.ability
     value: Ignora la prima casella pericolo
   - key: card.brawlerrat.ability
     value: Nessun danno in caso di vittoria
+  - key: card.guardrat.ability
+    value: +1 valore rifugio alla raccolta
   - key: card.packrat.ability
     value: "+1 capacit\xE0 di trasporto"
+  - key: card.scavengerrat.name
+    value: Ratto Raccoglitore
+  - key: card.scavengerrat.ability
+    value: +1 valore cibo alla raccolta
+  - key: card.tunnelrat.name
+    value: Ratto dei Tunnel
+  - key: card.tunnelrat.ability
+    value: Ignora la prima casella pericolo
+  - key: card.healerrat.name
+    value: Ratto Guaritore
+  - key: card.healerrat.ability
+    value: Cura un alleato ferito adiacente
+  - key: card.sapperrat.name
+    value: Ratto Geniere
+  - key: card.sapperrat.ability
+    value: Disattiva trappole adiacenti
+  - key: card.foragerrat.name
+    value: Ratto Cercatore
+  - key: card.foragerrat.ability
+    value: "+1 capacit\xE0 di trasporto"
+  - key: card.berserkerrat.name
+    value: Ratto Berserker
+  - key: card.berserkerrat.ability
+    value: +2 combattimento ma non trasporta
+  - key: card.shadowrat.name
+    value: Ratto Ombra
+  - key: card.shadowrat.ability
+    value: Ignora la prima pattuglia nemica
+  - key: card.elderrat.name
+    value: Ratto Anziano
+  - key: card.elderrat.ability
+    value: Tutti gli alleati +1 combattimento
+  - key: card.berrybush.name
+    value: Cespuglio di Bacche
+  - key: card.grainstash.name
+    value: Scorta di Grano
+  - key: card.cheesewedge.name
+    value: Spicchio di Formaggio
+  - key: card.feastscraps.name
+    value: Avanzi del Banchetto
+  - key: card.leafcanopy.name
+    value: Tettoia di Foglie
+  - key: card.hollowlog.name
+    value: Tronco Cavo
+  - key: card.stoneburrow.name
+    value: Tana di Pietra
+  - key: card.thornshield.name
+    value: Scudo di Spine
+  - key: card.rustynail.name
+    value: Chiodo Arrugginito
+  - key: card.copperring.name
+    value: Anello di Rame
+  - key: card.silverthimble.name
+    value: "Ditale d'Argento"
+  - key: card.goldbutton.name
+    value: "Bottone d'Oro"
