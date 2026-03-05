@@ -283,7 +283,7 @@ namespace Scurry.UI
             descTmp.alignment = TextAlignmentOptions.Left;
             descTmp.color = new Color(0.8f, 0.8f, 0.8f);
             descTmp.overflowMode = TextOverflowModes.Ellipsis;
-            descTmp.enableWordWrapping = false;
+            descTmp.textWrappingMode = TMPro.TextWrappingModes.NoWrap;
         }
 
         private void BuildTooltip()

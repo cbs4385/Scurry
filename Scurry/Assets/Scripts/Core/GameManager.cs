@@ -21,9 +21,6 @@ namespace Scurry.Core
         [SerializeField] private ColonyManager colonyManager;
         [SerializeField] private LocalizationManager localizationManager;
 
-        [Header("Settings")]
-        [SerializeField] private int cardsPerTurn = 5;
-
         private GamePhase currentPhase;
         private int turnNumber;
         private readonly HashSet<CardDefinitionSO> woundedHeroes = new HashSet<CardDefinitionSO>();

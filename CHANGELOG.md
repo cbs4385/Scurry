@@ -2,6 +2,20 @@
 
 All notable changes to Scurry: Tales of the Rat Pack will be documented in this file.
 
+## [0.3.0] - 2026-03-05
+
+### Added
+- M1 data foundation: ZoneSO, BossDefinitionSO, RelicDefinitionSO ScriptableObject types
+- New enums: StepType (CardPlacement, Shop, Healing, CardAddRemove, BossFight), RunState, RelicEffect, BossAbility
+- Zone 1 "The Wilds" definition asset with 3-stage structure, step pool weights, and boss reference
+- Boss "Elder Silas" definition asset (HP 20, Attack 3, 2 phases: Swoop at HP 20, Talons at HP 10)
+- Feather Relic definition asset (IgnoreFirstPatrol effect)
+- BossPhase serializable class for multi-phase boss encounters
+
+### Fixed
+- Obsolete TMP API warning: replaced enableWordWrapping with textWrappingMode in UIManager
+- Unused field warning: removed cardsPerTurn from GameManager
+
 ## [0.2.0] - 2026-03-05
 
 ### Added

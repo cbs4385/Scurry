@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f8b01e37d8ac761488e1ead43893cf60, type: 3}
+  m_Name: Zone_Wilds
+  m_EditorClassIdentifier: Assembly-CSharp::Scurry.Data.ZoneSO
+  zoneName: The Wilds
+  localizationKey: zone.wilds
+  gridSize: 4
+  stageLayouts:
+  - {fileID: 11400000, guid: 26bd791d47c517d4484f30f28ade06ba, type: 2}
+  - {fileID: 11400000, guid: 26bd791d47c517d4484f30f28ade06ba, type: 2}
+  - {fileID: 11400000, guid: 26bd791d47c517d4484f30f28ade06ba, type: 2}
+  stagesPerZone: 3
+  minStepsPerStage: 3
+  maxStepsPerStage: 5
+  stepPool: 00000000010000000200000003000000
+  stepWeights:
+  - 3
+  - 1
+  - 1
+  - 1
+  zoneCardPool: []
+  zoneBoss: {fileID: 11400000, guid: e87d497c647d8e1479f22e8cba39dfb8, type: 2}
