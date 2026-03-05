@@ -1,0 +1,135 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f3622595d6884d4eb301b4819b9a53b, type: 3}
+  m_Name: LocalizationTable_it
+  m_EditorClassIdentifier: Assembly-CSharp::Scurry.Data.LocalizationTableSO
+  languageCode: it
+  languageName: Italiano
+  entries:
+  - key: ui.phase.draw
+    value: PESCA
+  - key: ui.phase.deploy
+    value: SCHIERAMENTO
+  - key: ui.phase.gather
+    value: RACCOLTA
+  - key: ui.phase.resolve
+    value: RISOLUZIONE
+  - key: ui.button.endturn
+    value: FINE TURNO
+  - key: ui.button.undo
+    value: ANNULLA
+  - key: ui.legend.title
+    value: LEGENDA CASELLE
+  - key: ui.legend.normal.name
+    value: Normale
+  - key: ui.legend.normal.desc
+    value: Posiziona eroi o risorse
+  - key: ui.legend.resource.name
+    value: Nodo risorse
+  - key: ui.legend.resource.desc
+    value: Posiziona eroi qui
+  - key: ui.legend.enemy.name
+    value: Pattuglia nemica
+  - key: ui.legend.enemy.desc
+    value: Gli eroi devono combattere per passare
+  - key: ui.legend.hazard.name
+    value: Pericolo
+  - key: ui.legend.hazard.desc
+    value: Terreno invalicabile
+  - key: ui.hp.label
+    value: "PV Colonia: {0}/{1}"
+  - key: ui.currency.label
+    value: "Valuta: {0}"
+  - key: tile.normal.title
+    value: Casella normale
+  - key: tile.resourcenode.title
+    value: Nodo risorse
+  - key: tile.enemypatrol.title
+    value: Pattuglia nemica
+  - key: tile.hazard.title
+    value: Pericolo
+  - key: tile.unknown.title
+    value: Sconosciuto
+  - key: tile.normal.desc
+    value: Posiziona eroi o risorse qui.
+  - key: tile.resourcenode.desc
+    value: Posiziona eroi qui. Zona raccolta bonus.
+  - key: tile.enemypatrol.desc
+    value: "Nemico (For: {0}). Gli eroi devono combattere."
+  - key: tile.hazard.desc
+    value: "Invalicabile. Infligge {0} danni."
+  - key: tile.status.hero
+    value: "[Eroe]"
+  - key: tile.status.resource
+    value: "[{0} Val:{1}]"
+  - key: tile.status.defeated
+    value: "[Sconfitto]"
+  - key: card.stat.hero
+    value: "M:{0} C:{1} T:{2}"
+  - key: card.stat.resource
+    value: "{0}\nVal:{1}"
+  - key: gather.hero.begin
+    value: "{0} inizia il turno (vel {1})"
+  - key: gather.hero.summary
+    value: "{0}: {1} movimenti, {2} raccolti"
+  - key: gather.hero.wounded
+    value: " [FERITO]"
+  - key: gather.hero.healing
+    value: "{0} si sta curando (salta questo turno)"
+  - key: gather.enemy.holds
+    value: "Nemico (for {0}) mantiene posizione"
+  - key: gather.enemy.chases
+    value: "Il nemico insegue {0}!"
+  - key: gather.enemy.patrols
+    value: "Il nemico pattuglia verso {0}"
+  - key: gather.enemy.defeated
+    value: "Nemico sconfitto da {0}!"
+  - key: gather.hero.woundedby
+    value: "{0} ferito dal nemico!"
+  - key: ui.phase.deckbuild
+    value: COSTRUZIONE MAZZO
+  - key: ui.deckbuild.title
+    value: COSTRUISCI IL TUO MAZZO
+  - key: ui.deckbuild.subtitle
+    value: "Seleziona {0}-{1} carte per il tuo mazzo"
+  - key: ui.deckbuild.count
+    value: "Carte: {0} (servono {1}-{2})"
+  - key: ui.deckbuild.confirm
+    value: CONFERMA
+  - key: ui.deckbuild.max
+    value: MAX
+  - key: card.scoutrat.name
+    value: Ratto Esploratore
+  - key: card.nimblerat.name
+    value: Ratto Agile
+  - key: card.brawlerrat.name
+    value: Ratto Attaccabrighe
+  - key: card.guardrat.name
+    value: Ratto Guardiano
+  - key: card.packrat.name
+    value: Ratto Portatore
+  - key: card.foodscrap.name
+    value: Avanzo di cibo
+  - key: card.crumbpile.name
+    value: Mucchio di briciole
+  - key: card.cardboardshelter.name
+    value: Rifugio di cartone
+  - key: card.bottlecaparmor.name
+    value: Armatura di tappo
+  - key: card.shinycoin.name
+    value: Moneta luccicante
+  - key: card.scoutrat.ability
+    value: Ignora la prima casella pericolo
+  - key: card.brawlerrat.ability
+    value: Nessun danno in caso di vittoria
+  - key: card.packrat.ability
+    value: "+1 capacit\xE0 di trasporto"

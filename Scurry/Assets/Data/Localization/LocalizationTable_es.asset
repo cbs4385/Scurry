@@ -1,0 +1,135 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f3622595d6884d4eb301b4819b9a53b, type: 3}
+  m_Name: LocalizationTable_es
+  m_EditorClassIdentifier: Assembly-CSharp::Scurry.Data.LocalizationTableSO
+  languageCode: es
+  languageName: "Espa\xF1ol"
+  entries:
+  - key: ui.phase.draw
+    value: ROBAR
+  - key: ui.phase.deploy
+    value: DESPLIEGUE
+  - key: ui.phase.gather
+    value: "RECOLECCI\xD3N"
+  - key: ui.phase.resolve
+    value: "RESOLUCI\xD3N"
+  - key: ui.button.endturn
+    value: FIN DEL TURNO
+  - key: ui.button.undo
+    value: DESHACER
+  - key: ui.legend.title
+    value: LEYENDA DE CASILLAS
+  - key: ui.legend.normal.name
+    value: Normal
+  - key: ui.legend.normal.desc
+    value: "Coloca h\xE9roes o recursos"
+  - key: ui.legend.resource.name
+    value: Nodo de recursos
+  - key: ui.legend.resource.desc
+    value: "Coloca h\xE9roes aqu\xED"
+  - key: ui.legend.enemy.name
+    value: Patrulla enemiga
+  - key: ui.legend.enemy.desc
+    value: "Los h\xE9roes deben luchar para pasar"
+  - key: ui.legend.hazard.name
+    value: Peligro
+  - key: ui.legend.hazard.desc
+    value: Terreno intransitable
+  - key: ui.hp.label
+    value: "PV Colonia: {0}/{1}"
+  - key: ui.currency.label
+    value: "Moneda: {0}"
+  - key: tile.normal.title
+    value: Casilla normal
+  - key: tile.resourcenode.title
+    value: Nodo de recursos
+  - key: tile.enemypatrol.title
+    value: Patrulla enemiga
+  - key: tile.hazard.title
+    value: Peligro
+  - key: tile.unknown.title
+    value: Desconocido
+  - key: tile.normal.desc
+    value: "Coloca h\xE9roes o recursos aqu\xED."
+  - key: tile.resourcenode.desc
+    value: "Coloca h\xE9roes aqu\xED. Zona de recolecci\xF3n extra."
+  - key: tile.enemypatrol.desc
+    value: "Enemigo (Fue: {0}). Los h\xE9roes deben luchar."
+  - key: tile.hazard.desc
+    value: "Intransitable. Causa {0} de da\xF1o."
+  - key: tile.status.hero
+    value: "[H\xE9roe]"
+  - key: tile.status.resource
+    value: "[{0} Val:{1}]"
+  - key: tile.status.defeated
+    value: "[Derrotado]"
+  - key: card.stat.hero
+    value: "M:{0} C:{1} T:{2}"
+  - key: card.stat.resource
+    value: "{0}\nVal:{1}"
+  - key: gather.hero.begin
+    value: "{0} comienza turno (vel {1})"
+  - key: gather.hero.summary
+    value: "{0}: {1} movimientos, {2} recolectados"
+  - key: gather.hero.wounded
+    value: " [HERIDO]"
+  - key: gather.hero.healing
+    value: "{0} se cura (descansa este turno)"
+  - key: gather.enemy.holds
+    value: "Enemigo (fue {0}) mantiene posici\xF3n"
+  - key: gather.enemy.chases
+    value: "\xA1El enemigo persigue a {0}!"
+  - key: gather.enemy.patrols
+    value: "El enemigo patrulla hacia {0}"
+  - key: gather.enemy.defeated
+    value: "\xA1Enemigo derrotado por {0}!"
+  - key: gather.hero.woundedby
+    value: "\xA1{0} herido por el enemigo!"
+  - key: ui.phase.deckbuild
+    value: "CONSTRUCCI\xD3N DE MAZO"
+  - key: ui.deckbuild.title
+    value: CONSTRUYE TU MAZO
+  - key: ui.deckbuild.subtitle
+    value: "Selecciona {0}-{1} cartas para tu mazo"
+  - key: ui.deckbuild.count
+    value: "Cartas: {0} (necesitas {1}-{2})"
+  - key: ui.deckbuild.confirm
+    value: CONFIRMAR
+  - key: ui.deckbuild.max
+    value: "M\xC1X"
+  - key: card.scoutrat.name
+    value: Rata Exploradora
+  - key: card.nimblerat.name
+    value: "Rata \xC1gil"
+  - key: card.brawlerrat.name
+    value: Rata Peleadora
+  - key: card.guardrat.name
+    value: Rata Guardiana
+  - key: card.packrat.name
+    value: Rata Cargadora
+  - key: card.foodscrap.name
+    value: Sobra de comida
+  - key: card.crumbpile.name
+    value: "Mont\xF3n de migajas"
+  - key: card.cardboardshelter.name
+    value: "Refugio de cart\xF3n"
+  - key: card.bottlecaparmor.name
+    value: "Armadura de chapa"
+  - key: card.shinycoin.name
+    value: Moneda brillante
+  - key: card.scoutrat.ability
+    value: Ignora la primera casilla de peligro
+  - key: card.brawlerrat.ability
+    value: "Sin da\xF1o al ganar combate"
+  - key: card.packrat.ability
+    value: +1 capacidad de carga

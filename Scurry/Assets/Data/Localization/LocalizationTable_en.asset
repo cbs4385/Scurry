@@ -1,0 +1,135 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f3622595d6884d4eb301b4819b9a53b, type: 3}
+  m_Name: LocalizationTable_en
+  m_EditorClassIdentifier: Assembly-CSharp::Scurry.Data.LocalizationTableSO
+  languageCode: en
+  languageName: English
+  entries:
+  - key: ui.phase.draw
+    value: DRAW
+  - key: ui.phase.deploy
+    value: DEPLOY
+  - key: ui.phase.gather
+    value: GATHER
+  - key: ui.phase.resolve
+    value: RESOLVE
+  - key: ui.button.endturn
+    value: END TURN
+  - key: ui.button.undo
+    value: UNDO
+  - key: ui.legend.title
+    value: TILE LEGEND
+  - key: ui.legend.normal.name
+    value: Normal
+  - key: ui.legend.normal.desc
+    value: Place heroes or resources
+  - key: ui.legend.resource.name
+    value: Resource Node
+  - key: ui.legend.resource.desc
+    value: Place heroes here
+  - key: ui.legend.enemy.name
+    value: Enemy Patrol
+  - key: ui.legend.enemy.desc
+    value: Heroes must fight to pass
+  - key: ui.legend.hazard.name
+    value: Hazard
+  - key: ui.legend.hazard.desc
+    value: Impassable terrain
+  - key: ui.hp.label
+    value: "Colony HP: {0}/{1}"
+  - key: ui.currency.label
+    value: "Currency: {0}"
+  - key: tile.normal.title
+    value: Normal Tile
+  - key: tile.resourcenode.title
+    value: Resource Node
+  - key: tile.enemypatrol.title
+    value: Enemy Patrol
+  - key: tile.hazard.title
+    value: Hazard
+  - key: tile.unknown.title
+    value: Unknown
+  - key: tile.normal.desc
+    value: Place heroes or resources here.
+  - key: tile.resourcenode.desc
+    value: Place heroes here. Bonus gathering spot.
+  - key: tile.enemypatrol.desc
+    value: "Enemy (Str: {0}). Heroes must fight to pass."
+  - key: tile.hazard.desc
+    value: "Impassable. Deals {0} damage."
+  - key: tile.status.hero
+    value: "[Hero]"
+  - key: tile.status.resource
+    value: "[{0} Val:{1}]"
+  - key: tile.status.defeated
+    value: "[Defeated]"
+  - key: card.stat.hero
+    value: "M:{0} C:{1} K:{2}"
+  - key: card.stat.resource
+    value: "{0}\nVal:{1}"
+  - key: gather.hero.begin
+    value: "{0} begins turn (spd {1})"
+  - key: gather.hero.summary
+    value: "{0}: moved {1}, collected {2}"
+  - key: gather.hero.wounded
+    value: " [WOUNDED]"
+  - key: gather.hero.healing
+    value: "{0} is healing (sitting out this turn)"
+  - key: gather.enemy.holds
+    value: "Enemy (str {0}) holds position"
+  - key: gather.enemy.chases
+    value: "Enemy chases {0}!"
+  - key: gather.enemy.patrols
+    value: "Enemy patrols to {0}"
+  - key: gather.enemy.defeated
+    value: "Enemy defeated by {0}!"
+  - key: gather.hero.woundedby
+    value: "{0} wounded by enemy!"
+  - key: ui.phase.deckbuild
+    value: DECK BUILD
+  - key: ui.deckbuild.title
+    value: BUILD YOUR DECK
+  - key: ui.deckbuild.subtitle
+    value: "Select {0}-{1} cards for your deck"
+  - key: ui.deckbuild.count
+    value: "Cards: {0} (need {1}-{2})"
+  - key: ui.deckbuild.confirm
+    value: CONFIRM DECK
+  - key: ui.deckbuild.max
+    value: MAX
+  - key: card.scoutrat.name
+    value: Scout Rat
+  - key: card.nimblerat.name
+    value: Nimble Rat
+  - key: card.brawlerrat.name
+    value: Brawler Rat
+  - key: card.guardrat.name
+    value: Guard Rat
+  - key: card.packrat.name
+    value: Pack Rat
+  - key: card.foodscrap.name
+    value: Food Scrap
+  - key: card.crumbpile.name
+    value: Crumb Pile
+  - key: card.cardboardshelter.name
+    value: Cardboard Shelter
+  - key: card.bottlecaparmor.name
+    value: Bottle Cap Armor
+  - key: card.shinycoin.name
+    value: Shiny Coin
+  - key: card.scoutrat.ability
+    value: Ignores first hazard tile
+  - key: card.brawlerrat.ability
+    value: No damage on combat win
+  - key: card.packrat.ability
+    value: +1 carry capacity

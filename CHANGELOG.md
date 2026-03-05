@@ -2,6 +2,35 @@
 
 All notable changes to Scurry: Tales of the Rat Pack will be documented in this file.
 
+## [0.2.0] - 2026-03-05
+
+### Added
+- Deck building phase with copy limits per rarity (Common 3, Uncommon 2, Rare 2, Legendary 1)
+- Card rarity system: Common, Uncommon, Rare, Legendary assigned to all 10 cards
+- Persistent wound tracking: wounded heroes skip gathering to heal, permanently exhausted on wound/death
+- Run save/load system (JSON to persistent data path) tracking turn, colony HP, deck state, wounded heroes, living enemy positions
+- Hero token persistence between turns with stat reset each turn
+- Resource token persistence until collected by heroes or auto-collected
+- Resource card recycling: player-placed resource cards return to discard pile when collected by heroes
+- Three end conditions: (A) no heroes available, (B) all resources collected, (C) all enemies defeated with auto-collection of remaining resources
+- Dynamic tile transitions between turns: enemy-vacated tiles revert to Normal (green), enemy-occupied tiles become Enemy Patrol (red)
+- Enemy agents with chase/patrol AI and initiative-based turn order
+- Shelter adjacency defense in combat (reduces effective enemy strength)
+- Localization system with 5 languages (English, French, German, Italian, Spanish) and ~60 keys
+- Gathering phase notifications for hero movement, combat, and enemy actions
+- Undo button for card placement during Deploy phase
+
+### Changed
+- Game phase flow: DeckBuild → Draw → Deploy → Gather → Resolve (added DeckBuild)
+- Colony HP starting value 30 (was 20)
+- Unplayed cards go to discard pile (not draw pile) to prevent infinite draw loops
+- Deploy phase continues until player ends turn (no longer limited to single hand)
+
+### Fixed
+- Resource tokens and tile data no longer cleared between turns (was falsely triggering "all resources collected")
+- Enemy defeat tracking now uses living enemy positions instead of tile-based flags (fixes save/load respawn bug)
+- Tile transitions correctly convert all vacated enemy tiles to Normal (including originally-EnemyPatrol tiles)
+
 ## [0.1.0] - 2026-03-04
 
 ### Added

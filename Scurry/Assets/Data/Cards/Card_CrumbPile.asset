@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 508988cb7d86e7142a6ca81ee3a80f0b, type: 3}
+  m_Name: Card_CrumbPile
+  m_EditorClassIdentifier: Assembly-CSharp::Scurry.Data.CardDefinitionSO
+  cardName: Crumb Pile
+  localizationKey: card.crumbpile
+  cardType: 1
+  rarity: 0
+  artwork: {fileID: 0}
+  placeholderColor: {r: 0.85, g: 0.75, b: 0.5, a: 1}
+  movement: 0
+  combat: 0
+  carryCapacity: 0
+  specialAbilityDescription: 
+  specialAbility: 0
+  resourceType: 0
+  value: 3

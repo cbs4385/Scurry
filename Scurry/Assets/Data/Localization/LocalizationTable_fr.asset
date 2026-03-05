@@ -1,0 +1,135 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f3622595d6884d4eb301b4819b9a53b, type: 3}
+  m_Name: LocalizationTable_fr
+  m_EditorClassIdentifier: Assembly-CSharp::Scurry.Data.LocalizationTableSO
+  languageCode: fr
+  languageName: "Fran\xE7ais"
+  entries:
+  - key: ui.phase.draw
+    value: PIOCHE
+  - key: ui.phase.deploy
+    value: "D\xC9PLOIEMENT"
+  - key: ui.phase.gather
+    value: COLLECTE
+  - key: ui.phase.resolve
+    value: "R\xC9SOLUTION"
+  - key: ui.button.endturn
+    value: FIN DE TOUR
+  - key: ui.button.undo
+    value: ANNULER
+  - key: ui.legend.title
+    value: "L\xC9GENDE DES TUILES"
+  - key: ui.legend.normal.name
+    value: Normale
+  - key: ui.legend.normal.desc
+    value: "Placez h\xE9ros ou ressources"
+  - key: ui.legend.resource.name
+    value: Noeud de ressource
+  - key: ui.legend.resource.desc
+    value: "Placez des h\xE9ros ici"
+  - key: ui.legend.enemy.name
+    value: Patrouille ennemie
+  - key: ui.legend.enemy.desc
+    value: "Les h\xE9ros doivent combattre pour passer"
+  - key: ui.legend.hazard.name
+    value: Danger
+  - key: ui.legend.hazard.desc
+    value: Terrain infranchissable
+  - key: ui.hp.label
+    value: "PV Colonie : {0}/{1}"
+  - key: ui.currency.label
+    value: "Monnaie : {0}"
+  - key: tile.normal.title
+    value: Tuile normale
+  - key: tile.resourcenode.title
+    value: Noeud de ressource
+  - key: tile.enemypatrol.title
+    value: Patrouille ennemie
+  - key: tile.hazard.title
+    value: Danger
+  - key: tile.unknown.title
+    value: Inconnu
+  - key: tile.normal.desc
+    value: "Placez des h\xE9ros ou ressources ici."
+  - key: tile.resourcenode.desc
+    value: "Placez des h\xE9ros ici. Zone de collecte bonus."
+  - key: tile.enemypatrol.desc
+    value: "Ennemi (For : {0}). Les h\xE9ros doivent combattre."
+  - key: tile.hazard.desc
+    value: "Infranchissable. Inflige {0} d\xE9g\xE2ts."
+  - key: tile.status.hero
+    value: "[H\xE9ros]"
+  - key: tile.status.resource
+    value: "[{0} Val:{1}]"
+  - key: tile.status.defeated
+    value: "[Vaincu]"
+  - key: card.stat.hero
+    value: "D:{0} C:{1} T:{2}"
+  - key: card.stat.resource
+    value: "{0}\nVal:{1}"
+  - key: gather.hero.begin
+    value: "{0} commence son tour (vit {1})"
+  - key: gather.hero.summary
+    value: "{0} : {1} d\xE9placements, {2} collect\xE9s"
+  - key: gather.hero.wounded
+    value: " [BLESS\xC9]"
+  - key: gather.hero.healing
+    value: "{0} se soigne (passe ce tour)"
+  - key: gather.enemy.holds
+    value: "Ennemi (for {0}) reste en position"
+  - key: gather.enemy.chases
+    value: "L'ennemi pourchasse {0} !"
+  - key: gather.enemy.patrols
+    value: "L'ennemi patrouille vers {0}"
+  - key: gather.enemy.defeated
+    value: "Ennemi vaincu par {0} !"
+  - key: gather.hero.woundedby
+    value: "{0} bless\xE9 par l'ennemi !"
+  - key: ui.phase.deckbuild
+    value: "CONSTRUCTION DU DECK"
+  - key: ui.deckbuild.title
+    value: "CONSTRUISEZ VOTRE DECK"
+  - key: ui.deckbuild.subtitle
+    value: "S\xE9lectionnez {0}-{1} cartes pour votre deck"
+  - key: ui.deckbuild.count
+    value: "Cartes : {0} (besoin {1}-{2})"
+  - key: ui.deckbuild.confirm
+    value: CONFIRMER
+  - key: ui.deckbuild.max
+    value: MAX
+  - key: card.scoutrat.name
+    value: Rat \xC9claireur
+  - key: card.nimblerat.name
+    value: Rat Agile
+  - key: card.brawlerrat.name
+    value: Rat Bagarreur
+  - key: card.guardrat.name
+    value: Rat Gardien
+  - key: card.packrat.name
+    value: Rat Porteur
+  - key: card.foodscrap.name
+    value: Reste de nourriture
+  - key: card.crumbpile.name
+    value: Tas de miettes
+  - key: card.cardboardshelter.name
+    value: Abri en carton
+  - key: card.bottlecaparmor.name
+    value: "Armure en capsule"
+  - key: card.shinycoin.name
+    value: "Pi\xE8ce brillante"
+  - key: card.scoutrat.ability
+    value: "Ignore la premi\xE8re tuile de danger"
+  - key: card.brawlerrat.ability
+    value: "Aucun d\xE9g\xE2t en cas de victoire au combat"
+  - key: card.packrat.ability
+    value: "+1 capacit\xE9 de transport"

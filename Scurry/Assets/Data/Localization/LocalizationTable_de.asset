@@ -1,0 +1,135 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f3622595d6884d4eb301b4819b9a53b, type: 3}
+  m_Name: LocalizationTable_de
+  m_EditorClassIdentifier: Assembly-CSharp::Scurry.Data.LocalizationTableSO
+  languageCode: de
+  languageName: Deutsch
+  entries:
+  - key: ui.phase.draw
+    value: ZIEHEN
+  - key: ui.phase.deploy
+    value: AUFSTELLEN
+  - key: ui.phase.gather
+    value: SAMMELN
+  - key: ui.phase.resolve
+    value: "AUFL\xD6SEN"
+  - key: ui.button.endturn
+    value: ZUG BEENDEN
+  - key: ui.button.undo
+    value: "R\xDCCKG\xC4NGIG"
+  - key: ui.legend.title
+    value: KACHELLEGENDE
+  - key: ui.legend.normal.name
+    value: Normal
+  - key: ui.legend.normal.desc
+    value: Helden oder Ressourcen platzieren
+  - key: ui.legend.resource.name
+    value: Ressourcenknoten
+  - key: ui.legend.resource.desc
+    value: Helden hier platzieren
+  - key: ui.legend.enemy.name
+    value: Feindpatrouille
+  - key: ui.legend.enemy.desc
+    value: "Helden m\xFCssen k\xE4mpfen"
+  - key: ui.legend.hazard.name
+    value: Gefahr
+  - key: ui.legend.hazard.desc
+    value: "Unpassierbares Gel\xE4nde"
+  - key: ui.hp.label
+    value: "Kolonie LP: {0}/{1}"
+  - key: ui.currency.label
+    value: "W\xE4hrung: {0}"
+  - key: tile.normal.title
+    value: Normale Kachel
+  - key: tile.resourcenode.title
+    value: Ressourcenknoten
+  - key: tile.enemypatrol.title
+    value: Feindpatrouille
+  - key: tile.hazard.title
+    value: Gefahr
+  - key: tile.unknown.title
+    value: Unbekannt
+  - key: tile.normal.desc
+    value: Helden oder Ressourcen hier platzieren.
+  - key: tile.resourcenode.desc
+    value: Helden hier platzieren. Bonus-Sammelzone.
+  - key: tile.enemypatrol.desc
+    value: "Feind (St\xE4rke: {0}). Helden m\xFCssen k\xE4mpfen."
+  - key: tile.hazard.desc
+    value: "Unpassierbar. Verursacht {0} Schaden."
+  - key: tile.status.hero
+    value: "[Held]"
+  - key: tile.status.resource
+    value: "[{0} Wert:{1}]"
+  - key: tile.status.defeated
+    value: "[Besiegt]"
+  - key: card.stat.hero
+    value: "B:{0} K:{1} T:{2}"
+  - key: card.stat.resource
+    value: "{0}\nWert:{1}"
+  - key: gather.hero.begin
+    value: "{0} beginnt Zug (Tempo {1})"
+  - key: gather.hero.summary
+    value: "{0}: {1} bewegt, {2} gesammelt"
+  - key: gather.hero.wounded
+    value: " [VERWUNDET]"
+  - key: gather.hero.healing
+    value: "{0} heilt sich (setzt diese Runde aus)"
+  - key: gather.enemy.holds
+    value: "Feind (St {0}) h\xE4lt Position"
+  - key: gather.enemy.chases
+    value: "Feind jagt {0}!"
+  - key: gather.enemy.patrols
+    value: "Feind patrouilliert zu {0}"
+  - key: gather.enemy.defeated
+    value: "Feind besiegt von {0}!"
+  - key: gather.hero.woundedby
+    value: "{0} vom Feind verwundet!"
+  - key: ui.phase.deckbuild
+    value: DECKBAU
+  - key: ui.deckbuild.title
+    value: BAUE DEIN DECK
+  - key: ui.deckbuild.subtitle
+    value: "W\xE4hle {0}-{1} Karten f\xFCr dein Deck"
+  - key: ui.deckbuild.count
+    value: "Karten: {0} (brauche {1}-{2})"
+  - key: ui.deckbuild.confirm
+    value: "BEST\xC4TIGEN"
+  - key: ui.deckbuild.max
+    value: MAX
+  - key: card.scoutrat.name
+    value: Sp\xE4herratte
+  - key: card.nimblerat.name
+    value: Flinke Ratte
+  - key: card.brawlerrat.name
+    value: Raufratte
+  - key: card.guardrat.name
+    value: "W\xE4chterratte"
+  - key: card.packrat.name
+    value: "Packratte"
+  - key: card.foodscrap.name
+    value: Essensrest
+  - key: card.crumbpile.name
+    value: "Kr\xFCmelhaufen"
+  - key: card.cardboardshelter.name
+    value: Pappunterschlupf
+  - key: card.bottlecaparmor.name
+    value: Kronkorkenr\xFCstung
+  - key: card.shinycoin.name
+    value: "Gl\xE4nzende M\xFCnze"
+  - key: card.scoutrat.ability
+    value: Ignoriert erste Gefahrenkachel
+  - key: card.brawlerrat.ability
+    value: Kein Schaden bei Kampfsieg
+  - key: card.packrat.ability
+    value: "+1 Tragekapazit\xE4t"
