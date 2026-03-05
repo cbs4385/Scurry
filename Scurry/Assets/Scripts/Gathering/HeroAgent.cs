@@ -18,6 +18,9 @@ namespace Scurry.Gathering
         public bool IsHealing { get; private set; }
         public int ResourcesCollected { get; private set; }
         private bool hazardIgnored;
+        private bool patrolIgnored;
+        private bool healUsed;
+        private bool disarmUsed;
 
         public void ResetForNextTurn()
         {
@@ -26,11 +29,21 @@ namespace Scurry.Gathering
             RemainingCarry = CardData.carryCapacity;
             ResourcesCollected = 0;
             hazardIgnored = false;
+            patrolIgnored = false;
+            healUsed = false;
+            disarmUsed = false;
 
             if (CardData.specialAbility == SpecialAbility.ExtraCarry)
             {
                 RemainingCarry += 1;
                 Debug.Log($"[HeroAgent] ResetForNextTurn: ExtraCarry ability — carry increased to {RemainingCarry}");
+            }
+
+            if (CardData.specialAbility == SpecialAbility.Frenzy)
+            {
+                CurrentCombat += 2;
+                RemainingCarry = 0;
+                Debug.Log($"[HeroAgent] ResetForNextTurn: Frenzy ability — combat +2 to {CurrentCombat}, carry=0");
             }
 
             Debug.Log($"[HeroAgent] ResetForNextTurn: hero='{CardData.cardName}' reset — moves={RemainingMoves}, combat={CurrentCombat}, carry={RemainingCarry}");
@@ -42,11 +55,25 @@ namespace Scurry.Gathering
             Debug.Log($"[HeroAgent] ApplyWound: hero='{CardData.cardName}' is now wounded");
         }
 
+        public void HealWound()
+        {
+            IsWounded = false;
+            IsHealing = false;
+            Debug.Log($"[HeroAgent] HealWound: hero='{CardData.cardName}' has been healed");
+        }
+
         public void SetHealing()
         {
             IsWounded = true;
             IsHealing = true;
             Debug.Log($"[HeroAgent] SetHealing: hero='{CardData.cardName}' is wounded and healing (will sit out this gathering)");
+        }
+
+        public void AddCombatBonus(int amount)
+        {
+            int prev = CurrentCombat;
+            CurrentCombat += amount;
+            Debug.Log($"[HeroAgent] AddCombatBonus: hero='{CardData.cardName}' combat {prev} -> {CurrentCombat} (+{amount})");
         }
 
         public void Initialize(CardDefinitionSO card, Vector2Int startPos)
@@ -57,13 +84,24 @@ namespace Scurry.Gathering
             CurrentCombat = card.combat;
             RemainingCarry = card.carryCapacity;
             hazardIgnored = false;
+            patrolIgnored = false;
+            healUsed = false;
+            disarmUsed = false;
             Debug.Log($"[HeroAgent] Initialize: hero='{card.cardName}', ability={card.specialAbility}, gridPos={startPos}, moves={RemainingMoves}, combat={CurrentCombat}, carry={RemainingCarry}");
 
-            // ExtraCarry ability (Pack Rat): +1 carry capacity
+            // ExtraCarry ability (Pack Rat, Forager Rat): +1 carry capacity
             if (card.specialAbility == SpecialAbility.ExtraCarry)
             {
                 RemainingCarry += 1;
                 Debug.Log($"[HeroAgent] Initialize: ExtraCarry ability — carry increased to {RemainingCarry}");
+            }
+
+            // Frenzy ability (Berserker Rat): +2 combat, carry=0
+            if (card.specialAbility == SpecialAbility.Frenzy)
+            {
+                CurrentCombat += 2;
+                RemainingCarry = 0;
+                Debug.Log($"[HeroAgent] Initialize: Frenzy ability — combat +2 to {CurrentCombat}, carry=0");
             }
         }
 
@@ -88,19 +126,32 @@ namespace Scurry.Gathering
                 RemainingCarry--;
                 ResourcesCollected++;
                 Debug.Log($"[HeroAgent] CollectResourceAtCurrentTile: hero='{CardData.cardName}' collected {collectedType} (value={collectedValue}) at ({GridPosition}) (remainingCarry={RemainingCarry}, totalCollected={ResourcesCollected})");
+
                 if (collectedType == ResourceType.Equipment)
                 {
                     int prevCombat = CurrentCombat;
                     CurrentCombat += collectedValue;
                     Debug.Log($"[HeroAgent] CollectResourceAtCurrentTile: Equipment buff — combat {prevCombat} -> {CurrentCombat} (+{collectedValue})");
+                    string heroName = !string.IsNullOrEmpty(CardData.localizationKey) ? Loc.Get(CardData.localizationKey + ".name") : CardData.cardName;
+                    EventBus.OnGatheringNotification?.Invoke(Loc.Format("gather.equip.bonus", heroName, collectedType, collectedValue), new Color(0.5f, 0.5f, 0.9f));
                 }
+
                 EventBus.OnResourceCollected?.Invoke(collectedType, collectedValue);
+
                 // BonusFood ability (Scout Rat): +1 bonus Food on Food collection
                 if (CardData.specialAbility == SpecialAbility.BonusFood && collectedType == ResourceType.Food)
                 {
                     Debug.Log($"[HeroAgent] CollectResourceAtCurrentTile: BonusFood ability — granting +1 bonus Food");
                     EventBus.OnResourceCollected?.Invoke(ResourceType.Food, 1);
                 }
+
+                // ShelterBoost ability (Guard Rat): +1 bonus Shelter on Shelter collection
+                if (CardData.specialAbility == SpecialAbility.ShelterBoost && collectedType == ResourceType.Shelter)
+                {
+                    Debug.Log($"[HeroAgent] CollectResourceAtCurrentTile: ShelterBoost ability — granting +1 bonus Shelter");
+                    EventBus.OnResourceCollected?.Invoke(ResourceType.Shelter, 1);
+                }
+
                 DestroyResourceOnTile(board, GridPosition);
             }
             else
@@ -145,45 +196,56 @@ namespace Scurry.Gathering
 
                     if (tile.TileType == TileType.EnemyPatrol && !tile.IsEnemyDefeated)
                     {
-                        // Calculate shelter adjacency defense
-                        int shelterDefense = 0;
-                        int shelterMultiplier = (CardData.specialAbility == SpecialAbility.ShelterBoost) ? 3 : 1;
-                        var adjacentTiles = board.GetAdjacentTiles(nextPos);
-                        foreach (var adjTile in adjacentTiles)
+                        // StealthMove ability (Shadow Rat): ignore first enemy patrol
+                        if (CardData.specialAbility == SpecialAbility.StealthMove && !patrolIgnored)
                         {
-                            if (adjTile.HasResource && adjTile.StoredResourceType == ResourceType.Shelter)
-                            {
-                                int defValue = adjTile.StoredResourceValue * shelterMultiplier;
-                                shelterDefense += defValue;
-                                Debug.Log($"[HeroAgent] MoveAlongPath: shelter defense from ({adjTile.GridPosition}) — baseValue={adjTile.StoredResourceValue}, multiplier={shelterMultiplier}, effective={defValue}");
-                            }
-                        }
-                        int effectiveEnemyStrength = Mathf.Max(0, tile.EnemyStrength - shelterDefense);
-                        Debug.Log($"[HeroAgent] MoveAlongPath: hero='{CardData.cardName}' engaging enemy (heroCombat={CurrentCombat}, baseEnemyStr={tile.EnemyStrength}, shelterDef={shelterDefense}, effectiveEnemyStr={effectiveEnemyStrength})");
-
-                        bool won = CombatResolver.Resolve(CurrentCombat, effectiveEnemyStrength);
-                        EventBus.OnCombatResolved?.Invoke(CurrentCombat, effectiveEnemyStrength, won);
-
-                        if (won)
-                        {
-                            DestroyEnemyOnTile(board, nextPos);
-                            Debug.Log($"[HeroAgent] MoveAlongPath: hero='{CardData.cardName}' defeated enemy at ({nextPos}) — tile will transition in resolve phase");
+                            patrolIgnored = true;
+                            string heroName = !string.IsNullOrEmpty(CardData.localizationKey) ? Loc.Get(CardData.localizationKey + ".name") : CardData.cardName;
+                            Debug.Log($"[HeroAgent] MoveAlongPath: StealthMove ability — hero='{CardData.cardName}' ignoring enemy at ({nextPos})");
+                            EventBus.OnGatheringNotification?.Invoke(Loc.Format("gather.hero.stealth", heroName), new Color(0.5f, 0.3f, 0.7f));
                         }
                         else
                         {
-                            // NoDamageOnWin ability (Brawler Rat): survives combat loss without wounding
-                            if (CardData.specialAbility == SpecialAbility.NoDamageOnWin)
+                            // Calculate shelter adjacency defense
+                            int shelterDefense = 0;
+                            int shelterMultiplier = (CardData.specialAbility == SpecialAbility.ShelterBoost) ? 3 : 1;
+                            var adjacentTiles = board.GetAdjacentTiles(nextPos);
+                            foreach (var adjTile in adjacentTiles)
                             {
-                                Debug.Log($"[HeroAgent] MoveAlongPath: NoDamageOnWin ability — hero='{CardData.cardName}' lost combat but takes no wound, continuing movement");
+                                if (adjTile.HasResource && adjTile.StoredResourceType == ResourceType.Shelter)
+                                {
+                                    int defValue = adjTile.StoredResourceValue * shelterMultiplier;
+                                    shelterDefense += defValue;
+                                    Debug.Log($"[HeroAgent] MoveAlongPath: shelter defense from ({adjTile.GridPosition}) — baseValue={adjTile.StoredResourceValue}, multiplier={shelterMultiplier}, effective={defValue}");
+                                }
+                            }
+                            int effectiveEnemyStrength = Mathf.Max(0, tile.EnemyStrength - shelterDefense);
+                            Debug.Log($"[HeroAgent] MoveAlongPath: hero='{CardData.cardName}' engaging enemy (heroCombat={CurrentCombat}, baseEnemyStr={tile.EnemyStrength}, shelterDef={shelterDefense}, effectiveEnemyStr={effectiveEnemyStrength})");
+
+                            bool won = CombatResolver.Resolve(CurrentCombat, effectiveEnemyStrength);
+                            EventBus.OnCombatResolved?.Invoke(CurrentCombat, effectiveEnemyStrength, won);
+
+                            if (won)
+                            {
+                                DestroyEnemyOnTile(board, nextPos);
+                                Debug.Log($"[HeroAgent] MoveAlongPath: hero='{CardData.cardName}' defeated enemy at ({nextPos}) — tile will transition in resolve phase");
                             }
                             else
                             {
-                                int damage = effectiveEnemyStrength - CurrentCombat;
-                                Debug.Log($"[HeroAgent] MoveAlongPath: hero='{CardData.cardName}' LOST combat — damage to colony={damage}");
-                                EventBus.OnColonyHPChanged?.Invoke(-damage, 0);
-                                IsWounded = true;
-                                Debug.Log($"[HeroAgent] MoveAlongPath: hero='{CardData.cardName}' is wounded, stopping movement");
-                                yield break; // Hero stops moving
+                                // NoDamageOnWin ability (Brawler Rat): survives combat loss without wounding
+                                if (CardData.specialAbility == SpecialAbility.NoDamageOnWin)
+                                {
+                                    Debug.Log($"[HeroAgent] MoveAlongPath: NoDamageOnWin ability — hero='{CardData.cardName}' lost combat but takes no wound, continuing movement");
+                                }
+                                else
+                                {
+                                    int damage = effectiveEnemyStrength - CurrentCombat;
+                                    Debug.Log($"[HeroAgent] MoveAlongPath: hero='{CardData.cardName}' LOST combat — damage to colony={damage}");
+                                    EventBus.OnColonyHPChanged?.Invoke(-damage, 0);
+                                    IsWounded = true;
+                                    Debug.Log($"[HeroAgent] MoveAlongPath: hero='{CardData.cardName}' is wounded, stopping movement");
+                                    yield break; // Hero stops moving
+                                }
                             }
                         }
                     }
@@ -217,19 +279,32 @@ namespace Scurry.Gathering
                         RemainingCarry--;
                         ResourcesCollected++;
                         Debug.Log($"[HeroAgent] MoveAlongPath: hero='{CardData.cardName}' collected {collectedType} (value={collectedValue}) at ({nextPos}) (remainingCarry={RemainingCarry}, totalCollected={ResourcesCollected})");
+
                         if (collectedType == ResourceType.Equipment)
                         {
                             int prevCombat = CurrentCombat;
                             CurrentCombat += collectedValue;
                             Debug.Log($"[HeroAgent] MoveAlongPath: Equipment buff — combat {prevCombat} -> {CurrentCombat} (+{collectedValue})");
+                            string heroName = !string.IsNullOrEmpty(CardData.localizationKey) ? Loc.Get(CardData.localizationKey + ".name") : CardData.cardName;
+                            EventBus.OnGatheringNotification?.Invoke(Loc.Format("gather.equip.bonus", heroName, collectedType, collectedValue), new Color(0.5f, 0.5f, 0.9f));
                         }
+
                         EventBus.OnResourceCollected?.Invoke(collectedType, collectedValue);
+
                         // BonusFood ability (Scout Rat): +1 bonus Food on Food collection
                         if (CardData.specialAbility == SpecialAbility.BonusFood && collectedType == ResourceType.Food)
                         {
                             Debug.Log($"[HeroAgent] MoveAlongPath: BonusFood ability — granting +1 bonus Food");
                             EventBus.OnResourceCollected?.Invoke(ResourceType.Food, 1);
                         }
+
+                        // ShelterBoost ability (Guard Rat): +1 bonus Shelter on Shelter collection
+                        if (CardData.specialAbility == SpecialAbility.ShelterBoost && collectedType == ResourceType.Shelter)
+                        {
+                            Debug.Log($"[HeroAgent] MoveAlongPath: ShelterBoost ability — granting +1 bonus Shelter");
+                            EventBus.OnResourceCollected?.Invoke(ResourceType.Shelter, 1);
+                        }
+
                         DestroyResourceOnTile(board, nextPos);
                     }
                 }
@@ -242,6 +317,55 @@ namespace Scurry.Gathering
             }
 
             Debug.Log($"[HeroAgent] MoveAlongPath: hero='{CardData.cardName}' finished — finalPos={GridPosition}, remainingMoves={RemainingMoves}, resourcesCollected={ResourcesCollected}, wounded={IsWounded}");
+        }
+
+        /// <summary>
+        /// Post-movement abilities: HealAlly and TrapDisarm. Called by GatheringManager after MoveAlongPath completes.
+        /// </summary>
+        public void ExecutePostMoveAbilities(BoardManager board, List<HeroAgent> allHeroes)
+        {
+            if (IsWounded) return;
+
+            string heroName = !string.IsNullOrEmpty(CardData.localizationKey) ? Loc.Get(CardData.localizationKey + ".name") : CardData.cardName;
+
+            // HealAlly ability (Healer Rat): heal one adjacent wounded ally
+            if (CardData.specialAbility == SpecialAbility.HealAlly && !healUsed)
+            {
+                var adjacentTiles = board.GetAdjacentTiles(GridPosition);
+                foreach (var hero in allHeroes)
+                {
+                    if (hero == null || hero == this || !hero.IsWounded) continue;
+                    foreach (var adjTile in adjacentTiles)
+                    {
+                        if (hero.GridPosition == adjTile.GridPosition)
+                        {
+                            string targetName = !string.IsNullOrEmpty(hero.CardData.localizationKey) ? Loc.Get(hero.CardData.localizationKey + ".name") : hero.CardData.cardName;
+                            hero.HealWound();
+                            healUsed = true;
+                            Debug.Log($"[HeroAgent] ExecutePostMoveAbilities: HealAlly ability — hero='{CardData.cardName}' healed '{hero.CardData.cardName}' at ({hero.GridPosition})");
+                            EventBus.OnGatheringNotification?.Invoke(Loc.Format("gather.hero.healally", heroName, targetName), new Color(0.4f, 0.9f, 0.7f));
+                            goto doneHeal;
+                        }
+                    }
+                }
+                doneHeal:;
+            }
+
+            // TrapDisarm ability (Sapper Rat): convert adjacent hazard tiles to normal
+            if (CardData.specialAbility == SpecialAbility.TrapDisarm && !disarmUsed)
+            {
+                var adjacentTiles = board.GetAdjacentTiles(GridPosition);
+                foreach (var adjTile in adjacentTiles)
+                {
+                    if (adjTile.TileType == TileType.Hazard)
+                    {
+                        adjTile.SetAsNormal(new Color(0.3f, 0.7f, 0.3f));
+                        disarmUsed = true;
+                        Debug.Log($"[HeroAgent] ExecutePostMoveAbilities: TrapDisarm ability — hero='{CardData.cardName}' disarmed hazard at ({adjTile.GridPosition})");
+                        EventBus.OnGatheringNotification?.Invoke(Loc.Format("gather.hero.disarm", heroName, adjTile.GridPosition), new Color(0.7f, 0.5f, 0.2f));
+                    }
+                }
+            }
         }
 
         private void DestroyEnemyOnTile(BoardManager board, Vector2Int pos)

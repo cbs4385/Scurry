@@ -269,7 +269,8 @@ namespace Scurry.Core
             {
                 turnNumber = turnNumber,
                 colonyHP = colonyManager.CurrentHP,
-                currencyStockpile = colonyManager.CurrencyStockpile
+                currencyStockpile = colonyManager.CurrencyStockpile,
+                foodStockpile = colonyManager.FoodStockpile
             };
 
             // Save draw pile
@@ -312,7 +313,7 @@ namespace Scurry.Core
             turnNumber = saveData.turnNumber - 1;
 
             // Restore colony state
-            colonyManager.RestoreState(saveData.colonyHP, saveData.currencyStockpile);
+            colonyManager.RestoreState(saveData.colonyHP, saveData.currencyStockpile, saveData.foodStockpile);
 
             // Restore deck piles
             var drawPile = new List<CardDefinitionSO>();

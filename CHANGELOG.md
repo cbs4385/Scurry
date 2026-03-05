@@ -2,6 +2,24 @@
 
 All notable changes to Scurry: Tales of the Rat Pack will be documented in this file.
 
+## [0.5.0] - 2026-03-05
+
+### Added
+- Enemy definition system: EnemyDefinitionSO ScriptableObject with name, strength, speed, behavior, token color
+- 4 enemy types for Zone 1 "The Wilds": Field Mouse (Patrol), Grass Snake (Chase), Hawk Scout (Ambush), Badger (Guard)
+- EnemyBehavior enum with 4 AI patterns: Patrol (wander range 2), Chase (pursue heroes range 3), Ambush (wait then chase), Guard (hold position)
+- 5 hero special abilities now functional: HealAlly (heal adjacent wounded), TrapDisarm (convert adjacent hazards), Frenzy (+2 combat, no carry), StealthMove (ignore first patrol), RallyAll (buff all allies +1 combat)
+- Equipment combat bonus notification during gathering phase
+- Food dual-tracking: FoodStockpile accumulates alongside existing HP heal for future Healing step
+- SpendFood and SpendCurrency methods on ColonyManager for future Shop/Healing steps
+- Enemy names localized in all 5 languages (en/fr/de/it/es)
+- 9 new gathering notification localization keys across all 5 languages (equip, heal, disarm, rally, stealth)
+
+### Changed
+- EnemyAgent rewritten to support EnemyDefinitionSO with backward-compatible legacy Initialize
+- GatheringManager supports spawning enemies from EnemyDefinitionSO with per-type token colors
+- RunSaveData now tracks foodStockpile for save/load persistence
+
 ## [0.4.0] - 2026-03-05
 
 ### Added

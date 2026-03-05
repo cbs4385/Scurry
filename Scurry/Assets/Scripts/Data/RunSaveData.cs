@@ -8,6 +8,7 @@ namespace Scurry.Data
         public int turnNumber;
         public int colonyHP;
         public int currencyStockpile;
+        public int foodStockpile;
         public List<string> drawPileCardNames = new List<string>();
         public List<string> discardPileCardNames = new List<string>();
         public List<string> woundedHeroCardNames = new List<string>();

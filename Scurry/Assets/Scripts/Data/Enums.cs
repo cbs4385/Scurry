@@ -10,4 +10,5 @@ namespace Scurry.Data
     public enum RunState { Draft, InStage, StepTransition, BossFight, RunComplete, GameOver }
     public enum RelicEffect { None, IgnoreFirstPatrol, ShopDiscount, BonusHP, BonusMove, BonusCombat }
     public enum BossAbility { Swoop, Talons, AoEDamage, Summon, Stun }
+    public enum EnemyBehavior { Patrol, Chase, Ambush, Guard }
 }

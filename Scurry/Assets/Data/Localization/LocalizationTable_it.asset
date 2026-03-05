@@ -193,3 +193,29 @@ MonoBehaviour:
     value: "Ditale d'Argento"
   - key: card.goldbutton.name
     value: "Bottone d'Oro"
+  - key: enemy.fieldmouse.name
+    value: Topo di Campo
+  - key: enemy.grasssnake.name
+    value: Biscia
+  - key: enemy.hawkscout.name
+    value: Falco Esploratore
+  - key: enemy.badger.name
+    value: Tasso
+  - key: gather.equip.bonus
+    value: "{0} equipaggia {1} (+{2} combattimento)"
+  - key: gather.hero.healally
+    value: "{0} cura {1}!"
+  - key: gather.hero.disarm
+    value: "{0} disattiva trappola in {1}"
+  - key: gather.hero.rally
+    value: "{0} raduna! Tutti gli alleati +1 combattimento"
+  - key: gather.hero.stealth
+    value: "{0} si intrufola oltre il nemico!"
+  - key: resource.effect.food
+    value: "Cura PV colonia (valore \xD72)"
+  - key: resource.effect.shelter
+    value: Riduce la forza nemica quando adiacente all'eroe
+  - key: resource.effect.equipment
+    value: "+valore bonus combattimento all'eroe che raccoglie"
+  - key: resource.effect.currency
+    value: Aggiunge al deposito di valuta per i negozi

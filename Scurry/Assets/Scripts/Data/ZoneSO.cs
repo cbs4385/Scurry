@@ -23,6 +23,7 @@ namespace Scurry.Data
 
         [Header("Cards & Enemies")]
         public CardDefinitionSO[] zoneCardPool;
+        public EnemyDefinitionSO[] zoneEnemies;
         public BossDefinitionSO zoneBoss;
     }
 }

@@ -9,29 +9,92 @@ namespace Scurry.Gathering
 {
     public class EnemyAgent : MonoBehaviour
     {
+        public EnemyDefinitionSO Definition { get; private set; }
         public Vector2Int GridPosition { get; private set; }
         public int Strength { get; private set; }
         public int Speed { get; private set; }
         public bool IsDefeated { get; private set; }
+        public EnemyBehavior Behavior { get; private set; }
 
-        private const int ChaseRange = 2;
+        private const int PatrolChaseRange = 2;
+        private const int ChaseChaseRange = 3;
+        private bool ambushTriggered;
+        private Vector2Int guardTile;
+
+        public string DisplayName
+        {
+            get
+            {
+                if (Definition != null && !string.IsNullOrEmpty(Definition.localizationKey))
+                    return Loc.Get(Definition.localizationKey + ".name");
+                if (Definition != null)
+                    return Definition.enemyName;
+                return $"Enemy at {GridPosition}";
+            }
+        }
+
+        public void Initialize(EnemyDefinitionSO def, Vector2Int startPos)
+        {
+            Definition = def;
+            GridPosition = startPos;
+            Strength = def.strength;
+            Speed = def.speed;
+            Behavior = def.behavior;
+            IsDefeated = false;
+            ambushTriggered = false;
+            guardTile = startPos;
+            Debug.Log($"[EnemyAgent] Initialize: name='{def.enemyName}', gridPos={startPos}, strength={Strength}, speed={Speed}, behavior={Behavior}");
+        }
 
         public void Initialize(Vector2Int startPos, int strength, int speed = 2)
         {
             GridPosition = startPos;
             Strength = strength;
             Speed = speed;
+            Behavior = EnemyBehavior.Patrol;
             IsDefeated = false;
-            Debug.Log($"[EnemyAgent] Initialize: gridPos={startPos}, strength={strength}, speed={speed}");
+            ambushTriggered = false;
+            guardTile = startPos;
+            Debug.Log($"[EnemyAgent] Initialize: gridPos={startPos}, strength={strength}, speed={speed}, behavior=Patrol (legacy)");
         }
 
-        /// <summary>
-        /// Decide the enemy's next move. Sets chaseTarget to the hero being chased (or null if patrolling).
-        /// </summary>
         public Vector2Int? DecideMove(BoardManager board, List<HeroAgent> heroes, out HeroAgent chaseTarget)
         {
-            Debug.Log($"[EnemyAgent] DecideMove: enemy at {GridPosition}, checking {heroes.Count} heroes");
+            Debug.Log($"[EnemyAgent] DecideMove: enemy at {GridPosition}, behavior={Behavior}, checking {heroes.Count} heroes");
             chaseTarget = null;
+
+            if (Behavior == EnemyBehavior.Guard)
+            {
+                Debug.Log($"[EnemyAgent] DecideMove: GUARD — staying on guard tile {guardTile}");
+                return null;
+            }
+
+            int chaseRange = Behavior == EnemyBehavior.Chase ? ChaseChaseRange : PatrolChaseRange;
+
+            if (Behavior == EnemyBehavior.Ambush && !ambushTriggered)
+            {
+                // Check if any hero is adjacent
+                bool heroAdjacent = false;
+                foreach (var hero in heroes)
+                {
+                    if (hero == null || hero.IsWounded) continue;
+                    int dist = ManhattanDistance(GridPosition, hero.GridPosition);
+                    Debug.Log($"[EnemyAgent] DecideMove: (ambush check) hero '{hero.CardData.cardName}' at {hero.GridPosition}, dist={dist}");
+                    if (dist <= 1)
+                    {
+                        heroAdjacent = true;
+                        break;
+                    }
+                }
+                if (!heroAdjacent)
+                {
+                    Debug.Log($"[EnemyAgent] DecideMove: AMBUSH — no hero adjacent, staying hidden");
+                    return null;
+                }
+                ambushTriggered = true;
+                Debug.Log($"[EnemyAgent] DecideMove: AMBUSH TRIGGERED — hero adjacent, switching to chase");
+                chaseRange = ChaseChaseRange;
+            }
 
             // Find nearest non-wounded hero within chase range
             HeroAgent closestHero = null;
@@ -42,7 +105,7 @@ namespace Scurry.Gathering
                 if (hero == null || hero.IsWounded) continue;
                 int dist = ManhattanDistance(GridPosition, hero.GridPosition);
                 Debug.Log($"[EnemyAgent] DecideMove: hero '{hero.CardData.cardName}' at {hero.GridPosition}, dist={dist}");
-                if (dist <= ChaseRange && dist < closestDist)
+                if (dist <= chaseRange && dist < closestDist)
                 {
                     closestDist = dist;
                     closestHero = hero;
@@ -57,7 +120,12 @@ namespace Scurry.Gathering
             }
             else
             {
-                Debug.Log($"[EnemyAgent] DecideMove: PATROL — no hero in range ({ChaseRange}), moving randomly");
+                if (Behavior == EnemyBehavior.Ambush)
+                {
+                    Debug.Log($"[EnemyAgent] DecideMove: AMBUSH (triggered but no hero in range) — staying put");
+                    return null;
+                }
+                Debug.Log($"[EnemyAgent] DecideMove: PATROL — no hero in range ({chaseRange}), moving randomly");
                 return GetRandomAdjacentWalkable(board);
             }
         }

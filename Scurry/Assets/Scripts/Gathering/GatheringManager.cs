@@ -79,6 +79,28 @@ namespace Scurry.Gathering
             Debug.Log($"[GatheringManager] SpawnEnemyAt: spawned enemy at gridPos={gridPos}, strength={strength}, speed={enemyAgent.Speed}");
         }
 
+        public void SpawnEnemyFromDefinition(EnemyDefinitionSO def, Vector2Int gridPos)
+        {
+            Debug.Log($"[GatheringManager] SpawnEnemyFromDefinition: spawning '{def.enemyName}' at gridPos={gridPos}, strength={def.strength}, speed={def.speed}, behavior={def.behavior}");
+            Vector3 worldPos = boardManager.GetWorldPosition(gridPos);
+            worldPos.z = -0.08f;
+            GameObject enemy = Instantiate(enemyTokenPrefab, worldPos, Quaternion.identity, boardManager.transform);
+            enemy.name = $"Enemy_{def.enemyName.Replace(" ", "")}_{gridPos.x}_{gridPos.y}";
+            var sr = enemy.GetComponent<SpriteRenderer>();
+            if (sr != null)
+            {
+                SpriteHelper.EnsureSprite(sr);
+                sr.color = def.tokenColor;
+                sr.sortingOrder = 3;
+            }
+            SpriteHelper.AddOutline(enemy, 3);
+            var enemyAgent = enemy.GetComponent<EnemyAgent>();
+            if (enemyAgent == null)
+                enemyAgent = enemy.AddComponent<EnemyAgent>();
+            enemyAgent.Initialize(def, gridPos);
+            Debug.Log($"[GatheringManager] SpawnEnemyFromDefinition: spawned '{def.enemyName}' at gridPos={gridPos}");
+        }
+
         public IEnumerator RunGathering()
         {
             Debug.Log("[GatheringManager] RunGathering: starting gathering phase");
@@ -133,6 +155,20 @@ namespace Scurry.Gathering
                         continue;
                     }
 
+                    // RallyAll ability (Elder Rat): buff all non-wounded heroes +1 combat
+                    if (hero.CardData.specialAbility == SpecialAbility.RallyAll)
+                    {
+                        string rallyName = !string.IsNullOrEmpty(hero.CardData.localizationKey) ? Loc.Get(hero.CardData.localizationKey + ".name") : hero.CardData.cardName;
+                        Debug.Log($"[GatheringManager] RunGathering: RallyAll ability — '{hero.CardData.cardName}' buffing all allies +1 combat");
+                        foreach (var ally in heroes)
+                        {
+                            if (ally == null || ally.IsWounded) continue;
+                            ally.AddCombatBonus(1);
+                            Debug.Log($"[GatheringManager] RunGathering: RallyAll — '{ally.CardData.cardName}' combat now {ally.CurrentCombat}");
+                        }
+                        EventBus.OnGatheringNotification?.Invoke(Loc.Format("gather.hero.rally", rallyName), new Color(0.9f, 0.8f, 0.3f));
+                    }
+
                     Debug.Log($"[GatheringManager] RunGathering: HERO TURN — '{hero.CardData.cardName}' (moves={hero.RemainingMoves}, carry={hero.RemainingCarry})");
                     Color heroColor = new Color(0.4f, 0.9f, 0.4f);
                     string heroDisplayName = !string.IsNullOrEmpty(hero.CardData.localizationKey) ? Loc.Get(hero.CardData.localizationKey + ".name") : hero.CardData.cardName;
@@ -172,6 +208,9 @@ namespace Scurry.Gathering
                             yield return StartCoroutine(hero.MoveAlongPath(path, boardManager, moveStepDelay));
                         }
                     }
+
+                    // Post-move abilities (HealAlly, TrapDisarm)
+                    hero.ExecutePostMoveAbilities(boardManager, heroes);
 
                     // Summary notification
                     int movesMade = startMoves - hero.RemainingMoves;

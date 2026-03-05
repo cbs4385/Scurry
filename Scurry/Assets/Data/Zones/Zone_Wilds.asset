@@ -29,4 +29,9 @@ MonoBehaviour:
   - 1
   - 1
   zoneCardPool: []
+  zoneEnemies:
+  - {fileID: 11400000, guid: 6edc4b41b839d9c4fbc90c505bc6697d, type: 2}
+  - {fileID: 11400000, guid: 300e8606fb8f54943b0832de216b4262, type: 2}
+  - {fileID: 11400000, guid: 70de7c449a1c360489083c2d3cdc420e, type: 2}
+  - {fileID: 11400000, guid: c2637497647f89f45ac87f66a46597a8, type: 2}
   zoneBoss: {fileID: 11400000, guid: e87d497c647d8e1479f22e8cba39dfb8, type: 2}

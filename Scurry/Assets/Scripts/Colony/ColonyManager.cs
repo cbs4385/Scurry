@@ -13,6 +13,7 @@ namespace Scurry.Colony
         public int MaxHP => maxHP;
         public bool IsAlive => CurrentHP > 0;
         public int CurrencyStockpile { get; private set; }
+        public int FoodStockpile { get; private set; }
 
         private void Awake()
         {
@@ -36,16 +37,44 @@ namespace Scurry.Colony
         public void InitializeHP()
         {
             CurrentHP = startingHP;
-            Debug.Log($"[ColonyManager] InitializeHP: HP set to {CurrentHP}/{maxHP}");
+            FoodStockpile = 0;
+            Debug.Log($"[ColonyManager] InitializeHP: HP set to {CurrentHP}/{maxHP}, foodStockpile=0");
             BroadcastHP();
         }
 
-        public void RestoreState(int hp, int currency)
+        public void RestoreState(int hp, int currency, int food = 0)
         {
             CurrentHP = Mathf.Clamp(hp, 0, maxHP);
             CurrencyStockpile = currency;
-            Debug.Log($"[ColonyManager] RestoreState: HP={CurrentHP}/{maxHP}, currency={CurrencyStockpile}");
+            FoodStockpile = food;
+            Debug.Log($"[ColonyManager] RestoreState: HP={CurrentHP}/{maxHP}, currency={CurrencyStockpile}, food={FoodStockpile}");
             BroadcastHP();
+        }
+
+        public bool SpendFood(int amount)
+        {
+            if (FoodStockpile < amount)
+            {
+                Debug.Log($"[ColonyManager] SpendFood: insufficient food — have={FoodStockpile}, need={amount}");
+                return false;
+            }
+            int prev = FoodStockpile;
+            FoodStockpile -= amount;
+            Debug.Log($"[ColonyManager] SpendFood: spent {amount} food — stockpile {prev} -> {FoodStockpile}");
+            return true;
+        }
+
+        public bool SpendCurrency(int amount)
+        {
+            if (CurrencyStockpile < amount)
+            {
+                Debug.Log($"[ColonyManager] SpendCurrency: insufficient currency — have={CurrencyStockpile}, need={amount}");
+                return false;
+            }
+            int prev = CurrencyStockpile;
+            CurrencyStockpile -= amount;
+            Debug.Log($"[ColonyManager] SpendCurrency: spent {amount} currency — stockpile {prev} -> {CurrencyStockpile}");
+            return true;
         }
 
         public void TakeDamage(int amount)
@@ -84,6 +113,9 @@ namespace Scurry.Colony
                     int healAmount = value * 2;
                     Debug.Log($"[ColonyManager] HandleResourceCollected: Food — healing {healAmount} HP");
                     Heal(healAmount);
+                    int prevFood = FoodStockpile;
+                    FoodStockpile += value;
+                    Debug.Log($"[ColonyManager] HandleResourceCollected: Food — FoodStockpile {prevFood} -> {FoodStockpile}");
                     break;
                 case ResourceType.Shelter:
                     int shelterHeal = value;

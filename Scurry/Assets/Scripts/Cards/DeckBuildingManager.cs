@@ -433,6 +433,11 @@ namespace Scurry.Cards
             else
             {
                 abilityText = $"<b>Resource Type:</b> {card.resourceType}\n<b>Value:</b> {card.value}";
+                // Show resource type effect description
+                string effectKey = $"resource.effect.{card.resourceType.ToString().ToLower()}";
+                string effectText = Loc.Get(effectKey);
+                if (!string.IsNullOrEmpty(effectText) && !effectText.StartsWith("?"))
+                    abilityText += $"\n\n<b>Effect:</b> {effectText}";
             }
             abilityText += $"\n\n<b>Max Copies:</b> {GetMaxCopies(card.rarity)}";
 

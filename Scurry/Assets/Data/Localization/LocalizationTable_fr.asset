@@ -193,3 +193,29 @@ MonoBehaviour:
     value: "D\xE9 \xE0 Coudre d'Argent"
   - key: card.goldbutton.name
     value: "Bouton d'Or"
+  - key: enemy.fieldmouse.name
+    value: Souris des Champs
+  - key: enemy.grasssnake.name
+    value: Couleuvre
+  - key: enemy.hawkscout.name
+    value: Faucon Eclaireur
+  - key: enemy.badger.name
+    value: Blaireau
+  - key: gather.equip.bonus
+    value: "{0} equipe {1} (+{2} combat)"
+  - key: gather.hero.healally
+    value: "{0} soigne {1} !"
+  - key: gather.hero.disarm
+    value: "{0} desarme le piege en {1}"
+  - key: gather.hero.rally
+    value: "{0} rallie ! Tous les allies +1 combat"
+  - key: gather.hero.stealth
+    value: "{0} se faufile devant l'ennemi !"
+  - key: resource.effect.food
+    value: "Soigne les PV de la colonie (\xD72 la valeur)"
+  - key: resource.effect.shelter
+    value: "R\xE9duit la force ennemie quand adjacent au h\xE9ros"
+  - key: resource.effect.equipment
+    value: "Accorde +valeur de combat au h\xE9ros collecteur"
+  - key: resource.effect.currency
+    value: "Ajoute au stock de monnaie pour les boutiques"

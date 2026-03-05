@@ -193,3 +193,29 @@ MonoBehaviour:
     value: Silberfingerhut
   - key: card.goldbutton.name
     value: Goldknopf
+  - key: enemy.fieldmouse.name
+    value: Feldmaus
+  - key: enemy.grasssnake.name
+    value: Ringelnatter
+  - key: enemy.hawkscout.name
+    value: "Habichtsp\xE4her"
+  - key: enemy.badger.name
+    value: Dachs
+  - key: gather.equip.bonus
+    value: "{0} r\xFCstet {1} aus (+{2} Kampf)"
+  - key: gather.hero.healally
+    value: "{0} heilt {1}!"
+  - key: gather.hero.disarm
+    value: "{0} entsch\xE4rft Falle bei {1}"
+  - key: gather.hero.rally
+    value: "{0} sammelt! Alle Verb\xFCndeten +1 Kampf"
+  - key: gather.hero.stealth
+    value: "{0} schleicht am Feind vorbei!"
+  - key: resource.effect.food
+    value: "Heilt Kolonie-LP (Wert \xD72)"
+  - key: resource.effect.shelter
+    value: "Reduziert feindliche Kampfst\xE4rke wenn neben Held"
+  - key: resource.effect.equipment
+    value: "+Wert Kampfbonus f\xFCr den sammelnden Helden"
+  - key: resource.effect.currency
+    value: "Wird dem W\xE4hrungsvorrat f\xFCr L\xE4den hinzugef\xFCgt"

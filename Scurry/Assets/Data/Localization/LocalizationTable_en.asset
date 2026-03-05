@@ -193,3 +193,29 @@ MonoBehaviour:
     value: Silver Thimble
   - key: card.goldbutton.name
     value: Gold Button
+  - key: enemy.fieldmouse.name
+    value: Field Mouse
+  - key: enemy.grasssnake.name
+    value: Grass Snake
+  - key: enemy.hawkscout.name
+    value: Hawk Scout
+  - key: enemy.badger.name
+    value: Badger
+  - key: gather.equip.bonus
+    value: "{0} equips {1} (+{2} combat)"
+  - key: gather.hero.healally
+    value: "{0} heals {1}!"
+  - key: gather.hero.disarm
+    value: "{0} disarms trap at {1}"
+  - key: gather.hero.rally
+    value: "{0} rallies! All allies +1 combat"
+  - key: gather.hero.stealth
+    value: "{0} sneaks past enemy!"
+  - key: resource.effect.food
+    value: "Heals Colony HP equal to value \xD72"
+  - key: resource.effect.shelter
+    value: Reduces enemy combat strength when adjacent to hero
+  - key: resource.effect.equipment
+    value: Grants +value combat bonus to the collecting hero
+  - key: resource.effect.currency
+    value: Adds to currency stockpile for shops
