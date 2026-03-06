@@ -219,3 +219,27 @@ MonoBehaviour:
     value: Grants +value combat bonus to the collecting hero
   - key: resource.effect.currency
     value: Adds to currency stockpile for shops
+  - key: run.stage.begin
+    value: "Stage {0} of {1}"
+  - key: run.step.begin
+    value: "Step {0}: {1}"
+  - key: run.step.cardplacement
+    value: Card Placement
+  - key: run.step.shop
+    value: Shop
+  - key: run.step.healing
+    value: Healing
+  - key: run.step.cardaddremove
+    value: Card Edit
+  - key: run.step.bossfight
+    value: Boss Fight
+  - key: run.stage.complete
+    value: "Stage {0} Complete!"
+  - key: run.complete.victory
+    value: "Victory! The Pack is Free!"
+  - key: run.complete.defeat
+    value: "The Colony Has Fallen..."
+  - key: gather.autobattler
+    value: "No cards remaining — heroes fight on!"
+  - key: run.step.choose
+    value: "Choose Your Next Step"

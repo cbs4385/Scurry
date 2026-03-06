@@ -219,3 +219,27 @@ MonoBehaviour:
     value: "+Wert Kampfbonus f\xFCr den sammelnden Helden"
   - key: resource.effect.currency
     value: "Wird dem W\xE4hrungsvorrat f\xFCr L\xE4den hinzugef\xFCgt"
+  - key: run.stage.begin
+    value: "Stufe {0} von {1}"
+  - key: run.step.begin
+    value: "Schritt {0}: {1}"
+  - key: run.step.cardplacement
+    value: Kartenplatzierung
+  - key: run.step.shop
+    value: Laden
+  - key: run.step.healing
+    value: Heilung
+  - key: run.step.cardaddremove
+    value: Kartenbearbeitung
+  - key: run.step.bossfight
+    value: Bosskampf
+  - key: run.stage.complete
+    value: "Stufe {0} Abgeschlossen!"
+  - key: run.complete.victory
+    value: "Sieg! Das Rudel ist Frei!"
+  - key: run.complete.defeat
+    value: "Die Kolonie ist Gefallen..."
+  - key: gather.autobattler
+    value: "Keine Karten mehr \u2014 Helden k\xE4mpfen allein!"
+  - key: run.step.choose
+    value: "W\xE4hle Deinen N\xE4chsten Schritt"

@@ -219,3 +219,27 @@ MonoBehaviour:
     value: "Accorde +valeur de combat au h\xE9ros collecteur"
   - key: resource.effect.currency
     value: "Ajoute au stock de monnaie pour les boutiques"
+  - key: run.stage.begin
+    value: "\xC9tape {0} sur {1}"
+  - key: run.step.begin
+    value: "\xC9tape {0} : {1}"
+  - key: run.step.cardplacement
+    value: Placement de Cartes
+  - key: run.step.shop
+    value: Boutique
+  - key: run.step.healing
+    value: "Gu\xE9rison"
+  - key: run.step.cardaddremove
+    value: "\xC9dition de Cartes"
+  - key: run.step.bossfight
+    value: Combat de Boss
+  - key: run.stage.complete
+    value: "\xC9tape {0} Termin\xE9e !"
+  - key: run.complete.victory
+    value: "Victoire ! La Meute est Libre !"
+  - key: run.complete.defeat
+    value: "La Colonie est Tomb\xE9e..."
+  - key: gather.autobattler
+    value: "Plus de cartes \u2014 les h\xE9ros se battent seuls !"
+  - key: run.step.choose
+    value: "Choisissez Votre Prochaine \xC9tape"

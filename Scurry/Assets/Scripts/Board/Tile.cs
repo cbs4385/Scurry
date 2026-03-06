@@ -22,6 +22,8 @@ namespace Scurry.Board
         private SpriteRenderer spriteRenderer;
         private Color baseColor;
         private Color originalColor;
+        private int originalEnemyStrength;
+        private int originalHazardDamage;
 
         public void Initialize(Vector2Int gridPos, TileType type, Color color, int enemyStr, int hazardDmg)
         {
@@ -30,6 +32,8 @@ namespace Scurry.Board
             OriginalTileType = type;
             EnemyStrength = enemyStr;
             HazardDamage = hazardDmg;
+            originalEnemyStrength = enemyStr;
+            originalHazardDamage = hazardDmg;
             baseColor = color;
             originalColor = color;
 
@@ -118,9 +122,10 @@ namespace Scurry.Board
 
         public void RestoreOriginalType()
         {
-            Debug.Log($"[Tile] RestoreOriginalType: gridPos={GridPosition}, {TileType} -> {OriginalTileType}");
+            Debug.Log($"[Tile] RestoreOriginalType: gridPos={GridPosition}, {TileType} -> {OriginalTileType}, enemyStr={originalEnemyStrength}, hazardDmg={originalHazardDamage}");
             TileType = OriginalTileType;
-            EnemyStrength = OriginalTileType == TileType.EnemyPatrol ? EnemyStrength : 0;
+            EnemyStrength = originalEnemyStrength;
+            HazardDamage = originalHazardDamage;
             IsEnemyDefeated = false;
             baseColor = originalColor;
             if (spriteRenderer != null)

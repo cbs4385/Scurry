@@ -23,6 +23,15 @@ namespace Scurry.Core
         public static Action OnTileUnhovered;
         public static Action<string> OnResourceTokenCollected; // token name (for card recycling)
 
+        // Run-level events (RunManager <-> GameManager)
+        public static Action<bool> OnCardPlacementGameComplete; // GameManager → RunManager (bool = heroesLost)
+        public static Action<StepType> OnStepStarted;     // RunManager → UI
+        public static Action<int, int> OnStageProgress;    // currentStep, totalSteps
+        public static Action OnRunComplete;                 // victory
+        public static Action OnRunFailed;                   // defeat
+        public static Action<StepType[]> OnStepChoicePresented; // RunManager → UI (2-3 options)
+        public static Action<StepType> OnStepChosen;            // UI → RunManager (player picked)
+
         public static void Reset()
         {
             Debug.Log("[EventBus] Reset: clearing all event subscriptions");
@@ -42,6 +51,13 @@ namespace Scurry.Core
             OnTileHovered = null;
             OnTileUnhovered = null;
             OnResourceTokenCollected = null;
+            OnCardPlacementGameComplete = null;
+            OnStepStarted = null;
+            OnStageProgress = null;
+            OnRunComplete = null;
+            OnRunFailed = null;
+            OnStepChoicePresented = null;
+            OnStepChosen = null;
             Debug.Log("[EventBus] Reset: complete — all events nulled");
         }
 
@@ -63,7 +79,14 @@ namespace Scurry.Core
                 $"OnGatheringNotification={OnGatheringNotification?.GetInvocationList().Length ?? 0}, " +
                 $"OnTileHovered={OnTileHovered?.GetInvocationList().Length ?? 0}, " +
                 $"OnTileUnhovered={OnTileUnhovered?.GetInvocationList().Length ?? 0}, " +
-                $"OnResourceTokenCollected={OnResourceTokenCollected?.GetInvocationList().Length ?? 0}");
+                $"OnResourceTokenCollected={OnResourceTokenCollected?.GetInvocationList().Length ?? 0}, " +
+                $"OnCardPlacementGameComplete={OnCardPlacementGameComplete?.GetInvocationList().Length ?? 0}, " +
+                $"OnStepStarted={OnStepStarted?.GetInvocationList().Length ?? 0}, " +
+                $"OnStageProgress={OnStageProgress?.GetInvocationList().Length ?? 0}, " +
+                $"OnRunComplete={OnRunComplete?.GetInvocationList().Length ?? 0}, " +
+                $"OnRunFailed={OnRunFailed?.GetInvocationList().Length ?? 0}, " +
+                $"OnStepChoicePresented={OnStepChoicePresented?.GetInvocationList().Length ?? 0}, " +
+                $"OnStepChosen={OnStepChosen?.GetInvocationList().Length ?? 0}");
         }
     }
 }

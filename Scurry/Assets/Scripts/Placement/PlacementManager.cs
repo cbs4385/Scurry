@@ -277,6 +277,19 @@ namespace Scurry.Placement
                     }
                     toDestroy.Add(child.gameObject);
                 }
+                else if (child.name.StartsWith("Enemy_"))
+                {
+                    if (!keepHealthyHeroes)
+                    {
+                        // Full reset (new CardPlacement game) — destroy all enemies
+                        toDestroy.Add(child.gameObject);
+                    }
+                    else
+                    {
+                        // Between turns — keep enemies alive
+                        kept++;
+                    }
+                }
                 else if (child.name.StartsWith("Resource_"))
                 {
                     // Resource tokens persist until collected or removed via combat

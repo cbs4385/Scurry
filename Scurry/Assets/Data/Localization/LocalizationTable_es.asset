@@ -219,3 +219,27 @@ MonoBehaviour:
     value: "+valor de bonificaci\xF3n de combate al h\xE9roe recolector"
   - key: resource.effect.currency
     value: "Se a\xF1ade al dep\xF3sito de moneda para tiendas"
+  - key: run.stage.begin
+    value: "Etapa {0} de {1}"
+  - key: run.step.begin
+    value: "Paso {0}: {1}"
+  - key: run.step.cardplacement
+    value: "Colocaci\xF3n de Cartas"
+  - key: run.step.shop
+    value: Tienda
+  - key: run.step.healing
+    value: "Curaci\xF3n"
+  - key: run.step.cardaddremove
+    value: "Edici\xF3n de Cartas"
+  - key: run.step.bossfight
+    value: Pelea de Jefe
+  - key: run.stage.complete
+    value: "\xA1Etapa {0} Completada!"
+  - key: run.complete.victory
+    value: "\xA1Victoria! \xA1La Manada es Libre!"
+  - key: run.complete.defeat
+    value: "La Colonia Ha Ca\xEDdo..."
+  - key: gather.autobattler
+    value: "\xA1Sin cartas \u2014 los h\xE9roes luchan solos!"
+  - key: run.step.choose
+    value: "Elige Tu Pr\xF3ximo Paso"

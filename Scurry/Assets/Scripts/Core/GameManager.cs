@@ -12,6 +12,9 @@ namespace Scurry.Core
 {
     public class GameManager : MonoBehaviour
     {
+        [Header("Mode")]
+        [SerializeField] private bool standaloneMode = true;
+
         [Header("References")]
         [SerializeField] private BoardManager boardManager;
         [SerializeField] private DeckManager deckManager;
@@ -23,7 +26,10 @@ namespace Scurry.Core
 
         private GamePhase currentPhase;
         private int turnNumber;
-        private readonly HashSet<CardDefinitionSO> woundedHeroes = new HashSet<CardDefinitionSO>();
+        private readonly HashSet<int> woundedHeroIndices = new HashSet<int>(); // indices into the currentRunDeck list
+        private List<CardDefinitionSO> currentRunDeck; // reference to RunManager's deck for index mapping
+        private readonly List<CardDefinitionSO> exhaustedResources = new List<CardDefinitionSO>();
+        private bool suppressExhaustion; // true during auto-collect so cards aren't exhausted
 
         private void Awake()
         {
@@ -32,11 +38,12 @@ namespace Scurry.Core
 
         private void OnEnable()
         {
-            Debug.Log("[GameManager] OnEnable: subscribing to EventBus events");
+            Debug.Log($"[GameManager] OnEnable: subscribing to EventBus events (standaloneMode={standaloneMode})");
             EventBus.OnTurnEnded += OnEndTurnPressed;
             EventBus.OnGatheringComplete += OnGatheringDone;
-            EventBus.OnDeckBuildComplete += OnDeckBuildDone;
             EventBus.OnResourceTokenCollected += OnResourceTokenCollected;
+            if (standaloneMode)
+                EventBus.OnDeckBuildComplete += OnDeckBuildDone;
         }
 
         private void OnDisable()
@@ -44,14 +51,21 @@ namespace Scurry.Core
             Debug.Log("[GameManager] OnDisable: unsubscribing from EventBus events");
             EventBus.OnTurnEnded -= OnEndTurnPressed;
             EventBus.OnGatheringComplete -= OnGatheringDone;
-            EventBus.OnDeckBuildComplete -= OnDeckBuildDone;
             EventBus.OnResourceTokenCollected -= OnResourceTokenCollected;
+            if (standaloneMode)
+                EventBus.OnDeckBuildComplete -= OnDeckBuildDone;
         }
 
         private void Start()
         {
-            Debug.Log("[GameManager] Start: beginning run");
+            Debug.Log($"[GameManager] Start: standaloneMode={standaloneMode}");
             EventBus.LogSubscriberCounts();
+
+            if (!standaloneMode)
+            {
+                Debug.Log("[GameManager] Start: external mode — waiting for RunManager");
+                return;
+            }
 
             if (SaveManager.HasSave())
             {
@@ -72,6 +86,50 @@ namespace Scurry.Core
             SetPhase(GamePhase.DeckBuild);
         }
 
+        public void StartCardPlacementGame(List<CardDefinitionSO> deck)
+        {
+            Debug.Log($"[GameManager] StartCardPlacementGame: received {deck.Count} cards from RunManager, woundedHeroIndices={woundedHeroIndices.Count}");
+
+            // Clean up any leftover tokens and tiles from previous CardPlacement game
+            placementManager.ClearTokens(keepHealthyHeroes: false);
+            boardManager.ResetBoardForNewGame();
+            Debug.Log("[GameManager] StartCardPlacementGame: cleared board from previous game");
+
+            // Store deck reference for wound index tracking
+            currentRunDeck = deck;
+
+            // Filter out wounded heroes by deck index — only the specific copy is excluded
+            var activeDeck = new List<CardDefinitionSO>();
+            for (int i = 0; i < deck.Count; i++)
+            {
+                if (woundedHeroIndices.Contains(i))
+                {
+                    Debug.Log($"[GameManager] StartCardPlacementGame: excluding wounded hero index={i} '{deck[i].cardName}'");
+                }
+                else
+                {
+                    activeDeck.Add(deck[i]);
+                }
+            }
+            Debug.Log($"[GameManager] StartCardPlacementGame: active deck={activeDeck.Count} (excluded {deck.Count - activeDeck.Count} wounded)");
+            exhaustedResources.Clear();
+            deckManager.InitializeDeck(activeDeck);
+            turnNumber = 0;
+            boardManager.GenerateResourceNodeResources();
+            gatheringManager.SpawnEnemies();
+            StartNewTurn();
+        }
+
+        private void EndCardPlacementGame(string reason, bool heroesLost = false)
+        {
+            Debug.Log($"[GameManager] EndCardPlacementGame: reason='{reason}', heroesLost={heroesLost}, standaloneMode={standaloneMode}");
+            if (standaloneMode)
+            {
+                SaveManager.DeleteSave();
+            }
+            EventBus.OnCardPlacementGameComplete?.Invoke(heroesLost);
+        }
+
         private void OnDeckBuildDone(List<CardDefinitionSO> selectedCards)
         {
             Debug.Log($"[GameManager] OnDeckBuildDone: received {selectedCards.Count} cards, initializing game");
@@ -88,6 +146,18 @@ namespace Scurry.Core
             turnNumber++;
             Debug.Log($"[GameManager] ========== Turn {turnNumber} ==========");
 
+            // Check if deck is empty — auto-battler mode
+            if (!deckManager.CanDraw())
+            {
+                Debug.Log("[GameManager] StartNewTurn: no cards to draw — auto-battler mode, skipping Draw/Deploy");
+                handManager.ClearHand();
+                SetPhase(GamePhase.Gather);
+                string autoMsg = Loc.Get("gather.autobattler");
+                EventBus.OnGatheringNotification?.Invoke(autoMsg, new Color(1f, 0.7f, 0.3f));
+                StartCoroutine(gatheringManager.RunGathering());
+                return;
+            }
+
             // Draw phase
             SetPhase(GamePhase.Draw);
             handManager.ClearHand();
@@ -103,7 +173,7 @@ namespace Scurry.Core
 
         private void OnResourceTokenCollected(string tokenName)
         {
-            // Player-placed resource tokens (not auto-generated) return their card to the discard pile
+            // Auto-generated resource tokens have no card to track
             if (tokenName.StartsWith("Resource_Auto_"))
             {
                 Debug.Log($"[GameManager] OnResourceTokenCollected: '{tokenName}' is auto-generated — no card to recycle");
@@ -115,8 +185,20 @@ namespace Scurry.Core
             var card = deckManager.FindCardByName(cardName);
             if (card != null)
             {
-                deckManager.DiscardCard(card);
-                Debug.Log($"[GameManager] OnResourceTokenCollected: '{cardName}' returned to discard pile");
+                if (suppressExhaustion)
+                {
+                    Debug.Log($"[GameManager] OnResourceTokenCollected: '{cardName}' auto-collected — suppressing exhaustion (card stays in deck)");
+                }
+                else if (standaloneMode)
+                {
+                    deckManager.DiscardCard(card);
+                    Debug.Log($"[GameManager] OnResourceTokenCollected: '{cardName}' returned to discard pile (standalone mode)");
+                }
+                else
+                {
+                    exhaustedResources.Add(card);
+                    Debug.Log($"[GameManager] OnResourceTokenCollected: '{cardName}' exhausted (removed from deck until next stage, exhausted count={exhaustedResources.Count})");
+                }
             }
             else
             {
@@ -159,7 +241,7 @@ namespace Scurry.Core
             if (!colonyManager.IsAlive)
             {
                 Debug.Log("[GameManager] ===== GAME OVER — Colony defeated! =====");
-                SaveManager.DeleteSave();
+                EndCardPlacementGame("Colony defeated");
                 return;
             }
 
@@ -172,29 +254,37 @@ namespace Scurry.Core
             Debug.Log("[GameManager] ResolveAndNextTurn: waiting 0.5s before cleanup");
             yield return new WaitForSeconds(0.5f);
 
-            // Track wounds: scan all HeroAgents on the board
+            // Track wounds: scan all HeroAgents on the board and map to deck indices
             var heroes = boardManager.GetComponentsInChildren<HeroAgent>();
             Debug.Log($"[GameManager] ResolveAndNextTurn: scanning {heroes.Length} heroes for wound tracking");
             foreach (var hero in heroes)
             {
                 if (hero.IsHealing)
                 {
-                    // Hero sat out this turn to heal — remove from wounded set
-                    woundedHeroes.Remove(hero.CardData);
-                    Debug.Log($"[GameManager] ResolveAndNextTurn: hero='{hero.CardData.cardName}' healed (sat out gathering), removed from woundedHeroes");
+                    // Hero sat out this turn to heal — find and remove its deck index
+                    int healIdx = FindDeckIndex(hero.CardData, true);
+                    if (healIdx >= 0)
+                    {
+                        woundedHeroIndices.Remove(healIdx);
+                        Debug.Log($"[GameManager] ResolveAndNextTurn: hero='{hero.CardData.cardName}' healed (sat out gathering), removed index={healIdx}");
+                    }
                 }
                 else if (hero.IsWounded)
                 {
-                    // Hero got freshly wounded this turn — add to wounded set
-                    woundedHeroes.Add(hero.CardData);
-                    Debug.Log($"[GameManager] ResolveAndNextTurn: hero='{hero.CardData.cardName}' freshly wounded, added to woundedHeroes");
+                    // Hero got freshly wounded this turn — find an unwounded deck index for this card
+                    int woundIdx = FindDeckIndex(hero.CardData, false);
+                    if (woundIdx >= 0)
+                    {
+                        woundedHeroIndices.Add(woundIdx);
+                        Debug.Log($"[GameManager] ResolveAndNextTurn: hero='{hero.CardData.cardName}' freshly wounded, added index={woundIdx}");
+                    }
                 }
                 else
                 {
                     Debug.Log($"[GameManager] ResolveAndNextTurn: hero='{hero.CardData.cardName}' healthy");
                 }
             }
-            Debug.Log($"[GameManager] ResolveAndNextTurn: woundedHeroes count={woundedHeroes.Count}");
+            Debug.Log($"[GameManager] ResolveAndNextTurn: woundedHeroIndices count={woundedHeroIndices.Count}");
 
             // Played cards stay out of the deck — their tokens are on the board
             var placedCards = placementManager.GetPlacedCardDefinitions();
@@ -235,31 +325,36 @@ namespace Scurry.Core
             // Condition B: All resources collected from game tiles
             if (!hasResources)
             {
-                Debug.Log("[GameManager] ===== RUN COMPLETE — All resources collected! =====");
-                SaveManager.DeleteSave();
+                Debug.Log("[GameManager] ===== CARD PLACEMENT COMPLETE — All resources collected! =====");
+                EndCardPlacementGame("All resources collected");
                 yield break;
             }
 
             // Condition C: No enemies remain — auto-collect all remaining resources
             if (!hasEnemies)
             {
-                Debug.Log("[GameManager] ===== RUN COMPLETE — All enemies defeated! Auto-collecting remaining resources =====");
+                Debug.Log("[GameManager] ===== CARD PLACEMENT COMPLETE — All enemies defeated! Auto-collecting remaining resources =====");
+                suppressExhaustion = true;
                 boardManager.CollectAllRemainingResources();
-                SaveManager.DeleteSave();
+                suppressExhaustion = false;
+                EndCardPlacementGame("All enemies defeated");
                 yield break;
             }
 
-            // Condition A: No heroes in play AND no playable hero cards in deck
+            // Condition A: No heroes in play AND no playable hero cards in deck — heroes lost
             if (!hasHeroesOnBoard && !hasHeroCardsInDeck)
             {
-                Debug.Log("[GameManager] ===== RUN COMPLETE — No heroes available (none on board, none in deck)! =====");
-                SaveManager.DeleteSave();
+                Debug.Log("[GameManager] ===== CARD PLACEMENT COMPLETE — No heroes available (none on board, none in deck)! =====");
+                EndCardPlacementGame("No heroes available", heroesLost: true);
                 yield break;
             }
 
             // No end condition met — continue to next turn
             Debug.Log("[GameManager] ResolveAndNextTurn: continuing to next turn");
-            SaveRunState();
+            if (standaloneMode)
+            {
+                SaveRunState();
+            }
             StartNewTurn();
         }
 
@@ -281,9 +376,12 @@ namespace Scurry.Core
             foreach (var card in deckManager.DiscardPile)
                 saveData.discardPileCardNames.Add(card.cardName);
 
-            // Save wounded heroes
-            foreach (var card in woundedHeroes)
-                saveData.woundedHeroCardNames.Add(card.cardName);
+            // Save wounded heroes (by name — standalone mode doesn't use index tracking)
+            foreach (int idx in woundedHeroIndices)
+            {
+                if (currentRunDeck != null && idx < currentRunDeck.Count)
+                    saveData.woundedHeroCardNames.Add(currentRunDeck[idx].cardName);
+            }
 
             // Save living enemy positions and strengths
             var enemies = boardManager.GetComponentsInChildren<Gathering.EnemyAgent>();
@@ -330,16 +428,11 @@ namespace Scurry.Core
             }
             deckManager.RestorePiles(drawPile, discardPile);
 
-            // Restore wounded heroes
-            woundedHeroes.Clear();
+            // Restore wounded heroes (standalone mode — approximate by SO reference since we don't have deck indices)
+            woundedHeroIndices.Clear();
             foreach (var name in saveData.woundedHeroCardNames)
             {
-                var card = deckManager.FindCardByName(name);
-                if (card != null)
-                {
-                    woundedHeroes.Add(card);
-                    Debug.Log($"[GameManager] LoadRun: restored wounded hero '{name}'");
-                }
+                Debug.Log($"[GameManager] LoadRun: restored wounded hero '{name}' (standalone mode, SO-based)");
             }
 
             // Restore living enemies at saved positions
@@ -371,12 +464,49 @@ namespace Scurry.Core
 
         public GamePhase CurrentPhase => currentPhase;
         public int TurnNumber => turnNumber;
+        public bool StandaloneMode => standaloneMode;
+        public List<CardDefinitionSO> ExhaustedResources => exhaustedResources;
 
         public bool IsHeroWounded(CardDefinitionSO card)
         {
-            bool wounded = woundedHeroes.Contains(card);
-            Debug.Log($"[GameManager] IsHeroWounded: card='{card.cardName}', wounded={wounded}");
-            return wounded;
+            // Check if any wounded index matches this card SO
+            if (currentRunDeck != null)
+            {
+                foreach (int idx in woundedHeroIndices)
+                {
+                    if (idx < currentRunDeck.Count && currentRunDeck[idx] == card)
+                    {
+                        Debug.Log($"[GameManager] IsHeroWounded: card='{card.cardName}', wounded=True (index={idx})");
+                        return true;
+                    }
+                }
+            }
+            Debug.Log($"[GameManager] IsHeroWounded: card='{card.cardName}', wounded=False");
+            return false;
+        }
+
+        public void ClearWoundedHeroes()
+        {
+            Debug.Log($"[GameManager] ClearWoundedHeroes: clearing {woundedHeroIndices.Count} wounded hero indices");
+            woundedHeroIndices.Clear();
+        }
+
+        /// <summary>
+        /// Find a deck index for the given card. If findWounded=true, finds a wounded index. Otherwise finds an unwounded one.
+        /// </summary>
+        private int FindDeckIndex(CardDefinitionSO card, bool findWounded)
+        {
+            if (currentRunDeck == null) return -1;
+            for (int i = 0; i < currentRunDeck.Count; i++)
+            {
+                if (currentRunDeck[i] == card)
+                {
+                    bool isWounded = woundedHeroIndices.Contains(i);
+                    if (findWounded == isWounded)
+                        return i;
+                }
+            }
+            return -1;
         }
     }
 }

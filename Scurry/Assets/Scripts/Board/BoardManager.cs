@@ -140,6 +140,19 @@ namespace Scurry.Board
             Debug.Log("[BoardManager] ResetAllTiles: complete");
         }
 
+        public void ResetBoardForNewGame()
+        {
+            Debug.Log($"[BoardManager] ResetBoardForNewGame: restoring all tiles to original state");
+            for (int r = 0; r < Rows; r++)
+                for (int c = 0; c < Cols; c++)
+                {
+                    Grid[r, c].RestoreOriginalType();
+                    Grid[r, c].HasHero = false;
+                    Grid[r, c].HasResource = false;
+                }
+            Debug.Log("[BoardManager] ResetBoardForNewGame: complete");
+        }
+
         public void GenerateResourceNodeResources()
         {
             Debug.Log("[BoardManager] GenerateResourceNodeResources: scanning for empty ResourceNode tiles");

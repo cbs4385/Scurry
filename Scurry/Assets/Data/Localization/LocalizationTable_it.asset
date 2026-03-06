@@ -219,3 +219,27 @@ MonoBehaviour:
     value: "+valore bonus combattimento all'eroe che raccoglie"
   - key: resource.effect.currency
     value: Aggiunge al deposito di valuta per i negozi
+  - key: run.stage.begin
+    value: "Fase {0} di {1}"
+  - key: run.step.begin
+    value: "Passo {0}: {1}"
+  - key: run.step.cardplacement
+    value: Piazzamento Carte
+  - key: run.step.shop
+    value: Negozio
+  - key: run.step.healing
+    value: Guarigione
+  - key: run.step.cardaddremove
+    value: Modifica Carte
+  - key: run.step.bossfight
+    value: Scontro col Boss
+  - key: run.stage.complete
+    value: "Fase {0} Completata!"
+  - key: run.complete.victory
+    value: "Vittoria! Il Branco \xE8 Libero!"
+  - key: run.complete.defeat
+    value: "La Colonia \xE8 Caduta..."
+  - key: gather.autobattler
+    value: "Nessuna carta rimasta \u2014 gli eroi combattono da soli!"
+  - key: run.step.choose
+    value: "Scegli il Tuo Prossimo Passo"

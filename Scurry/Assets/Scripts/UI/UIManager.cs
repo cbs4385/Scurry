@@ -12,6 +12,7 @@ namespace Scurry.UI
     public class UIManager : MonoBehaviour
     {
         [SerializeField] private ColonyManager colonyManager;
+        [SerializeField] private RunManager runManager;
 
         private TextMeshProUGUI phaseLabel;
         private TextMeshProUGUI colonyHPText;
@@ -21,9 +22,16 @@ namespace Scurry.UI
         private TextMeshProUGUI currencyText;
         private Button undoButton;
 
+        // Run progress
+        private TextMeshProUGUI runProgressLabel;
+
         // Tooltip
         private GameObject tooltipPanel;
         private TextMeshProUGUI tooltipText;
+
+        // Step choice
+        private GameObject stepChoicePanel;
+        private readonly List<GameObject> stepChoiceButtons = new List<GameObject>();
 
         // Notification toasts
         private RectTransform notificationContainer;
@@ -53,6 +61,10 @@ namespace Scurry.UI
             EventBus.OnTileHovered += ShowTooltip;
             EventBus.OnTileUnhovered += HideTooltip;
             EventBus.OnGatheringNotification += SpawnNotification;
+            EventBus.OnStageProgress += UpdateStageProgress;
+            EventBus.OnRunComplete += OnRunComplete;
+            EventBus.OnRunFailed += OnRunFailed;
+            EventBus.OnStepChoicePresented += ShowStepChoices;
         }
 
         private void OnDisable()
@@ -62,6 +74,10 @@ namespace Scurry.UI
             EventBus.OnTileHovered -= ShowTooltip;
             EventBus.OnTileUnhovered -= HideTooltip;
             EventBus.OnGatheringNotification -= SpawnNotification;
+            EventBus.OnStageProgress -= UpdateStageProgress;
+            EventBus.OnRunComplete -= OnRunComplete;
+            EventBus.OnRunFailed -= OnRunFailed;
+            EventBus.OnStepChoicePresented -= ShowStepChoices;
         }
 
         private void Update()
@@ -92,6 +108,18 @@ namespace Scurry.UI
             phaseRect.sizeDelta = new Vector2(400, 60);
             phaseLabel = phaseLabelGO.GetComponent<TextMeshProUGUI>();
             Debug.Log("[UIManager] BuildUI: PhaseLabel created");
+
+            // Run Progress Label - below phase label
+            var runProgressGO = CreateUIText("RunProgressLabel", "", 20, TextAlignmentOptions.Center);
+            var runRect = runProgressGO.GetComponent<RectTransform>();
+            runRect.anchorMin = new Vector2(0.5f, 1f);
+            runRect.anchorMax = new Vector2(0.5f, 1f);
+            runRect.pivot = new Vector2(0.5f, 1f);
+            runRect.anchoredPosition = new Vector2(0, -75);
+            runRect.sizeDelta = new Vector2(500, 30);
+            runProgressLabel = runProgressGO.GetComponent<TextMeshProUGUI>();
+            runProgressLabel.color = new Color(0.8f, 0.8f, 1f);
+            Debug.Log("[UIManager] BuildUI: RunProgressLabel created");
 
             // Colony HP Text - top left
             var hpTextGO = CreateUIText("ColonyHP", Loc.Format("ui.hp.label", 20, 50), 28, TextAlignmentOptions.Left);
@@ -190,6 +218,9 @@ namespace Scurry.UI
 
             // Tooltip - hidden by default
             BuildTooltip();
+
+            // Step choice panel - center
+            BuildStepChoicePanel();
 
             // Notification container - right side
             BuildNotificationContainer();
@@ -395,6 +426,13 @@ namespace Scurry.UI
                 undoButton.gameObject.SetActive(isDeploy);
                 Debug.Log($"[UIManager] UpdatePhaseUI: undoButton.active={isDeploy}");
             }
+            // Hide step choice panel when a game phase starts
+            if (stepChoicePanel != null && stepChoicePanel.activeSelf)
+            {
+                stepChoicePanel.SetActive(false);
+                Debug.Log("[UIManager] UpdatePhaseUI: hiding step choice panel");
+            }
+            UpdateRunProgressLabel();
         }
 
         private void UpdateColonyHP()
@@ -511,6 +549,113 @@ namespace Scurry.UI
             }
         }
 
+        private void BuildStepChoicePanel()
+        {
+            stepChoicePanel = new GameObject("StepChoicePanel", typeof(RectTransform), typeof(Image));
+            stepChoicePanel.transform.SetParent(transform, false);
+            var panelRect = stepChoicePanel.GetComponent<RectTransform>();
+            panelRect.anchorMin = new Vector2(0.5f, 0.5f);
+            panelRect.anchorMax = new Vector2(0.5f, 0.5f);
+            panelRect.pivot = new Vector2(0.5f, 0.5f);
+            panelRect.anchoredPosition = Vector2.zero;
+            panelRect.sizeDelta = new Vector2(500, 220);
+            var panelImage = stepChoicePanel.GetComponent<Image>();
+            panelImage.color = new Color(0.08f, 0.08f, 0.12f, 0.95f);
+
+            // Title
+            var titleGO = new GameObject("ChoiceTitle", typeof(RectTransform), typeof(TextMeshProUGUI));
+            titleGO.transform.SetParent(stepChoicePanel.transform, false);
+            var titleRect = titleGO.GetComponent<RectTransform>();
+            titleRect.anchorMin = new Vector2(0, 1);
+            titleRect.anchorMax = new Vector2(1, 1);
+            titleRect.pivot = new Vector2(0.5f, 1);
+            titleRect.anchoredPosition = new Vector2(0, -10);
+            titleRect.sizeDelta = new Vector2(0, 40);
+            var titleTmp = titleGO.GetComponent<TextMeshProUGUI>();
+            titleTmp.text = Loc.Get("run.step.choose");
+            titleTmp.fontSize = 24;
+            titleTmp.fontStyle = FontStyles.Bold;
+            titleTmp.alignment = TextAlignmentOptions.Center;
+            titleTmp.color = new Color(1f, 0.9f, 0.3f);
+
+            stepChoicePanel.SetActive(false);
+            Debug.Log("[UIManager] BuildStepChoicePanel: created (hidden)");
+        }
+
+        private void ShowStepChoices(StepType[] options)
+        {
+            Debug.Log($"[UIManager] ShowStepChoices: presenting {options.Length} options");
+
+            // Clear old buttons
+            foreach (var btn in stepChoiceButtons)
+                Destroy(btn);
+            stepChoiceButtons.Clear();
+
+            float buttonWidth = 180f;
+            float buttonHeight = 60f;
+            float spacing = 20f;
+            float totalWidth = options.Length * buttonWidth + (options.Length - 1) * spacing;
+            float startX = -totalWidth / 2f + buttonWidth / 2f;
+
+            for (int i = 0; i < options.Length; i++)
+            {
+                StepType step = options[i];
+                string stepName = Loc.Get("run.step." + step.ToString().ToLower());
+
+                var btnGO = new GameObject($"StepChoice_{step}", typeof(RectTransform), typeof(Image), typeof(Button));
+                btnGO.transform.SetParent(stepChoicePanel.transform, false);
+                var btnRect = btnGO.GetComponent<RectTransform>();
+                btnRect.anchorMin = new Vector2(0.5f, 0);
+                btnRect.anchorMax = new Vector2(0.5f, 0);
+                btnRect.pivot = new Vector2(0.5f, 0);
+                btnRect.anchoredPosition = new Vector2(startX + i * (buttonWidth + spacing), 30);
+                btnRect.sizeDelta = new Vector2(buttonWidth, buttonHeight);
+                var btnImage = btnGO.GetComponent<Image>();
+                btnImage.color = GetStepButtonColor(step);
+
+                var textGO = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
+                textGO.transform.SetParent(btnGO.transform, false);
+                var textRect = textGO.GetComponent<RectTransform>();
+                textRect.anchorMin = Vector2.zero;
+                textRect.anchorMax = Vector2.one;
+                textRect.sizeDelta = Vector2.zero;
+                var tmp = textGO.GetComponent<TextMeshProUGUI>();
+                tmp.text = stepName;
+                tmp.fontSize = 18;
+                tmp.alignment = TextAlignmentOptions.Center;
+                tmp.color = Color.white;
+
+                var button = btnGO.GetComponent<Button>();
+                StepType captured = step;
+                button.onClick.AddListener(() => OnStepChoiceClicked(captured));
+
+                stepChoiceButtons.Add(btnGO);
+                Debug.Log($"[UIManager] ShowStepChoices: button {i} = {step} ('{stepName}')");
+            }
+
+            stepChoicePanel.SetActive(true);
+        }
+
+        private void OnStepChoiceClicked(StepType choice)
+        {
+            Debug.Log($"[UIManager] OnStepChoiceClicked: player chose {choice}");
+            stepChoicePanel.SetActive(false);
+            EventBus.OnStepChosen?.Invoke(choice);
+        }
+
+        private Color GetStepButtonColor(StepType step)
+        {
+            return step switch
+            {
+                StepType.CardPlacement => new Color(0.3f, 0.5f, 0.7f),
+                StepType.Shop => new Color(0.6f, 0.5f, 0.2f),
+                StepType.Healing => new Color(0.3f, 0.6f, 0.3f),
+                StepType.CardAddRemove => new Color(0.5f, 0.3f, 0.6f),
+                StepType.BossFight => new Color(0.7f, 0.2f, 0.2f),
+                _ => new Color(0.4f, 0.4f, 0.4f)
+            };
+        }
+
         private void OnUndoClicked()
         {
             Debug.Log("[UIManager] OnUndoClicked: invoking EventBus.OnUndoPlacement");
@@ -521,6 +666,44 @@ namespace Scurry.UI
         {
             Debug.Log("[UIManager] OnEndTurnClicked: invoking EventBus.OnTurnEnded");
             EventBus.OnTurnEnded?.Invoke();
+        }
+
+        private void UpdateStageProgress(int currentStep, int totalSteps)
+        {
+            UpdateRunProgressLabel();
+        }
+
+        private void UpdateRunProgressLabel()
+        {
+            if (runProgressLabel == null || runManager == null) return;
+            if (!runManager.enabled) { runProgressLabel.text = ""; return; }
+
+            var zone = runManager.CurrentZone;
+            if (zone == null) return;
+
+            int stage = runManager.CurrentStageIndex + 1;
+            int totalStages = zone.stagesPerZone;
+            string text = $"Stage {stage}/{totalStages}";
+            runProgressLabel.text = text;
+            Debug.Log($"[UIManager] UpdateRunProgressLabel: '{text}'");
+        }
+
+        private void OnRunComplete()
+        {
+            if (runProgressLabel != null)
+            {
+                runProgressLabel.text = Loc.Get("run.complete.victory");
+                runProgressLabel.color = new Color(1f, 0.9f, 0.3f);
+            }
+        }
+
+        private void OnRunFailed()
+        {
+            if (runProgressLabel != null)
+            {
+                runProgressLabel.text = Loc.Get("run.complete.defeat");
+                runProgressLabel.color = new Color(1f, 0.2f, 0.2f);
+            }
         }
     }
 }
