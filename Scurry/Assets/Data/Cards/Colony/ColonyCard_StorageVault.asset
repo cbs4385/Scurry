@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8466ddcc7a0b4dd4e92fb13ffa520b66, type: 3}
+  m_Name: ColonyCard_StorageVault
+  m_EditorClassIdentifier: Assembly-CSharp::Scurry.Data.ColonyCardDefinitionSO
+  cardName: Storage Vault
+  localizationKey: colonycard.storage_vault
+  description: A secure vault for storing extra food at start of encounters.
+  rarity: 2
+  placementRequirement: 3
+  adjacencyCardName: 
+  colonyEffect: 6
+  effectValue: 3
+  populationCost: 1
+  artwork: {fileID: 0}
+  placeholderColor: {r: 0.5, g: 0.5, b: 0.6, a: 1}
+  upgraded: 0

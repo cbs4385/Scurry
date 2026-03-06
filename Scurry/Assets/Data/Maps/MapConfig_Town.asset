@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feefce951307ea34ab924864842405fb, type: 3}
+  m_Name: MapConfig_Town
+  m_EditorClassIdentifier: Assembly-CSharp::Scurry.Data.MapConfigSO
+  levelName: The Town
+  localizationKey: level.town
+  levelNumber: 3
+  numRows: 12
+  minNodesPerRow: 3
+  maxNodesPerRow: 4
+  nodeTypeWeights:
+  - nodeType: 0
+    weight: 3
+  - nodeType: 1
+    weight: 2
+  - nodeType: 3
+    weight: 1.5
+  - nodeType: 4
+    weight: 1
+  - nodeType: 5
+    weight: 1
+  - nodeType: 6
+    weight: 1
+  - nodeType: 7
+    weight: 1.5
+  - nodeType: 8
+    weight: 0.5
+  firstRowType: 0
+  bossDefinition: {fileID: 11400000, guid: 453776cedd714c468ae11cb115af9a21, type: 2}
+  encounterPool:
+  - {fileID: 11400000, guid: cdc072b9427942f18264afe2f3798308, type: 2}
+  - {fileID: 11400000, guid: 140d2168ea19413fb3b01c82007daeab, type: 2}
+  - {fileID: 11400000, guid: b7425fae39464386b5e0ad2527ab1c74, type: 2}
+  - {fileID: 11400000, guid: 16423a94316a4c3cbe9f87ba5ec793a6, type: 2}
+  - {fileID: 11400000, guid: 7231ce7dd8164e00adc52f4d8750b2c2, type: 2}
+  - {fileID: 11400000, guid: f4039e33f1674f7c8f4d44c6add57874, type: 2}
+  eliteEncounterPool:
+  - {fileID: 11400000, guid: 4e6faa08ac414971978e5bbe2228eecb, type: 2}
+  - {fileID: 11400000, guid: d1bea73c3dc640bea7e5e7f4d94bee07, type: 2}
+  - {fileID: 11400000, guid: f9bd203036994eb59a78e2a30fbc71f7, type: 2}
+  shopCardPool: []
+  eventPool:
+  - {fileID: 11400000, guid: a3c7e1f04b2d48e6912f5a8c3d7b0e14, type: 2}
+  - {fileID: 11400000, guid: b5d9f2a17c3e59f7a23d6b9e4f8c1a25, type: 2}
+  - {fileID: 11400000, guid: c6e0a3b28d4f6a08b34e7c0f5a9d2b36, type: 2}
+  - {fileID: 11400000, guid: d7f1b4c39e5a7b19c45f8d1a6bae3c47, type: 2}
+  - {fileID: 11400000, guid: e8a2c5d40f6b8c2ad56a9e2b7cbf4d58, type: 2}
+  boardSize: 6
+  colonyBoardSize: 5

@@ -104,6 +104,7 @@ namespace Scurry.Gathering
         public IEnumerator RunGathering()
         {
             Debug.Log("[GatheringManager] RunGathering: starting gathering phase");
+            float speedMult = Core.GameSettings.Instance != null ? Core.GameSettings.Instance.BattleWaitMultiplier : 1f;
 
             // Gather all actors
             var heroes = new List<HeroAgent>(boardManager.GetComponentsInChildren<HeroAgent>());
@@ -241,7 +242,7 @@ namespace Scurry.Gathering
                     {
                         EventBus.OnGatheringNotification?.Invoke(Loc.Format("gather.enemy.holds", enemy.Strength), enemyColor);
                         Debug.Log($"[GatheringManager] RunGathering: enemy at {enemy.GridPosition} has no valid move — staying put");
-                        yield return new WaitForSeconds(0.2f);
+                        yield return new WaitForSeconds(0.2f * speedMult);
                         continue;
                     }
 
@@ -280,7 +281,7 @@ namespace Scurry.Gathering
                     }
                 }
 
-                yield return new WaitForSeconds(0.2f);
+                yield return new WaitForSeconds(0.2f * speedMult);
             }
 
             Debug.Log("[GatheringManager] RunGathering: all actors processed — invoking OnGatheringComplete");

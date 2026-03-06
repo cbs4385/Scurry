@@ -11,6 +11,9 @@ namespace Scurry.Gathering
     {
         public CardDefinitionSO CardData { get; private set; }
         public Vector2Int GridPosition { get; private set; }
+        public int Movement { get; private set; }
+        public int Combat { get; private set; }
+        public int CarryCapacity { get; private set; }
         public int RemainingMoves { get; private set; }
         public int CurrentCombat { get; private set; }
         public int RemainingCarry { get; private set; }
@@ -76,10 +79,35 @@ namespace Scurry.Gathering
             Debug.Log($"[HeroAgent] AddCombatBonus: hero='{CardData.cardName}' combat {prev} -> {CurrentCombat} (+{amount})");
         }
 
+        public void ApplyColonyBonuses(int combatBonus, int moveBonus, int carryBonus)
+        {
+            CurrentCombat += combatBonus;
+            Combat += combatBonus;
+            RemainingMoves += moveBonus;
+            Movement += moveBonus;
+            RemainingCarry += carryBonus;
+            CarryCapacity += carryBonus;
+            Debug.Log($"[HeroAgent] ApplyColonyBonuses: hero='{CardData.cardName}' combat+{combatBonus}={CurrentCombat}, move+{moveBonus}={RemainingMoves}, carry+{carryBonus}={RemainingCarry}");
+        }
+
+        public void AddEquipmentBonus(int combatBonus, int moveBonus, int carryBonus)
+        {
+            CurrentCombat += combatBonus;
+            Combat += combatBonus;
+            RemainingMoves += moveBonus;
+            Movement += moveBonus;
+            RemainingCarry += carryBonus;
+            CarryCapacity += carryBonus;
+            Debug.Log($"[HeroAgent] AddEquipmentBonus: hero='{CardData.cardName}' combat+{combatBonus}={CurrentCombat}, move+{moveBonus}={RemainingMoves}, carry+{carryBonus}={RemainingCarry}");
+        }
+
         public void Initialize(CardDefinitionSO card, Vector2Int startPos)
         {
             CardData = card;
             GridPosition = startPos;
+            Movement = card.movement;
+            Combat = card.combat;
+            CarryCapacity = card.carryCapacity;
             RemainingMoves = card.movement;
             CurrentCombat = card.combat;
             RemainingCarry = card.carryCapacity;
@@ -93,6 +121,7 @@ namespace Scurry.Gathering
             if (card.specialAbility == SpecialAbility.ExtraCarry)
             {
                 RemainingCarry += 1;
+                CarryCapacity += 1;
                 Debug.Log($"[HeroAgent] Initialize: ExtraCarry ability — carry increased to {RemainingCarry}");
             }
 
@@ -100,7 +129,9 @@ namespace Scurry.Gathering
             if (card.specialAbility == SpecialAbility.Frenzy)
             {
                 CurrentCombat += 2;
+                Combat += 2;
                 RemainingCarry = 0;
+                CarryCapacity = 0;
                 Debug.Log($"[HeroAgent] Initialize: Frenzy ability — combat +2 to {CurrentCombat}, carry=0");
             }
         }

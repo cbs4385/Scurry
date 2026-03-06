@@ -243,3 +243,207 @@ MonoBehaviour:
     value: "\xA1Sin cartas \u2014 los h\xE9roes luchan solos!"
   - key: run.step.choose
     value: "Elige Tu Pr\xF3ximo Paso"
+  - key: card.warriorrat.name
+    value: Rata Guerrera
+  - key: card.thiefrat.name
+    value: Rata Ladrona
+  - key: card.alchemistrat.name
+    value: Rata Alquimista
+  - key: card.warlordrat.name
+    value: Rata Se\xF1or de la Guerra
+  - key: card.runnerrat.name
+    value: Rata Corredora
+  - key: card.demolisherrat.name
+    value: Rata Demoledora
+  - key: card.medicrat.name
+    value: "Rata M\xE9dica"
+  - key: card.equipment.ironclaw.name
+    value: Garra de Hierro
+  - key: card.equipment.feathercape.name
+    value: Capa de Plumas
+  - key: card.equipment.deeppockets.name
+    value: Bolsillos Profundos
+  - key: card.equipment.poisonfang.name
+    value: Colmillo Venenoso
+  - key: card.equipment.windrunners.name
+    value: Botas del Viento
+  - key: card.equipment.hoardersbag.name
+    value: Bolsa del Acumulador
+  - key: card.equipment.ancientamulet.name
+    value: Amuleto Antiguo
+  - key: card.equipment.thornshield.name
+    value: Escudo de Espinas
+  - key: card.equipment.rustynail.name
+    value: Clavo Oxidado
+  - key: card.equipment.swiftboots.name
+    value: "Botas R\xE1pidas"
+  - key: card.equipment.packsatchel.name
+    value: Bolsa de la Manada
+  - key: card.equipment.battlefang.name
+    value: Colmillo de Batalla
+  - key: card.herobenefit.rallycry.name
+    value: Grito de Guerra
+  - key: card.herobenefit.herbpouch.name
+    value: Bolsa de Hierbas
+  - key: card.herobenefit.desperatestand.name
+    value: Resistencia Desesperada
+  - key: card.herobenefit.scavengersinstinct.name
+    value: Instinto del Carro\xF1ero
+  - key: card.herobenefit.battlehymn.name
+    value: Himno de Batalla
+  - key: card.herobenefit.laststand.name
+    value: "\xDAltima Resistencia"
+  - key: card.herobenefit.victoryrush.name
+    value: "\xCDmpetu de Victoria"
+  - key: card.herobenefit.foragersluck.name
+    value: Suerte del Recolector
+  - key: card.herobenefit.tacticalretreat.name
+    value: "Retirada T\xE1ctica"
+  - key: card.herobenefit.inspiration.name
+    value: "Inspiraci\xF3n"
+  - key: colonycard.burrow_entrance.name
+    value: Entrada de Madriguera
+  - key: colonycard.food_store.name
+    value: "Almac\xE9n de Comida"
+  - key: colonycard.training_ground.name
+    value: Campo de Entrenamiento
+  - key: colonycard.scout_tower.name
+    value: Torre de Vigilancia
+  - key: colonycard.pack_den.name
+    value: Guarida de la Manada
+  - key: colonycard.rationing_post.name
+    value: Puesto de Racionamiento
+  - key: colonycard.armory.name
+    value: "Armer\xEDa"
+  - key: colonycard.gathering_hall.name
+    value: "Sal\xF3n de Reuniones"
+  - key: colonycard.watchtower.name
+    value: Atalaya
+  - key: colonycard.elders_chamber.name
+    value: "C\xE1mara del Anciano"
+  - key: colonycard.nursery.name
+    value: "Guarder\xEDa"
+  - key: colonycard.granary.name
+    value: Granero
+  - key: colonycard.fight_pit.name
+    value: Foso de Combate
+  - key: colonycard.runners_burrow.name
+    value: Madriguera del Corredor
+  - key: colonycard.trading_post.name
+    value: Puesto Comercial
+  - key: colonycard.herb_garden.name
+    value: "Jard\xEDn de Hierbas"
+  - key: colonycard.storage_vault.name
+    value: "B\xF3veda de Almacenamiento"
+  - key: colonycard.war_room.name
+    value: Sala de Guerra
+  - key: colonycard.spy_network.name
+    value: Red de Espionaje
+  - key: colonycard.great_hall.name
+    value: Gran Sala
+  - key: level.wilderness.name
+    value: La Espesura
+  - key: level.rural_village.name
+    value: Aldea Rural
+  - key: level.town.name
+    value: La Ciudad
+  - key: boss.eldersilas.name
+    value: Elder Silas
+  - key: boss.tobiasduchess.name
+    value: Tobias & Duchess
+  - key: boss.aldricfenn.name
+    value: Guildmaster Aldric Fenn
+  - key: boss.piedpiper.name
+    value: The Pied Piper
+  - key: node.resource_encounter
+    value: Encuentro de Recursos
+  - key: node.elite_encounter
+    value: Encuentro de \xC9lite
+  - key: node.boss
+    value: Jefe
+  - key: node.shop
+    value: Tienda
+  - key: node.healing_shrine
+    value: "Santuario de Curaci\xF3n"
+  - key: node.upgrade_shrine
+    value: Santuario de Mejora
+  - key: node.card_draft
+    value: "Selecci\xF3n de Cartas"
+  - key: node.event
+    value: Evento
+  - key: node.rest_site
+    value: Lugar de Descanso
+  - key: ui.colony.title
+    value: "Gesti\xF3n de Colonia"
+  - key: ui.colony.hand
+    value: "Mano {0} de {1}"
+  - key: ui.colony.finish
+    value: Finalizar Colonia
+  - key: ui.colony.nexthand
+    value: Siguiente Mano
+  - key: ui.map.title
+    value: Mapa
+  - key: ui.encounter.recall
+    value: RETIRADA
+  - key: ui.encounter.result.success
+    value: "\xA1Encuentro Completado!"
+  - key: ui.encounter.result.failure
+    value: Encuentro Fallido
+  - key: ui.encounter.result.recalled
+    value: Retirada Exitosa
+  - key: ui.shop.title
+    value: Tienda
+  - key: ui.shop.reroll
+    value: "Relanzar ({0} Moneda)"
+  - key: ui.shop.leave
+    value: Salir de la Tienda
+  - key: ui.healing.title
+    value: "Santuario de Curaci\xF3n"
+  - key: ui.upgrade.title
+    value: Santuario de Mejora
+  - key: ui.draft.title
+    value: "Selecci\xF3n de Cartas"
+  - key: ui.event.title
+    value: Evento
+  - key: ui.rest.title
+    value: Lugar de Descanso
+  - key: ui.settings.title
+    value: Ajustes
+  - key: ui.settings.speed
+    value: Velocidad de Batalla
+  - key: ui.settings.colorblind
+    value: Modo Daltonismo
+  - key: ui.settings.textsize
+    value: "Tama\xF1o de Texto"
+  - key: ui.scrapbook.title
+    value: "\xC1lbum de Recortes"
+  - key: ui.victory.title
+    value: "\xA1VICTORIA!"
+  - key: ui.defeat.title
+    value: DERROTA
+  - key: ui.button.newrun
+    value: Nueva Partida
+  - key: ui.button.tryagain
+    value: Intentar de Nuevo
+  - key: ui.button.scrapbook
+    value: "\xC1lbum"
+  - key: relic.feather.name
+    value: Reliquia de Pluma
+  - key: relic.barn_key.name
+    value: Llave del Granero
+  - key: relic.golden_bell.name
+    value: Campana Dorada
+  - key: relic.swift_paw.name
+    value: "Pata R\xE1pida"
+  - key: relic.war_banner.name
+    value: Estandarte de Guerra
+  - key: relic.silver_flute.name
+    value: Flauta de Plata
+  - key: relic.ancient_map.name
+    value: Mapa Antiguo
+  - key: relic.iron_heart.name
+    value: "Coraz\xF3n de Hierro"
+  - key: relic.thieves_gloves.name
+    value: "Guantes del Ladr\xF3n"
+  - key: relic.crown_of_thorns.name
+    value: Corona de Espinas

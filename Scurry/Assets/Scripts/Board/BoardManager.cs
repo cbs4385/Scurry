@@ -23,8 +23,10 @@ namespace Scurry.Board
         [SerializeField] private int defaultHazardDamage = 2;
 
         public Tile[,] Grid { get; private set; }
-        public int Rows => boardLayout.rows;
-        public int Cols => boardLayout.cols;
+        private int currentRows;
+        private int currentCols;
+        public int Rows => currentRows;
+        public int Cols => currentCols;
 
         private Vector3 boardOrigin;
         private ResourceType[,] nodeResourceTypes;
@@ -40,6 +42,8 @@ namespace Scurry.Board
         {
             int rows = boardLayout.rows;
             int cols = boardLayout.cols;
+            currentRows = rows;
+            currentCols = cols;
             Grid = new Tile[rows, cols];
             nodeResourceTypes = new ResourceType[rows, cols];
             nodeResourceValues = new int[rows, cols];
@@ -97,6 +101,56 @@ namespace Scurry.Board
                 TileType.Hazard => hazardColor,
                 _ => Color.white
             };
+        }
+
+        public void InitializeBoard(BoardLayoutSO layout)
+        {
+            Debug.Log($"[BoardManager] InitializeBoard: rebuilding board from layout {layout.name} ({layout.rows}x{layout.cols})");
+
+            // Destroy existing tiles
+            foreach (Transform child in transform)
+            {
+                Destroy(child.gameObject);
+            }
+
+            boardLayout = layout;
+            int rows = layout.rows;
+            int cols = layout.cols;
+            currentRows = rows;
+            currentCols = cols;
+            Grid = new Tile[rows, cols];
+            nodeResourceTypes = new ResourceType[rows, cols];
+            nodeResourceValues = new int[rows, cols];
+
+            boardOrigin = new Vector3(
+                -(cols - 1) * tileSize * 0.5f,
+                -(rows - 1) * tileSize * 0.5f + 1f,
+                0f
+            );
+
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    TileType type = layout.GetTileType(r, c);
+                    Vector3 worldPos = boardOrigin + new Vector3(c * tileSize, r * tileSize, 0f);
+                    GameObject tileGO = Instantiate(tilePrefab, worldPos, Quaternion.identity, transform);
+                    Tile tile = tileGO.GetComponent<Tile>();
+                    Color color = GetColorForType(type);
+                    int enemyStr = type == TileType.EnemyPatrol ? defaultEnemyStrength : 0;
+                    int hazardDmg = type == TileType.Hazard ? defaultHazardDamage : 0;
+                    tile.Initialize(new Vector2Int(r, c), type, color, enemyStr, hazardDmg);
+                    Grid[r, c] = tile;
+
+                    if (type == TileType.ResourceNode)
+                    {
+                        nodeResourceTypes[r, c] = layout.GetNodeResourceType(r, c);
+                        nodeResourceValues[r, c] = layout.GetNodeResourceValue(r, c);
+                    }
+                }
+            }
+
+            Debug.Log($"[BoardManager] InitializeBoard: complete — {rows}x{cols} board built");
         }
 
         public Tile GetTile(Vector2Int pos)

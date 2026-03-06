@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feefce951307ea34ab924864842405fb, type: 3}
+  m_Name: MapConfig_RuralVillage
+  m_EditorClassIdentifier: Assembly-CSharp::Scurry.Data.MapConfigSO
+  levelName: Rural Village
+  localizationKey: level.rural_village
+  levelNumber: 2
+  numRows: 10
+  minNodesPerRow: 2
+  maxNodesPerRow: 4
+  nodeTypeWeights:
+  - nodeType: 0
+    weight: 4
+  - nodeType: 1
+    weight: 1.5
+  - nodeType: 3
+    weight: 1.5
+  - nodeType: 4
+    weight: 1
+  - nodeType: 5
+    weight: 0.5
+  - nodeType: 6
+    weight: 1
+  - nodeType: 7
+    weight: 1.5
+  - nodeType: 8
+    weight: 0.5
+  firstRowType: 0
+  bossDefinition: {fileID: 11400000, guid: a680da2e58284619ac161cb85c02ec36, type: 2}
+  encounterPool:
+  - {fileID: 11400000, guid: f68531ccf8524dcd87afd130b56b1a62, type: 2}
+  - {fileID: 11400000, guid: 92073761c2f84b5ba3dde50fc88456a4, type: 2}
+  - {fileID: 11400000, guid: 43b3cc7ad3814139b5b5d7aa1b7da2f5, type: 2}
+  - {fileID: 11400000, guid: 087e64fe8b6944608c851a188caf7521, type: 2}
+  - {fileID: 11400000, guid: 6e5576c6ba13418aa77c25ed499ddf31, type: 2}
+  - {fileID: 11400000, guid: 29227a45c406435c8765eae1683e5d73, type: 2}
+  eliteEncounterPool:
+  - {fileID: 11400000, guid: 875504ec8d5d41cd94bea30f6f8e6e68, type: 2}
+  - {fileID: 11400000, guid: 5f3db82aa77e4967a690b18fe33dda07, type: 2}
+  - {fileID: 11400000, guid: 83ff24b8d00246adba708501f1e0e0be, type: 2}
+  shopCardPool: []
+  eventPool:
+  - {fileID: 11400000, guid: 06059cc3781321c48949a6508ac43d02, type: 2}
+  - {fileID: 11400000, guid: 3ba8a544c687fb340a7cef1a45f453de, type: 2}
+  - {fileID: 11400000, guid: b597b97e6686d1340a471faf32e2a72c, type: 2}
+  - {fileID: 11400000, guid: e2bf6a1ee49c7d6498a779c1e3709fbe, type: 2}
+  - {fileID: 11400000, guid: 67ebb5dceb1e90848b49871ab1c072e0, type: 2}
+  boardSize: 5
+  colonyBoardSize: 4

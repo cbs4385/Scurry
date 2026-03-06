@@ -243,3 +243,207 @@ MonoBehaviour:
     value: "No cards remaining — heroes fight on!"
   - key: run.step.choose
     value: "Choose Your Next Step"
+  - key: card.warriorrat.name
+    value: Warrior Rat
+  - key: card.thiefrat.name
+    value: Thief Rat
+  - key: card.alchemistrat.name
+    value: Alchemist Rat
+  - key: card.warlordrat.name
+    value: Warlord Rat
+  - key: card.runnerrat.name
+    value: Runner Rat
+  - key: card.demolisherrat.name
+    value: Demolisher Rat
+  - key: card.medicrat.name
+    value: Medic Rat
+  - key: card.equipment.ironclaw.name
+    value: Iron Claw
+  - key: card.equipment.feathercape.name
+    value: Feather Cape
+  - key: card.equipment.deeppockets.name
+    value: Deep Pockets
+  - key: card.equipment.poisonfang.name
+    value: Poison Fang
+  - key: card.equipment.windrunners.name
+    value: Wind Runners
+  - key: card.equipment.hoardersbag.name
+    value: "Hoarder's Bag"
+  - key: card.equipment.ancientamulet.name
+    value: Ancient Amulet
+  - key: card.equipment.thornshield.name
+    value: Thorn Shield
+  - key: card.equipment.rustynail.name
+    value: Rusty Nail
+  - key: card.equipment.swiftboots.name
+    value: Swift Boots
+  - key: card.equipment.packsatchel.name
+    value: Pack Satchel
+  - key: card.equipment.battlefang.name
+    value: Battle Fang
+  - key: card.herobenefit.rallycry.name
+    value: Rally Cry
+  - key: card.herobenefit.herbpouch.name
+    value: Herb Pouch
+  - key: card.herobenefit.desperatestand.name
+    value: Desperate Stand
+  - key: card.herobenefit.scavengersinstinct.name
+    value: "Scavenger's Instinct"
+  - key: card.herobenefit.battlehymn.name
+    value: Battle Hymn
+  - key: card.herobenefit.laststand.name
+    value: Last Stand
+  - key: card.herobenefit.victoryrush.name
+    value: Victory Rush
+  - key: card.herobenefit.foragersluck.name
+    value: "Forager's Luck"
+  - key: card.herobenefit.tacticalretreat.name
+    value: Tactical Retreat
+  - key: card.herobenefit.inspiration.name
+    value: Inspiration
+  - key: colonycard.burrow_entrance.name
+    value: Burrow Entrance
+  - key: colonycard.food_store.name
+    value: Food Store
+  - key: colonycard.training_ground.name
+    value: Training Ground
+  - key: colonycard.scout_tower.name
+    value: Scout Tower
+  - key: colonycard.pack_den.name
+    value: Pack Den
+  - key: colonycard.rationing_post.name
+    value: Rationing Post
+  - key: colonycard.armory.name
+    value: Armory
+  - key: colonycard.gathering_hall.name
+    value: Gathering Hall
+  - key: colonycard.watchtower.name
+    value: Watchtower
+  - key: colonycard.elders_chamber.name
+    value: "Elder's Chamber"
+  - key: colonycard.nursery.name
+    value: Nursery
+  - key: colonycard.granary.name
+    value: Granary
+  - key: colonycard.fight_pit.name
+    value: Fight Pit
+  - key: colonycard.runners_burrow.name
+    value: "Runner's Burrow"
+  - key: colonycard.trading_post.name
+    value: Trading Post
+  - key: colonycard.herb_garden.name
+    value: Herb Garden
+  - key: colonycard.storage_vault.name
+    value: Storage Vault
+  - key: colonycard.war_room.name
+    value: War Room
+  - key: colonycard.spy_network.name
+    value: Spy Network
+  - key: colonycard.great_hall.name
+    value: Great Hall
+  - key: level.wilderness.name
+    value: The Wilderness
+  - key: level.rural_village.name
+    value: Rural Village
+  - key: level.town.name
+    value: The Town
+  - key: boss.eldersilas.name
+    value: Elder Silas
+  - key: boss.tobiasduchess.name
+    value: Tobias & Duchess
+  - key: boss.aldricfenn.name
+    value: Guildmaster Aldric Fenn
+  - key: boss.piedpiper.name
+    value: The Pied Piper
+  - key: node.resource_encounter
+    value: Resource Encounter
+  - key: node.elite_encounter
+    value: Elite Encounter
+  - key: node.boss
+    value: Boss
+  - key: node.shop
+    value: Shop
+  - key: node.healing_shrine
+    value: Healing Shrine
+  - key: node.upgrade_shrine
+    value: Upgrade Shrine
+  - key: node.card_draft
+    value: Card Draft
+  - key: node.event
+    value: Event
+  - key: node.rest_site
+    value: Rest Site
+  - key: ui.colony.title
+    value: Colony Management
+  - key: ui.colony.hand
+    value: "Hand {0} of {1}"
+  - key: ui.colony.finish
+    value: Finish Colony
+  - key: ui.colony.nexthand
+    value: Next Hand
+  - key: ui.map.title
+    value: Map
+  - key: ui.encounter.recall
+    value: RECALL
+  - key: ui.encounter.result.success
+    value: Encounter Complete!
+  - key: ui.encounter.result.failure
+    value: Encounter Failed
+  - key: ui.encounter.result.recalled
+    value: Recalled Successfully
+  - key: ui.shop.title
+    value: Shop
+  - key: ui.shop.reroll
+    value: "Reroll ({0} Currency)"
+  - key: ui.shop.leave
+    value: Leave Shop
+  - key: ui.healing.title
+    value: Healing Shrine
+  - key: ui.upgrade.title
+    value: Upgrade Shrine
+  - key: ui.draft.title
+    value: Card Draft
+  - key: ui.event.title
+    value: Event
+  - key: ui.rest.title
+    value: Rest Site
+  - key: ui.settings.title
+    value: Settings
+  - key: ui.settings.speed
+    value: Battle Speed
+  - key: ui.settings.colorblind
+    value: Color Blind Mode
+  - key: ui.settings.textsize
+    value: Text Size
+  - key: ui.scrapbook.title
+    value: The Scrapbook
+  - key: ui.victory.title
+    value: VICTORY!
+  - key: ui.defeat.title
+    value: DEFEAT
+  - key: ui.button.newrun
+    value: New Run
+  - key: ui.button.tryagain
+    value: Try Again
+  - key: ui.button.scrapbook
+    value: Scrapbook
+  - key: relic.feather.name
+    value: Feather Relic
+  - key: relic.barn_key.name
+    value: Barn Key
+  - key: relic.golden_bell.name
+    value: Golden Bell
+  - key: relic.swift_paw.name
+    value: Swift Paw
+  - key: relic.war_banner.name
+    value: War Banner
+  - key: relic.silver_flute.name
+    value: Silver Flute
+  - key: relic.ancient_map.name
+    value: Ancient Map
+  - key: relic.iron_heart.name
+    value: Iron Heart
+  - key: relic.thieves_gloves.name
+    value: "Thief's Gloves"
+  - key: relic.crown_of_thorns.name
+    value: Crown of Thorns

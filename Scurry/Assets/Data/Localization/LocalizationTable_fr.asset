@@ -243,3 +243,207 @@ MonoBehaviour:
     value: "Plus de cartes \u2014 les h\xE9ros se battent seuls !"
   - key: run.step.choose
     value: "Choisissez Votre Prochaine \xC9tape"
+  - key: card.warriorrat.name
+    value: Rat Guerrier
+  - key: card.thiefrat.name
+    value: Rat Voleur
+  - key: card.alchemistrat.name
+    value: Rat Alchimiste
+  - key: card.warlordrat.name
+    value: Rat Seigneur de Guerre
+  - key: card.runnerrat.name
+    value: Rat Coureur
+  - key: card.demolisherrat.name
+    value: Rat D\xE9molisseur
+  - key: card.medicrat.name
+    value: "Rat M\xE9decin"
+  - key: card.equipment.ironclaw.name
+    value: Griffe de Fer
+  - key: card.equipment.feathercape.name
+    value: Cape de Plumes
+  - key: card.equipment.deeppockets.name
+    value: Poches Profondes
+  - key: card.equipment.poisonfang.name
+    value: Croc Empoisonn\xE9
+  - key: card.equipment.windrunners.name
+    value: Bottes du Vent
+  - key: card.equipment.hoardersbag.name
+    value: Sac de l'Amasseur
+  - key: card.equipment.ancientamulet.name
+    value: Amulette Ancienne
+  - key: card.equipment.thornshield.name
+    value: "Bouclier d'\xC9pines"
+  - key: card.equipment.rustynail.name
+    value: "Clou Rouill\xE9"
+  - key: card.equipment.swiftboots.name
+    value: Bottes Rapides
+  - key: card.equipment.packsatchel.name
+    value: Sacoche de Meute
+  - key: card.equipment.battlefang.name
+    value: Croc de Bataille
+  - key: card.herobenefit.rallycry.name
+    value: Cri de Ralliement
+  - key: card.herobenefit.herbpouch.name
+    value: Bourse d'Herbes
+  - key: card.herobenefit.desperatestand.name
+    value: "R\xE9sistance D\xE9sesp\xE9r\xE9e"
+  - key: card.herobenefit.scavengersinstinct.name
+    value: Instinct du Fouineur
+  - key: card.herobenefit.battlehymn.name
+    value: Hymne de Bataille
+  - key: card.herobenefit.laststand.name
+    value: "Derni\xE8re R\xE9sistance"
+  - key: card.herobenefit.victoryrush.name
+    value: "Ru\xE9e de Victoire"
+  - key: card.herobenefit.foragersluck.name
+    value: Chance du Cueilleur
+  - key: card.herobenefit.tacticalretreat.name
+    value: Retraite Tactique
+  - key: card.herobenefit.inspiration.name
+    value: Inspiration
+  - key: colonycard.burrow_entrance.name
+    value: "Entr\xE9e du Terrier"
+  - key: colonycard.food_store.name
+    value: "R\xE9serve de Nourriture"
+  - key: colonycard.training_ground.name
+    value: "Terrain d'Entra\xEEnement"
+  - key: colonycard.scout_tower.name
+    value: Tour de Guet
+  - key: colonycard.pack_den.name
+    value: Tani\xE8re de la Meute
+  - key: colonycard.rationing_post.name
+    value: Poste de Rationnement
+  - key: colonycard.armory.name
+    value: Armurerie
+  - key: colonycard.gathering_hall.name
+    value: Salle de Rassemblement
+  - key: colonycard.watchtower.name
+    value: Tour de Guet
+  - key: colonycard.elders_chamber.name
+    value: Chambre de l'Ancien
+  - key: colonycard.nursery.name
+    value: Nurserie
+  - key: colonycard.granary.name
+    value: Grenier
+  - key: colonycard.fight_pit.name
+    value: "Ar\xE8ne de Combat"
+  - key: colonycard.runners_burrow.name
+    value: Terrier du Coureur
+  - key: colonycard.trading_post.name
+    value: Comptoir Commercial
+  - key: colonycard.herb_garden.name
+    value: Jardin d'Herbes
+  - key: colonycard.storage_vault.name
+    value: "Chambre Forte"
+  - key: colonycard.war_room.name
+    value: Salle de Guerre
+  - key: colonycard.spy_network.name
+    value: "R\xE9seau d'Espions"
+  - key: colonycard.great_hall.name
+    value: Grande Salle
+  - key: level.wilderness.name
+    value: Les Terres Sauvages
+  - key: level.rural_village.name
+    value: Village Rural
+  - key: level.town.name
+    value: La Ville
+  - key: boss.eldersilas.name
+    value: Ancien Silas
+  - key: boss.tobiasduchess.name
+    value: Tobias & Duchess
+  - key: boss.aldricfenn.name
+    value: "Ma\xEEtre de Guilde Aldric Fenn"
+  - key: boss.piedpiper.name
+    value: "Le Joueur de Fl\xFBte"
+  - key: node.resource_encounter
+    value: Rencontre de Ressources
+  - key: node.elite_encounter
+    value: "Rencontre d'\xC9lite"
+  - key: node.boss
+    value: Boss
+  - key: node.shop
+    value: Boutique
+  - key: node.healing_shrine
+    value: "Sanctuaire de Gu\xE9rison"
+  - key: node.upgrade_shrine
+    value: "Sanctuaire d'Am\xE9lioration"
+  - key: node.card_draft
+    value: "S\xE9lection de Cartes"
+  - key: node.event
+    value: "\xC9v\xE9nement"
+  - key: node.rest_site
+    value: Lieu de Repos
+  - key: ui.colony.title
+    value: Gestion de la Colonie
+  - key: ui.colony.hand
+    value: "Main {0} sur {1}"
+  - key: ui.colony.finish
+    value: Terminer la Colonie
+  - key: ui.colony.nexthand
+    value: Main Suivante
+  - key: ui.map.title
+    value: Carte
+  - key: ui.encounter.recall
+    value: RAPPEL
+  - key: ui.encounter.result.success
+    value: "Rencontre Termin\xE9e !"
+  - key: ui.encounter.result.failure
+    value: "Rencontre \xC9chou\xE9e"
+  - key: ui.encounter.result.recalled
+    value: "Rappel R\xE9ussi"
+  - key: ui.shop.title
+    value: Boutique
+  - key: ui.shop.reroll
+    value: "Relancer ({0} Monnaie)"
+  - key: ui.shop.leave
+    value: Quitter la Boutique
+  - key: ui.healing.title
+    value: "Sanctuaire de Gu\xE9rison"
+  - key: ui.upgrade.title
+    value: "Sanctuaire d'Am\xE9lioration"
+  - key: ui.draft.title
+    value: "S\xE9lection de Cartes"
+  - key: ui.event.title
+    value: "\xC9v\xE9nement"
+  - key: ui.rest.title
+    value: Lieu de Repos
+  - key: ui.settings.title
+    value: "Param\xE8tres"
+  - key: ui.settings.speed
+    value: Vitesse de Combat
+  - key: ui.settings.colorblind
+    value: Mode Daltonien
+  - key: ui.settings.textsize
+    value: Taille du Texte
+  - key: ui.scrapbook.title
+    value: "L'Album"
+  - key: ui.victory.title
+    value: VICTOIRE !
+  - key: ui.defeat.title
+    value: "D\xC9FAITE"
+  - key: ui.button.newrun
+    value: Nouvelle Partie
+  - key: ui.button.tryagain
+    value: "R\xE9essayer"
+  - key: ui.button.scrapbook
+    value: Album
+  - key: relic.feather.name
+    value: Relique de Plume
+  - key: relic.barn_key.name
+    value: "Cl\xE9 de la Grange"
+  - key: relic.golden_bell.name
+    value: Cloche Dor\xE9e
+  - key: relic.swift_paw.name
+    value: Patte Rapide
+  - key: relic.war_banner.name
+    value: "Banni\xE8re de Guerre"
+  - key: relic.silver_flute.name
+    value: "Fl\xFBte d'Argent"
+  - key: relic.ancient_map.name
+    value: Carte Ancienne
+  - key: relic.iron_heart.name
+    value: Coeur de Fer
+  - key: relic.thieves_gloves.name
+    value: Gants du Voleur
+  - key: relic.crown_of_thorns.name
+    value: "Couronne d'\xC9pines"

@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6b35e6cda439b3449bc1fbff3d95354, type: 3}
+  m_Name: Event_TownCrier
+  m_EditorClassIdentifier: Assembly-CSharp::Scurry.Data.EventDefinitionSO
+  eventName: The Town Crier
+  localizationKey: event.town_crier
+  description: "The town crier announces a bounty on rats. The humans are mobilizing.
+    You must decide how to respond."
+  choices:
+  - choiceTextKey: event.town_crier.choice1
+    outcomeType: 6
+    outcomeValue: 5
+    outcomeDescriptionKey: event.town_crier.outcome1
+  - choiceTextKey: event.town_crier.choice2
+    outcomeType: 2
+    outcomeValue: 6
+    outcomeDescriptionKey: event.town_crier.outcome2
+  - choiceTextKey: event.town_crier.choice3
+    outcomeType: 7
+    outcomeValue: 3
+    outcomeDescriptionKey: event.town_crier.outcome3

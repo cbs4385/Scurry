@@ -243,3 +243,207 @@ MonoBehaviour:
     value: "Nessuna carta rimasta \u2014 gli eroi combattono da soli!"
   - key: run.step.choose
     value: "Scegli il Tuo Prossimo Passo"
+  - key: card.warriorrat.name
+    value: Ratto Guerriero
+  - key: card.thiefrat.name
+    value: Ratto Ladro
+  - key: card.alchemistrat.name
+    value: Ratto Alchimista
+  - key: card.warlordrat.name
+    value: Ratto Signore della Guerra
+  - key: card.runnerrat.name
+    value: Ratto Corridore
+  - key: card.demolisherrat.name
+    value: Ratto Demolitore
+  - key: card.medicrat.name
+    value: Ratto Medico
+  - key: card.equipment.ironclaw.name
+    value: Artiglio di Ferro
+  - key: card.equipment.feathercape.name
+    value: Mantello di Piume
+  - key: card.equipment.deeppockets.name
+    value: Tasche Profonde
+  - key: card.equipment.poisonfang.name
+    value: Zanna Avvelenata
+  - key: card.equipment.windrunners.name
+    value: Wind Runners
+  - key: card.equipment.hoardersbag.name
+    value: "Borsa dell'Accumulatore"
+  - key: card.equipment.ancientamulet.name
+    value: Amuleto Antico
+  - key: card.equipment.thornshield.name
+    value: Scudo di Spine
+  - key: card.equipment.rustynail.name
+    value: Chiodo Arrugginito
+  - key: card.equipment.swiftboots.name
+    value: Stivali Veloci
+  - key: card.equipment.packsatchel.name
+    value: Bisaccia del Branco
+  - key: card.equipment.battlefang.name
+    value: Zanna da Battaglia
+  - key: card.herobenefit.rallycry.name
+    value: Grido di Battaglia
+  - key: card.herobenefit.herbpouch.name
+    value: Sacchetto di Erbe
+  - key: card.herobenefit.desperatestand.name
+    value: Resistenza Disperata
+  - key: card.herobenefit.scavengersinstinct.name
+    value: Istinto del Raccoglitore
+  - key: card.herobenefit.battlehymn.name
+    value: Inno di Guerra
+  - key: card.herobenefit.laststand.name
+    value: Ultima Resistenza
+  - key: card.herobenefit.victoryrush.name
+    value: Impeto della Vittoria
+  - key: card.herobenefit.foragersluck.name
+    value: Fortuna del Cercatore
+  - key: card.herobenefit.tacticalretreat.name
+    value: Ritirata Tattica
+  - key: card.herobenefit.inspiration.name
+    value: Ispirazione
+  - key: colonycard.burrow_entrance.name
+    value: Ingresso della Tana
+  - key: colonycard.food_store.name
+    value: Deposito di Cibo
+  - key: colonycard.training_ground.name
+    value: Campo di Addestramento
+  - key: colonycard.scout_tower.name
+    value: Torre di Vedetta
+  - key: colonycard.pack_den.name
+    value: Tana del Branco
+  - key: colonycard.rationing_post.name
+    value: Posto di Razionamento
+  - key: colonycard.armory.name
+    value: Armeria
+  - key: colonycard.gathering_hall.name
+    value: Sala di Raccolta
+  - key: colonycard.watchtower.name
+    value: Torre di Guardia
+  - key: colonycard.elders_chamber.name
+    value: "Camera dell'Anziano"
+  - key: colonycard.nursery.name
+    value: Nursery
+  - key: colonycard.granary.name
+    value: Granaio
+  - key: colonycard.fight_pit.name
+    value: Arena di Combattimento
+  - key: colonycard.runners_burrow.name
+    value: Tana del Corridore
+  - key: colonycard.trading_post.name
+    value: Posto di Commercio
+  - key: colonycard.herb_garden.name
+    value: Giardino delle Erbe
+  - key: colonycard.storage_vault.name
+    value: Camera Blindata
+  - key: colonycard.war_room.name
+    value: Sala di Guerra
+  - key: colonycard.spy_network.name
+    value: Rete di Spie
+  - key: colonycard.great_hall.name
+    value: Sala Grande
+  - key: level.wilderness.name
+    value: La Natura Selvaggia
+  - key: level.rural_village.name
+    value: Villaggio Rurale
+  - key: level.town.name
+    value: "La Citt\xE0"
+  - key: boss.eldersilas.name
+    value: Elder Silas
+  - key: boss.tobiasduchess.name
+    value: Tobias & Duchess
+  - key: boss.aldricfenn.name
+    value: Guildmaster Aldric Fenn
+  - key: boss.piedpiper.name
+    value: The Pied Piper
+  - key: node.resource_encounter
+    value: Incontro Risorse
+  - key: node.elite_encounter
+    value: "Incontro \xC9lite"
+  - key: node.boss
+    value: Boss
+  - key: node.shop
+    value: Negozio
+  - key: node.healing_shrine
+    value: Santuario di Guarigione
+  - key: node.upgrade_shrine
+    value: Santuario di Potenziamento
+  - key: node.card_draft
+    value: Selezione Carte
+  - key: node.event
+    value: Evento
+  - key: node.rest_site
+    value: Luogo di Riposo
+  - key: ui.colony.title
+    value: Gestione Colonia
+  - key: ui.colony.hand
+    value: "Mano {0} di {1}"
+  - key: ui.colony.finish
+    value: Completa Colonia
+  - key: ui.colony.nexthand
+    value: Prossima Mano
+  - key: ui.map.title
+    value: Mappa
+  - key: ui.encounter.recall
+    value: RICHIAMO
+  - key: ui.encounter.result.success
+    value: Incontro Completato!
+  - key: ui.encounter.result.failure
+    value: Incontro Fallito
+  - key: ui.encounter.result.recalled
+    value: Richiamo Riuscito
+  - key: ui.shop.title
+    value: Negozio
+  - key: ui.shop.reroll
+    value: "Rilancia ({0} Valuta)"
+  - key: ui.shop.leave
+    value: Lascia il Negozio
+  - key: ui.healing.title
+    value: Santuario di Guarigione
+  - key: ui.upgrade.title
+    value: Santuario di Potenziamento
+  - key: ui.draft.title
+    value: Selezione Carte
+  - key: ui.event.title
+    value: Evento
+  - key: ui.rest.title
+    value: Luogo di Riposo
+  - key: ui.settings.title
+    value: Impostazioni
+  - key: ui.settings.speed
+    value: "Velocit\xE0 di Battaglia"
+  - key: ui.settings.colorblind
+    value: "Modalit\xE0 Daltonismo"
+  - key: ui.settings.textsize
+    value: Dimensione Testo
+  - key: ui.scrapbook.title
+    value: "L'Album"
+  - key: ui.victory.title
+    value: VITTORIA!
+  - key: ui.defeat.title
+    value: SCONFITTA
+  - key: ui.button.newrun
+    value: Nuova Partita
+  - key: ui.button.tryagain
+    value: Riprova
+  - key: ui.button.scrapbook
+    value: Album
+  - key: relic.feather.name
+    value: Reliquia Piuma
+  - key: relic.barn_key.name
+    value: Chiave del Fienile
+  - key: relic.golden_bell.name
+    value: "Campana d'Oro"
+  - key: relic.swift_paw.name
+    value: Zampa Veloce
+  - key: relic.war_banner.name
+    value: Stendardo di Guerra
+  - key: relic.silver_flute.name
+    value: "Flauto d'Argento"
+  - key: relic.ancient_map.name
+    value: Mappa Antica
+  - key: relic.iron_heart.name
+    value: Cuore di Ferro
+  - key: relic.thieves_gloves.name
+    value: Guanti del Ladro
+  - key: relic.crown_of_thorns.name
+    value: Corona di Spine

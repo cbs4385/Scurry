@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0, type: 3}
+  m_Name: BalanceConfig
+  m_EditorClassIdentifier: Assembly-CSharp::Scurry.Data.BalanceConfigSO
+  startingFood: 15
+  startingMaterials: 5
+  startingCurrency: 5
+  starvationDamagePerFood: 2
+  baseColonyHP: 30
+  baseColonyMaxHP: 30
+  baseHeroDeckSize: 8
+  priceCommon: 2
+  priceUncommon: 4
+  priceRare: 7
+  priceLegendary: 12
+  shopRerollCost: 2
+  shopCardCount: 5
+  upgradeCostCommon: 2
+  upgradeCostUncommon: 4
+  upgradeCostRare: 7
+  minorHealCost: 2
+  minorHealAmount: 5
+  majorHealCost: 5
+  majorHealAmount: 15
+  resupplyCost: 3
+  restHealPercent: 30
+  difficultyScalingFactor: 0.15
+  bossFailureDamage: 10
+  draftCardCount: 3
+  eliteBonusCurrency: 3

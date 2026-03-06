@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6b35e6cda439b3449bc1fbff3d95354, type: 3}
+  m_Name: Event_AbandonedApothecary
+  m_EditorClassIdentifier: Assembly-CSharp::Scurry.Data.EventDefinitionSO
+  eventName: Abandoned Apothecary
+  localizationKey: event.abandoned_apothecary
+  description: "Your scouts find an abandoned apothecary shop. Herbs, tinctures,
+    and strange concoctions line the shelves. Some could heal, others could harm."
+  choices:
+  - choiceTextKey: event.abandoned_apothecary.choice1
+    outcomeType: 6
+    outcomeValue: 6
+    outcomeDescriptionKey: event.abandoned_apothecary.outcome1
+  - choiceTextKey: event.abandoned_apothecary.choice2
+    outcomeType: 2
+    outcomeValue: 5
+    outcomeDescriptionKey: event.abandoned_apothecary.outcome2

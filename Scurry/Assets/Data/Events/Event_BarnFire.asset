@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6b35e6cda439b3449bc1fbff3d95354, type: 3}
+  m_Name: Event_BarnFire
+  m_EditorClassIdentifier: Assembly-CSharp::Scurry.Data.EventDefinitionSO
+  eventName: Barn Fire
+  localizationKey: event.barn_fire
+  description: A nearby barn catches fire! In the chaos, supplies scatter everywhere.
+    Your rats could rush in to grab materials, but the flames are dangerous.
+  choices:
+  - choiceTextKey: Rush into the flames
+    outcomeType: 1
+    outcomeValue: 6
+    outcomeDescriptionKey: event.barn_fire.outcome1
+  - choiceTextKey: Stay safe and scavenge outside
+    outcomeType: 0
+    outcomeValue: 3
+    outcomeDescriptionKey: event.barn_fire.outcome2
+  - choiceTextKey: Send a hero to rescue trapped supplies
+    outcomeType: 11
+    outcomeValue: 0
+    outcomeDescriptionKey: event.barn_fire.outcome3

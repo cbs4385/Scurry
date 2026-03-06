@@ -243,3 +243,207 @@ MonoBehaviour:
     value: "Keine Karten mehr \u2014 Helden k\xE4mpfen allein!"
   - key: run.step.choose
     value: "W\xE4hle Deinen N\xE4chsten Schritt"
+  - key: card.warriorrat.name
+    value: Kriegerratte
+  - key: card.thiefrat.name
+    value: Diebesratte
+  - key: card.alchemistrat.name
+    value: Alchemistenratte
+  - key: card.warlordrat.name
+    value: Kriegsherrenratte
+  - key: card.runnerrat.name
+    value: "L\xE4uferratte"
+  - key: card.demolisherrat.name
+    value: "Zerst\xF6rerratte"
+  - key: card.medicrat.name
+    value: Sanitratte
+  - key: card.equipment.ironclaw.name
+    value: Iron Claw
+  - key: card.equipment.feathercape.name
+    value: Feather Cape
+  - key: card.equipment.deeppockets.name
+    value: Deep Pockets
+  - key: card.equipment.poisonfang.name
+    value: Poison Fang
+  - key: card.equipment.windrunners.name
+    value: Wind Runners
+  - key: card.equipment.hoardersbag.name
+    value: "Hoarder's Bag"
+  - key: card.equipment.ancientamulet.name
+    value: Ancient Amulet
+  - key: card.equipment.thornshield.name
+    value: Thorn Shield
+  - key: card.equipment.rustynail.name
+    value: Rusty Nail
+  - key: card.equipment.swiftboots.name
+    value: Swift Boots
+  - key: card.equipment.packsatchel.name
+    value: Pack Satchel
+  - key: card.equipment.battlefang.name
+    value: Battle Fang
+  - key: card.herobenefit.rallycry.name
+    value: Rally Cry
+  - key: card.herobenefit.herbpouch.name
+    value: Herb Pouch
+  - key: card.herobenefit.desperatestand.name
+    value: Desperate Stand
+  - key: card.herobenefit.scavengersinstinct.name
+    value: "Scavenger's Instinct"
+  - key: card.herobenefit.battlehymn.name
+    value: Battle Hymn
+  - key: card.herobenefit.laststand.name
+    value: Last Stand
+  - key: card.herobenefit.victoryrush.name
+    value: Victory Rush
+  - key: card.herobenefit.foragersluck.name
+    value: "Forager's Luck"
+  - key: card.herobenefit.tacticalretreat.name
+    value: Tactical Retreat
+  - key: card.herobenefit.inspiration.name
+    value: Inspiration
+  - key: colonycard.burrow_entrance.name
+    value: Baueingang
+  - key: colonycard.food_store.name
+    value: Nahrungslager
+  - key: colonycard.training_ground.name
+    value: "\xDCbungsplatz"
+  - key: colonycard.scout_tower.name
+    value: "Sp\xE4herturm"
+  - key: colonycard.pack_den.name
+    value: Rudelbau
+  - key: colonycard.rationing_post.name
+    value: Rationierungsposten
+  - key: colonycard.armory.name
+    value: "R\xFCstkammer"
+  - key: colonycard.gathering_hall.name
+    value: Versammlungshalle
+  - key: colonycard.watchtower.name
+    value: Wachturm
+  - key: colonycard.elders_chamber.name
+    value: "\xC4ltestenkammer"
+  - key: colonycard.nursery.name
+    value: Kinderstube
+  - key: colonycard.granary.name
+    value: Kornspeicher
+  - key: colonycard.fight_pit.name
+    value: Kampfgrube
+  - key: colonycard.runners_burrow.name
+    value: "L\xE4uferbau"
+  - key: colonycard.trading_post.name
+    value: Handelsposten
+  - key: colonycard.herb_garden.name
+    value: "Kr\xE4utergarten"
+  - key: colonycard.storage_vault.name
+    value: Lagergew\xF6lbe
+  - key: colonycard.war_room.name
+    value: Kriegsraum
+  - key: colonycard.spy_network.name
+    value: Spionagenetz
+  - key: colonycard.great_hall.name
+    value: "Gro\xDFe Halle"
+  - key: level.wilderness.name
+    value: Die Wildnis
+  - key: level.rural_village.name
+    value: "L\xE4ndliches Dorf"
+  - key: level.town.name
+    value: Die Stadt
+  - key: boss.eldersilas.name
+    value: Elder Silas
+  - key: boss.tobiasduchess.name
+    value: Tobias & Duchess
+  - key: boss.aldricfenn.name
+    value: Guildmaster Aldric Fenn
+  - key: boss.piedpiper.name
+    value: The Pied Piper
+  - key: node.resource_encounter
+    value: Ressourcentreffen
+  - key: node.elite_encounter
+    value: Elitetreffen
+  - key: node.boss
+    value: Boss
+  - key: node.shop
+    value: Laden
+  - key: node.healing_shrine
+    value: Heilschrein
+  - key: node.upgrade_shrine
+    value: Aufwertungsschrein
+  - key: node.card_draft
+    value: Kartenauswahl
+  - key: node.event
+    value: Ereignis
+  - key: node.rest_site
+    value: Rastplatz
+  - key: ui.colony.title
+    value: Kolonieverwaltung
+  - key: ui.colony.hand
+    value: "Hand {0} von {1}"
+  - key: ui.colony.finish
+    value: Kolonie abschlie\xDFen
+  - key: ui.colony.nexthand
+    value: "N\xE4chste Hand"
+  - key: ui.map.title
+    value: Karte
+  - key: ui.encounter.recall
+    value: "R\xDCCKRUF"
+  - key: ui.encounter.result.success
+    value: Treffen Abgeschlossen!
+  - key: ui.encounter.result.failure
+    value: Treffen Fehlgeschlagen
+  - key: ui.encounter.result.recalled
+    value: "Erfolgreich Zur\xFCckgerufen"
+  - key: ui.shop.title
+    value: Laden
+  - key: ui.shop.reroll
+    value: "Neu W\xFCrfeln ({0} W\xE4hrung)"
+  - key: ui.shop.leave
+    value: Laden Verlassen
+  - key: ui.healing.title
+    value: Heilschrein
+  - key: ui.upgrade.title
+    value: Aufwertungsschrein
+  - key: ui.draft.title
+    value: Kartenauswahl
+  - key: ui.event.title
+    value: Ereignis
+  - key: ui.rest.title
+    value: Rastplatz
+  - key: ui.settings.title
+    value: Einstellungen
+  - key: ui.settings.speed
+    value: Kampfgeschwindigkeit
+  - key: ui.settings.colorblind
+    value: Farbenblindmodus
+  - key: ui.settings.textsize
+    value: "Textgr\xF6\xDFe"
+  - key: ui.scrapbook.title
+    value: Das Sammelalbum
+  - key: ui.victory.title
+    value: SIEG!
+  - key: ui.defeat.title
+    value: NIEDERLAGE
+  - key: ui.button.newrun
+    value: Neuer Lauf
+  - key: ui.button.tryagain
+    value: Erneut Versuchen
+  - key: ui.button.scrapbook
+    value: Sammelalbum
+  - key: relic.feather.name
+    value: Feather Relic
+  - key: relic.barn_key.name
+    value: Barn Key
+  - key: relic.golden_bell.name
+    value: Golden Bell
+  - key: relic.swift_paw.name
+    value: Swift Paw
+  - key: relic.war_banner.name
+    value: War Banner
+  - key: relic.silver_flute.name
+    value: Silver Flute
+  - key: relic.ancient_map.name
+    value: Ancient Map
+  - key: relic.iron_heart.name
+    value: Iron Heart
+  - key: relic.thieves_gloves.name
+    value: "Thief's Gloves"
+  - key: relic.crown_of_thorns.name
+    value: Crown of Thorns

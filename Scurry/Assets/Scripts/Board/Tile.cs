@@ -120,6 +120,18 @@ namespace Scurry.Board
                 spriteRenderer.color = baseColor;
         }
 
+        public void SetAsResourceNode(ResourceType resourceType, int resourceValue)
+        {
+            Debug.Log($"[Tile] SetAsResourceNode: gridPos={GridPosition}, type={resourceType}, value={resourceValue}");
+            TileType = TileType.ResourceNode;
+            HasResource = true;
+            StoredResourceType = resourceType;
+            StoredResourceValue = resourceValue;
+            baseColor = new Color(0.9f, 0.85f, 0.3f);
+            if (spriteRenderer != null)
+                spriteRenderer.color = baseColor;
+        }
+
         public void RestoreOriginalType()
         {
             Debug.Log($"[Tile] RestoreOriginalType: gridPos={GridPosition}, {TileType} -> {OriginalTileType}, enemyStr={originalEnemyStrength}, hazardDmg={originalHazardDamage}");

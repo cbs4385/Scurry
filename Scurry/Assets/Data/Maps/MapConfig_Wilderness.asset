@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feefce951307ea34ab924864842405fb, type: 3}
+  m_Name: MapConfig_Wilderness
+  m_EditorClassIdentifier: Assembly-CSharp::Scurry.Data.MapConfigSO
+  levelName: The Wilderness
+  localizationKey: level.wilderness
+  levelNumber: 1
+  numRows: 8
+  minNodesPerRow: 2
+  maxNodesPerRow: 3
+  nodeTypeWeights:
+  - nodeType: 0
+    weight: 4
+  - nodeType: 1
+    weight: 1
+  - nodeType: 3
+    weight: 1
+  - nodeType: 4
+    weight: 1
+  - nodeType: 5
+    weight: 0.5
+  - nodeType: 6
+    weight: 1
+  - nodeType: 7
+    weight: 1
+  - nodeType: 8
+    weight: 1
+  firstRowType: 0
+  bossDefinition: {fileID: 11400000, guid: e87d497c647d8e1479f22e8cba39dfb8, type: 2}
+  encounterPool:
+  - {fileID: 11400000, guid: 6af6179d134c2fa42b3d3c0cfdc17a35, type: 2}
+  - {fileID: 11400000, guid: 589926b1e75ab974a9a968d45918df66, type: 2}
+  - {fileID: 11400000, guid: abcfa2cb3cfe7f940bb757d527b42966, type: 2}
+  - {fileID: 11400000, guid: 026985a7eafa50149a9efbc80078dce3, type: 2}
+  - {fileID: 11400000, guid: 908f008599266744f82611538e14e8db, type: 2}
+  eliteEncounterPool:
+  - {fileID: 11400000, guid: fc69d2c908112e14ea3c4bcf4057d57e, type: 2}
+  - {fileID: 11400000, guid: 35dfbd6bbf4611749937ecac805e4008, type: 2}
+  shopCardPool: []
+  eventPool:
+  - {fileID: 11400000, guid: 0cebe3bfb81afb445b4ba7fe1668b851, type: 2}
+  - {fileID: 11400000, guid: f83b0e7590e0ccc469002df93b9374e7, type: 2}
+  - {fileID: 11400000, guid: 264d3fe328e454b4993cd0b3b064fce3, type: 2}
+  - {fileID: 11400000, guid: 3a275bf32b59d794db979cee55784a7d, type: 2}
+  - {fileID: 11400000, guid: 11e2c85386aa6524f8192b344161e95d, type: 2}
+  boardSize: 4
+  colonyBoardSize: 3

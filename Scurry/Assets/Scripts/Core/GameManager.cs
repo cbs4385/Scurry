@@ -13,7 +13,7 @@ namespace Scurry.Core
     public class GameManager : MonoBehaviour
     {
         [Header("Mode")]
-        [SerializeField] private bool standaloneMode = true;
+        [SerializeField] private bool standaloneMode = false;
 
         [Header("References")]
         [SerializeField] private BoardManager boardManager;
@@ -360,98 +360,15 @@ namespace Scurry.Core
 
         private void SaveRunState()
         {
-            var saveData = new RunSaveData
-            {
-                turnNumber = turnNumber,
-                colonyHP = colonyManager.CurrentHP,
-                currencyStockpile = colonyManager.CurrencyStockpile,
-                foodStockpile = colonyManager.FoodStockpile
-            };
-
-            // Save draw pile
-            foreach (var card in deckManager.DrawPile)
-                saveData.drawPileCardNames.Add(card.cardName);
-
-            // Save discard pile
-            foreach (var card in deckManager.DiscardPile)
-                saveData.discardPileCardNames.Add(card.cardName);
-
-            // Save wounded heroes (by name — standalone mode doesn't use index tracking)
-            foreach (int idx in woundedHeroIndices)
-            {
-                if (currentRunDeck != null && idx < currentRunDeck.Count)
-                    saveData.woundedHeroCardNames.Add(currentRunDeck[idx].cardName);
-            }
-
-            // Save living enemy positions and strengths
-            var enemies = boardManager.GetComponentsInChildren<Gathering.EnemyAgent>();
-            foreach (var enemy in enemies)
-            {
-                if (!enemy.IsDefeated)
-                    saveData.livingEnemyPositions.Add($"{enemy.GridPosition.x},{enemy.GridPosition.y},{enemy.Strength}");
-            }
-
-            Debug.Log($"[GameManager] SaveRunState: turn={saveData.turnNumber}, hp={saveData.colonyHP}, draw={saveData.drawPileCardNames.Count}, discard={saveData.discardPileCardNames.Count}, wounded={saveData.woundedHeroCardNames.Count}, livingEnemies={saveData.livingEnemyPositions.Count}");
-            SaveManager.Save(saveData);
+            // Legacy M0 save — no longer used. M1 saves are handled by RunManager.
+            Debug.Log("[GameManager] SaveRunState: legacy M0 save skipped (use RunManager for M1 saves)");
         }
 
         private void LoadRun()
         {
-            var saveData = SaveManager.Load();
-            if (saveData == null)
-            {
-                Debug.LogWarning("[GameManager] LoadRun: save data was null — starting new run instead");
-                StartRun();
-                return;
-            }
-
-            Debug.Log($"[GameManager] LoadRun: restoring turn={saveData.turnNumber}, hp={saveData.colonyHP}");
-
-            // Restore turn number (will be incremented by StartNewTurn)
-            turnNumber = saveData.turnNumber - 1;
-
-            // Restore colony state
-            colonyManager.RestoreState(saveData.colonyHP, saveData.currencyStockpile, saveData.foodStockpile);
-
-            // Restore deck piles
-            var drawPile = new List<CardDefinitionSO>();
-            foreach (var name in saveData.drawPileCardNames)
-            {
-                var card = deckManager.FindCardByName(name);
-                if (card != null) drawPile.Add(card);
-            }
-            var discardPile = new List<CardDefinitionSO>();
-            foreach (var name in saveData.discardPileCardNames)
-            {
-                var card = deckManager.FindCardByName(name);
-                if (card != null) discardPile.Add(card);
-            }
-            deckManager.RestorePiles(drawPile, discardPile);
-
-            // Restore wounded heroes (standalone mode — approximate by SO reference since we don't have deck indices)
-            woundedHeroIndices.Clear();
-            foreach (var name in saveData.woundedHeroCardNames)
-            {
-                Debug.Log($"[GameManager] LoadRun: restored wounded hero '{name}' (standalone mode, SO-based)");
-            }
-
-            // Restore living enemies at saved positions
-            foreach (var posStr in saveData.livingEnemyPositions)
-            {
-                var parts = posStr.Split(',');
-                if (parts.Length == 3 && int.TryParse(parts[0], out int r) && int.TryParse(parts[1], out int c) && int.TryParse(parts[2], out int str))
-                {
-                    gatheringManager.SpawnEnemyAt(new Vector2Int(r, c), str);
-                    Debug.Log($"[GameManager] LoadRun: restored living enemy at ({r},{c}) str={str}");
-                }
-            }
-
-            // Generate board resources and update tile types for enemy positions
-            boardManager.GenerateResourceNodeResources();
-            boardManager.UpdateTilesForEnemyMovement();
-
-            Debug.Log("[GameManager] LoadRun: state restored, starting next turn");
-            StartNewTurn();
+            // Legacy M0 load — no longer used. M1 loads are handled by RunManager.
+            Debug.LogWarning("[GameManager] LoadRun: legacy M0 load not supported — starting new run");
+            StartRun();
         }
 
         private void SetPhase(GamePhase phase)

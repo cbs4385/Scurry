@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6b35e6cda439b3449bc1fbff3d95354, type: 3}
+  m_Name: Event_SewerFlood
+  m_EditorClassIdentifier: Assembly-CSharp::Scurry.Data.EventDefinitionSO
+  eventName: Sewer Flood
+  localizationKey: event.sewer_flood
+  description: "Heavy rains have flooded the town sewers, washing up all manner of
+    debris and supplies. But the currents are treacherous."
+  choices:
+  - choiceTextKey: event.sewer_flood.choice1
+    outcomeType: 1
+    outcomeValue: 8
+    outcomeDescriptionKey: event.sewer_flood.outcome1
+  - choiceTextKey: event.sewer_flood.choice2
+    outcomeType: 0
+    outcomeValue: 4
+    outcomeDescriptionKey: event.sewer_flood.outcome2

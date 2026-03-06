@@ -14,6 +14,7 @@ namespace Scurry.Colony
         public bool IsAlive => CurrentHP > 0;
         public int CurrencyStockpile { get; private set; }
         public int FoodStockpile { get; private set; }
+        public int MaterialsStockpile { get; private set; }
 
         private void Awake()
         {
@@ -36,9 +37,17 @@ namespace Scurry.Colony
 
         public void InitializeHP()
         {
+            var bc = BalanceConfigSO.Instance;
+            if (bc != null)
+            {
+                startingHP = bc.baseColonyHP;
+                maxHP = bc.baseColonyMaxHP;
+            }
             CurrentHP = startingHP;
-            FoodStockpile = 0;
-            Debug.Log($"[ColonyManager] InitializeHP: HP set to {CurrentHP}/{maxHP}, foodStockpile=0");
+            FoodStockpile = bc != null ? bc.startingFood : 0;
+            MaterialsStockpile = bc != null ? bc.startingMaterials : 0;
+            CurrencyStockpile = bc != null ? bc.startingCurrency : 0;
+            Debug.Log($"[ColonyManager] InitializeHP: HP set to {CurrentHP}/{maxHP}, food={FoodStockpile}, materials={MaterialsStockpile}, currency={CurrencyStockpile}");
             BroadcastHP();
         }
 
@@ -75,6 +84,40 @@ namespace Scurry.Colony
             CurrencyStockpile -= amount;
             Debug.Log($"[ColonyManager] SpendCurrency: spent {amount} currency — stockpile {prev} -> {CurrencyStockpile}");
             return true;
+        }
+
+        public bool SpendMaterials(int amount)
+        {
+            if (MaterialsStockpile < amount)
+            {
+                Debug.Log($"[ColonyManager] SpendMaterials: insufficient materials — have={MaterialsStockpile}, need={amount}");
+                return false;
+            }
+            int prev = MaterialsStockpile;
+            MaterialsStockpile -= amount;
+            Debug.Log($"[ColonyManager] SpendMaterials: spent {amount} materials — stockpile {prev} -> {MaterialsStockpile}");
+            return true;
+        }
+
+        public void AddFood(int amount)
+        {
+            int prev = FoodStockpile;
+            FoodStockpile += amount;
+            Debug.Log($"[ColonyManager] AddFood: +{amount} food — stockpile {prev} -> {FoodStockpile}");
+        }
+
+        public void AddMaterials(int amount)
+        {
+            int prev = MaterialsStockpile;
+            MaterialsStockpile += amount;
+            Debug.Log($"[ColonyManager] AddMaterials: +{amount} materials — stockpile {prev} -> {MaterialsStockpile}");
+        }
+
+        public void AddCurrency(int amount)
+        {
+            int prev = CurrencyStockpile;
+            CurrencyStockpile += amount;
+            Debug.Log($"[ColonyManager] AddCurrency: +{amount} currency — stockpile {prev} -> {CurrencyStockpile}");
         }
 
         public void TakeDamage(int amount)
@@ -117,13 +160,18 @@ namespace Scurry.Colony
                     FoodStockpile += value;
                     Debug.Log($"[ColonyManager] HandleResourceCollected: Food — FoodStockpile {prevFood} -> {FoodStockpile}");
                     break;
+                case ResourceType.Materials:
+                    int prevMat = MaterialsStockpile;
+                    MaterialsStockpile += value;
+                    Debug.Log($"[ColonyManager] HandleResourceCollected: Materials — stockpile {prevMat} -> {MaterialsStockpile}");
+                    break;
                 case ResourceType.Shelter:
                     int shelterHeal = value;
-                    Debug.Log($"[ColonyManager] HandleResourceCollected: Shelter — healing {shelterHeal} HP");
+                    Debug.Log($"[ColonyManager] HandleResourceCollected: Shelter — healing {shelterHeal} HP (legacy)");
                     Heal(shelterHeal);
                     break;
                 case ResourceType.Equipment:
-                    Debug.Log($"[ColonyManager] HandleResourceCollected: Equipment — buff applied at hero level, no colony effect");
+                    Debug.Log($"[ColonyManager] HandleResourceCollected: Equipment — buff applied at hero level, no colony effect (legacy)");
                     break;
                 case ResourceType.Currency:
                     int oldCurrency = CurrencyStockpile;

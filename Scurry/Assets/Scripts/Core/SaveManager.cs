@@ -12,7 +12,12 @@ namespace Scurry.Core
         {
             string json = JsonUtility.ToJson(data, true);
             File.WriteAllText(SavePath, json);
-            Debug.Log($"[SaveManager] Save: saved run data to '{SavePath}' (turn={data.turnNumber}, colonyHP={data.colonyHP}, drawPile={data.drawPileCardNames.Count}, discardPile={data.discardPileCardNames.Count}, wounded={data.woundedHeroCardNames.Count}, livingEnemies={data.livingEnemyPositions.Count})");
+            Debug.Log($"[SaveManager] Save: saved to '{SavePath}' (level={data.currentLevel}, colonyHP={data.colonyHP}, " +
+                      $"heroDeck={data.heroDeckCardNames.Count}, wounded={data.woundedHeroNames.Count}, " +
+                      $"nodes={data.nodesVisited}, food={data.foodStockpile}, materials={data.materialsStockpile}, currency={data.currencyStockpile})");
+
+            // Sync to Steam Cloud
+            Steam.SteamManager.CloudSave("run_save.json", json);
         }
 
         public static RunSaveData Load()
@@ -25,7 +30,8 @@ namespace Scurry.Core
 
             string json = File.ReadAllText(SavePath);
             var data = JsonUtility.FromJson<RunSaveData>(json);
-            Debug.Log($"[SaveManager] Load: loaded run data from '{SavePath}' (turn={data.turnNumber}, colonyHP={data.colonyHP}, drawPile={data.drawPileCardNames.Count}, discardPile={data.discardPileCardNames.Count}, wounded={data.woundedHeroCardNames.Count}, livingEnemies={data.livingEnemyPositions.Count})");
+            Debug.Log($"[SaveManager] Load: loaded from '{SavePath}' (level={data.currentLevel}, colonyHP={data.colonyHP}, " +
+                      $"heroDeck={data.heroDeckCardNames.Count}, wounded={data.woundedHeroNames.Count}, nodes={data.nodesVisited})");
             return data;
         }
 

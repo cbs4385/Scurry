@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50db5cd42c1c32e429ff49f42d965d60, type: 3}
+  m_Name: Boss_TobiasDuchess
+  m_EditorClassIdentifier: Assembly-CSharp::Scurry.Data.BossDefinitionSO
+  bossName: Tobias & Duchess
+  localizationKey: boss.tobiasduchess
+  maxHP: 30
+  baseAttack: 4
+  phases:
+  - hpThreshold: 30
+    ability: 4
+    abilityValue: 0
+    localizationKey: boss.tobiasduchess.phase1
+  - hpThreshold: 15
+    ability: 2
+    abilityValue: 3
+    localizationKey: boss.tobiasduchess.phase2
+  rewardCards: []
+  rewardRelic: {fileID: 0}
+  artwork: {fileID: 0}
+  placeholderColor: {r: 0.5, g: 0.3, b: 0.1, a: 1}

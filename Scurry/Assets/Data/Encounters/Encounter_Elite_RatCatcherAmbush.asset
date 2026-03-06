@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d26000d32d44ca4bbf48528abafc9c8, type: 3}
+  m_Name: Encounter_Elite_RatCatcherAmbush
+  m_EditorClassIdentifier: Assembly-CSharp::Scurry.Data.EncounterDefinitionSO
+  encounterName: Rat Catcher Ambush
+  localizationKey: encounter.elite_ratcatcher_ambush
+  encounterType: 1
+  boardLayout: {fileID: 11400000, guid: 47b5ed48f01b4975a1bdbd1959ae44d8, type: 2}
+  enemySpawns:
+  - enemyDefinition: {fileID: 11400000, guid: df3de8c85cb018e4482e997b64654109, type: 2}
+    gridPosition: {x: 4, y: 2}
+  - enemyDefinition: {fileID: 11400000, guid: df3de8c85cb018e4482e997b64654109, type: 2}
+    gridPosition: {x: 3, y: 4}
+  - enemyDefinition: {fileID: 11400000, guid: a684926cfc5122244ac439ae933c98ca, type: 2}
+    gridPosition: {x: 5, y: 3}
+  resourceNodes:
+  - resourceType: 4
+    value: 1
+    gridPosition: {x: 0, y: 0}
+  - resourceType: 4
+    value: 1
+    gridPosition: {x: 1, y: 3}
+  - resourceType: 4
+    value: 1
+    gridPosition: {x: 2, y: 5}
+  - resourceType: 3
+    value: 1
+    gridPosition: {x: 0, y: 4}
+  - resourceType: 3
+    value: 1
+    gridPosition: {x: 2, y: 1}
+  difficulty: 7
+  allowRecall: 0
+  rewardCards: []
+  rewardRelic: {fileID: 0}

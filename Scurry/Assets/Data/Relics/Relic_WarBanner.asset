@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea8607a7e80d0fb4bad26ac971adf00e, type: 3}
+  m_Name: Relic_WarBanner
+  m_EditorClassIdentifier: Assembly-CSharp::Scurry.Data.RelicDefinitionSO
+  relicName: War Banner
+  localizationKey: relic.war_banner
+  effect: 5
+  effectValue: 1
+  artwork: {fileID: 0}
+  placeholderColor: {r: 0.9, g: 0.2, b: 0.2, a: 1}
