@@ -17,8 +17,8 @@ namespace Scurry.Encounter
 
         private void Awake()
         {
-            if (boardManager == null) boardManager = FindObjectOfType<BoardManager>();
-            if (gatheringManager == null) gatheringManager = FindObjectOfType<GatheringManager>();
+            if (boardManager == null) boardManager = FindAnyObjectByType<BoardManager>();
+            if (gatheringManager == null) gatheringManager = FindAnyObjectByType<GatheringManager>();
             Debug.Log($"[EncounterManager] Awake: boardManager={boardManager != null}, gatheringManager={gatheringManager != null}, heroTokenPrefab={heroTokenPrefab != null}");
         }
 

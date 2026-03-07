@@ -6,12 +6,13 @@ using Scurry.Data;
 using Scurry.Core;
 using Scurry.Map;
 using Scurry.Encounter;
+using Scurry.Interfaces;
 
 namespace Scurry.UI
 {
     public class MapUI : MonoBehaviour
     {
-        [SerializeField] private MapManager mapManager;
+        private IMapManager mapManager;
 
         private GameObject mapPanel;
         private RectTransform contentRect;
@@ -39,8 +40,13 @@ namespace Scurry.UI
 
         private void Awake()
         {
-            if (mapManager == null) mapManager = FindObjectOfType<MapManager>();
             BuildMapPanel();
+        }
+
+        private void Start()
+        {
+            mapManager = ServiceLocator.Get<IMapManager>();
+            Debug.Log($"[MapUI] Start: mapManager={(mapManager != null ? "OK" : "NULL")}");
         }
 
         private void BuildMapPanel()

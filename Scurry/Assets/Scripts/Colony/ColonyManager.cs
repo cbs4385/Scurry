@@ -1,11 +1,15 @@
 using UnityEngine;
 using Scurry.Data;
 using Scurry.Core;
+using Scurry.Interfaces;
 
 namespace Scurry.Colony
 {
-    public class ColonyManager : MonoBehaviour
+    public class ColonyManager : MonoBehaviour, IColonyManager
     {
+        private static ColonyManager _instance;
+        public static ColonyManager Instance => _instance;
+
         [SerializeField] private int startingHP = 30;
         [SerializeField] private int maxHP = 50;
 
@@ -18,6 +22,15 @@ namespace Scurry.Colony
 
         private void Awake()
         {
+            if (_instance != null && _instance != this)
+            {
+                Debug.Log("[ColonyManager] Awake: duplicate instance — destroying self");
+                Destroy(gameObject);
+                return;
+            }
+            _instance = this;
+            DontDestroyOnLoad(gameObject);
+            ServiceLocator.Register<IColonyManager>(this);
             Debug.Log($"[ColonyManager] Awake: startingHP={startingHP}, maxHP={maxHP}");
         }
 
@@ -51,12 +64,14 @@ namespace Scurry.Colony
             BroadcastHP();
         }
 
-        public void RestoreState(int hp, int currency, int food = 0)
+        public void RestoreState(int hp, int maxHp, int currency, int food, int materials)
         {
+            maxHP = maxHp;
             CurrentHP = Mathf.Clamp(hp, 0, maxHP);
             CurrencyStockpile = currency;
             FoodStockpile = food;
-            Debug.Log($"[ColonyManager] RestoreState: HP={CurrentHP}/{maxHP}, currency={CurrencyStockpile}, food={FoodStockpile}");
+            MaterialsStockpile = materials;
+            Debug.Log($"[ColonyManager] RestoreState: HP={CurrentHP}/{maxHP}, currency={CurrencyStockpile}, food={FoodStockpile}, materials={MaterialsStockpile}");
             BroadcastHP();
         }
 

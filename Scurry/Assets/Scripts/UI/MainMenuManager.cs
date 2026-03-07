@@ -3,11 +3,14 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
 using Scurry.Core;
+using Scurry.Interfaces;
 
 namespace Scurry.UI
 {
     public class MainMenuManager : MonoBehaviour
     {
+        private IRunManager runManager;
+
         private Button newRunButton;
         private Button continueButton;
 
@@ -15,6 +18,12 @@ namespace Scurry.UI
         {
             Debug.Log("[MainMenuManager] Awake: building main menu UI");
             BuildMenu();
+        }
+
+        private void Start()
+        {
+            runManager = ServiceLocator.Get<IRunManager>();
+            Debug.Log($"[MainMenuManager] Start: runManager={(runManager != null ? "OK" : "NULL")}");
         }
 
         private void BuildMenu()
@@ -134,15 +143,29 @@ namespace Scurry.UI
 
         private void OnNewRunClicked()
         {
-            Debug.Log("[MainMenuManager] OnNewRunClicked: deleting save and loading prototype scene");
+            Debug.Log("[MainMenuManager] OnNewRunClicked: deleting save and starting new run via RunManager");
             SaveManager.DeleteSave();
-            SceneManager.LoadScene("M0_Prototype");
+            if (runManager != null)
+            {
+                runManager.StartRun();
+            }
+            else
+            {
+                Debug.LogError("[MainMenuManager] OnNewRunClicked: runManager is null — cannot start run");
+            }
         }
 
         private void OnContinueClicked()
         {
-            Debug.Log("[MainMenuManager] OnContinueClicked: loading prototype scene (will auto-load save)");
-            SceneManager.LoadScene("M0_Prototype");
+            Debug.Log("[MainMenuManager] OnContinueClicked: loading saved run via RunManager");
+            if (runManager != null)
+            {
+                runManager.ContinueRun();
+            }
+            else
+            {
+                Debug.LogError("[MainMenuManager] OnContinueClicked: runManager is null — cannot continue");
+            }
         }
     }
 }

@@ -1,11 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Scurry.Data;
+using Scurry.Interfaces;
 
 namespace Scurry.Core
 {
-    public class MetaProgressionManager : MonoBehaviour
+    public class MetaProgressionManager : MonoBehaviour, IMetaProgressionManager
     {
+        private static MetaProgressionManager _instance;
+        public static MetaProgressionManager Instance => _instance;
+
         private const string SAVE_KEY = "MetaProgression";
 
         private MetaProgressionData data;
@@ -26,6 +30,15 @@ namespace Scurry.Core
 
         private void Awake()
         {
+            if (_instance != null && _instance != this)
+            {
+                Debug.Log("[MetaProgressionManager] Awake: duplicate instance — destroying self");
+                Destroy(gameObject);
+                return;
+            }
+            _instance = this;
+            DontDestroyOnLoad(gameObject);
+            ServiceLocator.Register<IMetaProgressionManager>(this);
             Debug.Log("[MetaProgressionManager] Awake: loading meta-progression data");
             Load();
         }

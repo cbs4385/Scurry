@@ -5,17 +5,20 @@ using TMPro;
 using Scurry.Data;
 using Scurry.Core;
 using Scurry.Colony;
+using Scurry.Interfaces;
 
 namespace Scurry.UI
 {
     public class ColonyUI : MonoBehaviour
     {
-        [SerializeField] private ColonyBoardManager colonyBoardManager;
+        private IColonyBoardManager colonyBoardManager;
 
         private GameObject colonyPanel;
+        private GameObject gridContainer;
         private GameObject handPanel;
         private TextMeshProUGUI statsText;
         private TextMeshProUGUI handCounterText;
+        private TextMeshProUGUI instructionText;
         private Button finishButton;
         private Button nextHandButton;
 
@@ -23,7 +26,6 @@ namespace Scurry.UI
         private readonly List<GameObject> handCards = new List<GameObject>();
 
         private ColonyCardDefinitionSO selectedCard;
-        private bool colonyActive;
 
         private void OnEnable()
         {
@@ -39,21 +41,24 @@ namespace Scurry.UI
 
         private void Awake()
         {
-            if (colonyBoardManager == null) colonyBoardManager = FindObjectOfType<ColonyBoardManager>();
             BuildColonyPanel();
+        }
+
+        private void Start()
+        {
+            colonyBoardManager = ServiceLocator.Get<IColonyBoardManager>();
+            Debug.Log($"[ColonyUI] Start: colonyBoardManager={(colonyBoardManager != null ? "OK" : "NULL")}");
         }
 
         private void OnLevelStarted(int level)
         {
             Debug.Log($"[ColonyUI] OnLevelStarted: level={level}, showing colony management");
-            colonyActive = true;
             ShowColony();
         }
 
         private void OnColonyComplete(ColonyConfig config)
         {
             Debug.Log($"[ColonyUI] OnColonyComplete: hiding colony panel — {config}");
-            colonyActive = false;
             colonyPanel.SetActive(false);
         }
 
@@ -67,51 +72,85 @@ namespace Scurry.UI
             panelRect.sizeDelta = Vector2.zero;
             colonyPanel.GetComponent<Image>().color = new Color(0.08f, 0.06f, 0.04f, 0.95f);
 
-            // Title
+            // Title — top center
             var titleGO = new GameObject("ColonyTitle", typeof(RectTransform), typeof(TextMeshProUGUI));
             titleGO.transform.SetParent(colonyPanel.transform, false);
             var titleRect = titleGO.GetComponent<RectTransform>();
             titleRect.anchorMin = new Vector2(0, 1);
             titleRect.anchorMax = new Vector2(1, 1);
             titleRect.pivot = new Vector2(0.5f, 1);
-            titleRect.anchoredPosition = new Vector2(0, -10);
-            titleRect.sizeDelta = new Vector2(0, 40);
+            titleRect.anchoredPosition = new Vector2(0, -5);
+            titleRect.sizeDelta = new Vector2(0, 35);
             var titleTmp = titleGO.GetComponent<TextMeshProUGUI>();
             titleTmp.text = "Colony Management";
-            titleTmp.fontSize = 28;
+            titleTmp.fontSize = 24;
             titleTmp.fontStyle = FontStyles.Bold;
             titleTmp.alignment = TextAlignmentOptions.Center;
             titleTmp.color = new Color(0.9f, 0.7f, 0.3f);
 
-            // Hand counter
+            // Hand counter — below title
             var counterGO = new GameObject("HandCounter", typeof(RectTransform), typeof(TextMeshProUGUI));
             counterGO.transform.SetParent(colonyPanel.transform, false);
             var counterRect = counterGO.GetComponent<RectTransform>();
             counterRect.anchorMin = new Vector2(0, 1);
             counterRect.anchorMax = new Vector2(1, 1);
             counterRect.pivot = new Vector2(0.5f, 1);
-            counterRect.anchoredPosition = new Vector2(0, -50);
-            counterRect.sizeDelta = new Vector2(0, 30);
+            counterRect.anchoredPosition = new Vector2(0, -38);
+            counterRect.sizeDelta = new Vector2(0, 22);
             handCounterText = counterGO.GetComponent<TextMeshProUGUI>();
-            handCounterText.fontSize = 18;
+            handCounterText.fontSize = 14;
             handCounterText.alignment = TextAlignmentOptions.Center;
             handCounterText.color = Color.white;
 
-            // Stats panel - right side
+            // Instruction text — below hand counter
+            var instrGO = new GameObject("Instructions", typeof(RectTransform), typeof(TextMeshProUGUI));
+            instrGO.transform.SetParent(colonyPanel.transform, false);
+            var instrRect = instrGO.GetComponent<RectTransform>();
+            instrRect.anchorMin = new Vector2(0, 1);
+            instrRect.anchorMax = new Vector2(1, 1);
+            instrRect.pivot = new Vector2(0.5f, 1);
+            instrRect.anchoredPosition = new Vector2(0, -58);
+            instrRect.sizeDelta = new Vector2(0, 22);
+            instructionText = instrGO.GetComponent<TextMeshProUGUI>();
+            instructionText.fontSize = 14;
+            instructionText.fontStyle = FontStyles.Italic;
+            instructionText.alignment = TextAlignmentOptions.Center;
+            instructionText.color = new Color(0.7f, 0.7f, 0.6f);
+            instructionText.text = "Click a card below, then click a grid slot to place it.";
+
+            // Grid container — centered, between top labels and hand area
+            // Uses anchor-based region: top 18% to top 75% of panel
+            gridContainer = new GameObject("GridContainer", typeof(RectTransform));
+            gridContainer.transform.SetParent(colonyPanel.transform, false);
+            var gcRect = gridContainer.GetComponent<RectTransform>();
+            gcRect.anchorMin = new Vector2(0.1f, 0.32f);
+            gcRect.anchorMax = new Vector2(0.7f, 0.88f);
+            gcRect.offsetMin = Vector2.zero;
+            gcRect.offsetMax = Vector2.zero;
+
+            // Stats panel — right side
             var statsGO = new GameObject("Stats", typeof(RectTransform), typeof(TextMeshProUGUI));
             statsGO.transform.SetParent(colonyPanel.transform, false);
             var statsRect = statsGO.GetComponent<RectTransform>();
-            statsRect.anchorMin = new Vector2(1, 0.3f);
-            statsRect.anchorMax = new Vector2(1, 0.8f);
-            statsRect.pivot = new Vector2(1, 0.5f);
-            statsRect.anchoredPosition = new Vector2(-20, 0);
-            statsRect.sizeDelta = new Vector2(250, 0);
+            statsRect.anchorMin = new Vector2(0.72f, 0.35f);
+            statsRect.anchorMax = new Vector2(0.98f, 0.88f);
+            statsRect.offsetMin = Vector2.zero;
+            statsRect.offsetMax = Vector2.zero;
             statsText = statsGO.GetComponent<TextMeshProUGUI>();
             statsText.fontSize = 14;
             statsText.alignment = TextAlignmentOptions.TopLeft;
             statsText.color = new Color(0.8f, 0.8f, 0.7f);
 
-            // Finish button - bottom right
+            // Hand panel — bottom area, spanning most of the width
+            handPanel = new GameObject("HandPanel", typeof(RectTransform));
+            handPanel.transform.SetParent(colonyPanel.transform, false);
+            var hpRect = handPanel.GetComponent<RectTransform>();
+            hpRect.anchorMin = new Vector2(0.02f, 0.12f);
+            hpRect.anchorMax = new Vector2(0.7f, 0.30f);
+            hpRect.offsetMin = Vector2.zero;
+            hpRect.offsetMax = Vector2.zero;
+
+            // Finish button — bottom right
             var finishGO = new GameObject("FinishButton", typeof(RectTransform), typeof(Image), typeof(Button));
             finishGO.transform.SetParent(colonyPanel.transform, false);
             var finishRect = finishGO.GetComponent<RectTransform>();
@@ -137,14 +176,14 @@ namespace Scurry.UI
             finishButton = finishGO.GetComponent<Button>();
             finishButton.onClick.AddListener(OnFinishClicked);
 
-            // Next Hand button - bottom center
+            // Next Hand button — bottom center-right
             var nextGO = new GameObject("NextHandButton", typeof(RectTransform), typeof(Image), typeof(Button));
             nextGO.transform.SetParent(colonyPanel.transform, false);
             var nextRect = nextGO.GetComponent<RectTransform>();
-            nextRect.anchorMin = new Vector2(0.5f, 0);
-            nextRect.anchorMax = new Vector2(0.5f, 0);
-            nextRect.pivot = new Vector2(0.5f, 0);
-            nextRect.anchoredPosition = new Vector2(0, 20);
+            nextRect.anchorMin = new Vector2(1, 0);
+            nextRect.anchorMax = new Vector2(1, 0);
+            nextRect.pivot = new Vector2(1, 0);
+            nextRect.anchoredPosition = new Vector2(-20, 80);
             nextRect.sizeDelta = new Vector2(180, 50);
             nextGO.GetComponent<Image>().color = new Color(0.5f, 0.4f, 0.2f);
 
@@ -163,16 +202,6 @@ namespace Scurry.UI
             nextHandButton = nextGO.GetComponent<Button>();
             nextHandButton.onClick.AddListener(OnNextHandClicked);
 
-            // Hand panel - bottom area
-            handPanel = new GameObject("HandPanel", typeof(RectTransform));
-            handPanel.transform.SetParent(colonyPanel.transform, false);
-            var hpRect = handPanel.GetComponent<RectTransform>();
-            hpRect.anchorMin = new Vector2(0, 0);
-            hpRect.anchorMax = new Vector2(0.6f, 0);
-            hpRect.pivot = new Vector2(0, 0);
-            hpRect.anchoredPosition = new Vector2(20, 80);
-            hpRect.sizeDelta = new Vector2(0, 120);
-
             colonyPanel.SetActive(false);
             Debug.Log("[ColonyUI] BuildColonyPanel: complete (hidden)");
         }
@@ -181,10 +210,22 @@ namespace Scurry.UI
         {
             colonyPanel.SetActive(true);
             selectedCard = null;
+            UpdateInstructions();
             RenderGrid();
             RenderHand();
             UpdateStats();
             UpdateHandCounter();
+        }
+
+        private void UpdateInstructions()
+        {
+            if (instructionText == null) return;
+            if (selectedCard != null)
+                instructionText.text = $"Selected: <b>{selectedCard.cardName}</b> — Click a green slot on the grid to place it. Click the card again to deselect.";
+            else if (colonyBoardManager.CurrentHand.Count > 0)
+                instructionText.text = "Click a card below to select it, then click a grid slot to place it.";
+            else
+                instructionText.text = "All cards placed! Click 'Finish Colony' when ready, or click a placed card to remove it.";
         }
 
         private void RenderGrid()
@@ -193,23 +234,24 @@ namespace Scurry.UI
             gridSlots.Clear();
 
             int size = colonyBoardManager.BoardSize;
-            float slotSize = 60f;
-            float gridWidth = size * (slotSize + 5);
-            float startX = -gridWidth / 2f;
-            float startY = 100f; // Center vertically (rough)
+
+            // Calculate slot size to fit within gridContainer with gaps
+            float gap = 4f;
+            // Use anchors to distribute slots evenly within the grid container
+            float cellSize = 1f / size;
 
             for (int r = 0; r < size; r++)
             {
                 for (int c = 0; c < size; c++)
                 {
                     var slotGO = new GameObject($"Slot_{r}_{c}", typeof(RectTransform), typeof(Image), typeof(Button));
-                    slotGO.transform.SetParent(colonyPanel.transform, false);
+                    slotGO.transform.SetParent(gridContainer.transform, false);
                     var slotRect = slotGO.GetComponent<RectTransform>();
-                    slotRect.anchorMin = new Vector2(0.5f, 0.5f);
-                    slotRect.anchorMax = new Vector2(0.5f, 0.5f);
-                    slotRect.pivot = new Vector2(0.5f, 0.5f);
-                    slotRect.anchoredPosition = new Vector2(startX + c * (slotSize + 5) + slotSize / 2, startY - r * (slotSize + 5));
-                    slotRect.sizeDelta = new Vector2(slotSize, slotSize);
+                    // Anchor each slot to its grid cell within the container
+                    slotRect.anchorMin = new Vector2(c * cellSize, 1f - (r + 1) * cellSize);
+                    slotRect.anchorMax = new Vector2((c + 1) * cellSize, 1f - r * cellSize);
+                    slotRect.offsetMin = new Vector2(gap / 2, gap / 2);
+                    slotRect.offsetMax = new Vector2(-gap / 2, -gap / 2);
 
                     var card = colonyBoardManager.GetCardAt(new Vector2Int(r, c));
                     if (card != null)
@@ -224,7 +266,7 @@ namespace Scurry.UI
                         labelRect.sizeDelta = Vector2.zero;
                         var tmp = labelGO.GetComponent<TextMeshProUGUI>();
                         tmp.text = card.cardName;
-                        tmp.fontSize = 9;
+                        tmp.fontSize = 10;
                         tmp.alignment = TextAlignmentOptions.Center;
                         tmp.color = Color.white;
 
@@ -236,7 +278,25 @@ namespace Scurry.UI
                     {
                         // Empty slot — click to place selected card
                         bool valid = selectedCard != null && colonyBoardManager.IsValidPlacement(selectedCard, new Vector2Int(r, c));
-                        slotGO.GetComponent<Image>().color = valid ? new Color(0.3f, 0.5f, 0.3f, 0.5f) : new Color(0.2f, 0.2f, 0.2f, 0.5f);
+                        slotGO.GetComponent<Image>().color = valid
+                            ? new Color(0.3f, 0.6f, 0.3f, 0.7f)
+                            : new Color(0.2f, 0.2f, 0.2f, 0.4f);
+
+                        // Show "+" hint on valid slots
+                        if (valid)
+                        {
+                            var hintGO = new GameObject("Hint", typeof(RectTransform), typeof(TextMeshProUGUI));
+                            hintGO.transform.SetParent(slotGO.transform, false);
+                            var hintRect = hintGO.GetComponent<RectTransform>();
+                            hintRect.anchorMin = Vector2.zero;
+                            hintRect.anchorMax = Vector2.one;
+                            hintRect.sizeDelta = Vector2.zero;
+                            var hintTmp = hintGO.GetComponent<TextMeshProUGUI>();
+                            hintTmp.text = "+";
+                            hintTmp.fontSize = 20;
+                            hintTmp.alignment = TextAlignmentOptions.Center;
+                            hintTmp.color = new Color(1f, 1f, 1f, 0.6f);
+                        }
 
                         Vector2Int pos = new Vector2Int(r, c);
                         slotGO.GetComponent<Button>().onClick.AddListener(() => OnGridSlotClicked(pos));
@@ -253,8 +313,11 @@ namespace Scurry.UI
             handCards.Clear();
 
             var hand = colonyBoardManager.CurrentHand;
-            float cardWidth = 90f;
-            float spacing = 10f;
+            if (hand.Count == 0) return;
+
+            float cardWidth = 120f;
+            float cardHeight = 90f;
+            float spacing = 8f;
 
             for (int i = 0; i < hand.Count; i++)
             {
@@ -266,10 +329,19 @@ namespace Scurry.UI
                 cardRect.anchorMax = new Vector2(0, 0.5f);
                 cardRect.pivot = new Vector2(0, 0.5f);
                 cardRect.anchoredPosition = new Vector2(i * (cardWidth + spacing), 0);
-                cardRect.sizeDelta = new Vector2(cardWidth, 100);
+                cardRect.sizeDelta = new Vector2(cardWidth, cardHeight);
 
                 bool isSelected = (selectedCard == cardDef);
-                cardGO.GetComponent<Image>().color = isSelected ? cardDef.placeholderColor * 1.4f : cardDef.placeholderColor;
+                Color cardColor = isSelected ? cardDef.placeholderColor * 1.5f : cardDef.placeholderColor;
+                cardGO.GetComponent<Image>().color = cardColor;
+
+                // Selection border indicator
+                if (isSelected)
+                {
+                    var outline = cardGO.AddComponent<UnityEngine.UI.Outline>();
+                    outline.effectColor = Color.yellow;
+                    outline.effectDistance = new Vector2(3, 3);
+                }
 
                 // Card info
                 var textGO = new GameObject("Text", typeof(RectTransform), typeof(TextMeshProUGUI));
@@ -277,13 +349,15 @@ namespace Scurry.UI
                 var textRect = textGO.GetComponent<RectTransform>();
                 textRect.anchorMin = Vector2.zero;
                 textRect.anchorMax = Vector2.one;
-                textRect.offsetMin = new Vector2(4, 4);
-                textRect.offsetMax = new Vector2(-4, -4);
+                textRect.offsetMin = new Vector2(6, 6);
+                textRect.offsetMax = new Vector2(-6, -6);
                 var tmp = textGO.GetComponent<TextMeshProUGUI>();
                 tmp.text = $"<b>{cardDef.cardName}</b>\n{cardDef.colonyEffect} +{cardDef.effectValue}\nPop: {cardDef.populationCost}";
-                tmp.fontSize = 10;
+                tmp.fontSize = 14;
                 tmp.alignment = TextAlignmentOptions.TopLeft;
                 tmp.color = Color.white;
+                tmp.textWrappingMode = TextWrappingModes.Normal;
+                tmp.overflowMode = TextOverflowModes.Truncate;
 
                 ColonyCardDefinitionSO captured = cardDef;
                 cardGO.GetComponent<Button>().onClick.AddListener(() => OnHandCardClicked(captured));
@@ -296,6 +370,7 @@ namespace Scurry.UI
         {
             Debug.Log($"[ColonyUI] OnHandCardClicked: card='{card.cardName}', wasSelected={selectedCard == card}");
             selectedCard = (selectedCard == card) ? null : card;
+            UpdateInstructions();
             RenderGrid();
             RenderHand();
         }
@@ -320,6 +395,7 @@ namespace Scurry.UI
                 }
             }
 
+            UpdateInstructions();
             RenderGrid();
             RenderHand();
             UpdateStats();
@@ -364,6 +440,7 @@ namespace Scurry.UI
         {
             handCounterText.text = $"Hand {colonyBoardManager.CurrentHandIndex} of {colonyBoardManager.TotalHands}";
             nextHandButton.interactable = colonyBoardManager.HasMoreHands;
+            nextHandButton.gameObject.SetActive(colonyBoardManager.TotalHands > 1);
         }
     }
 }

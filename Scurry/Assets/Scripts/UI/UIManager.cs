@@ -5,14 +5,14 @@ using UnityEngine.InputSystem;
 using TMPro;
 using Scurry.Data;
 using Scurry.Core;
-using Scurry.Colony;
+using Scurry.Interfaces;
 
 namespace Scurry.UI
 {
     public class UIManager : MonoBehaviour
     {
-        [SerializeField] private ColonyManager colonyManager;
-        [SerializeField] private RunManager runManager;
+        private IColonyManager colonyManager;
+        private IRunManager runManager;
 
         private TextMeshProUGUI phaseLabel;
         private TextMeshProUGUI colonyHPText;
@@ -50,8 +50,14 @@ namespace Scurry.UI
 
         private void Awake()
         {
-            Debug.Log($"[UIManager] Awake: colonyManager={colonyManager?.name ?? "NULL"}");
             BuildUI();
+        }
+
+        private void Start()
+        {
+            colonyManager = ServiceLocator.Get<IColonyManager>();
+            runManager = ServiceLocator.Get<IRunManager>();
+            Debug.Log($"[UIManager] Start: colonyManager={( colonyManager != null ? "OK" : "NULL")}, runManager={(runManager != null ? "OK" : "NULL")}");
         }
 
         private void OnEnable()
@@ -676,7 +682,6 @@ namespace Scurry.UI
         private void UpdateRunProgressLabel()
         {
             if (runProgressLabel == null || runManager == null) return;
-            if (!runManager.enabled) { runProgressLabel.text = ""; return; }
 
             var zone = runManager.CurrentZone;
             if (zone == null) return;

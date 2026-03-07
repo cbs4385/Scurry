@@ -4,13 +4,14 @@ using UnityEngine.UI;
 using TMPro;
 using Scurry.Data;
 using Scurry.Core;
-using Scurry.Colony;
+using Scurry.Interfaces;
 
 namespace Scurry.UI
 {
     public class HealingManager : MonoBehaviour
     {
-        [SerializeField] private ColonyManager colonyManager;
+        private IColonyManager colonyManager;
+        private IBalanceConfig balanceConfig;
 
         private GameObject healingPanel;
         private Button minorHealBtn;
@@ -24,8 +25,14 @@ namespace Scurry.UI
 
         private void Awake()
         {
-            if (colonyManager == null) colonyManager = FindObjectOfType<ColonyManager>();
             BuildHealingPanel();
+        }
+
+        private void Start()
+        {
+            colonyManager = ServiceLocator.Get<IColonyManager>();
+            balanceConfig = ServiceLocator.Get<IBalanceConfig>();
+            Debug.Log($"[HealingManager] Start: colonyManager={(colonyManager != null ? "OK" : "NULL")}, balanceConfig={(balanceConfig != null ? "OK" : "NULL")}");
         }
 
         public void OpenHealing(HashSet<CardDefinitionSO> wounded)
@@ -78,12 +85,12 @@ namespace Scurry.UI
             statusText.alignment = TextAlignmentOptions.Center;
             statusText.color = Color.white;
 
-            var bc = BalanceConfigSO.Instance;
-            int minC = bc != null ? bc.minorHealCost : 2;
-            int minA = bc != null ? bc.minorHealAmount : 5;
-            int majC = bc != null ? bc.majorHealCost : 5;
-            int majA = bc != null ? bc.majorHealAmount : 15;
-            int resC = bc != null ? bc.resupplyCost : 3;
+            var bc = balanceConfig;
+            int minC = bc != null ? bc.MinorHealCost : 2;
+            int minA = bc != null ? bc.MinorHealAmount : 5;
+            int majC = bc != null ? bc.MajorHealCost : 5;
+            int majA = bc != null ? bc.MajorHealAmount : 15;
+            int resC = bc != null ? bc.ResupplyCost : 3;
 
             minorHealBtn = CreateOptionButton(healingPanel.transform, "MinorHeal", new Vector2(0, -100),
                 $"Minor Heal ({minC} Food -> +{minA} HP)", OnMinorHeal);
@@ -134,9 +141,9 @@ namespace Scurry.UI
 
         private void OnMinorHeal()
         {
-            var bc = BalanceConfigSO.Instance;
-            int cost = bc != null ? bc.minorHealCost : 2;
-            int amount = bc != null ? bc.minorHealAmount : 5;
+            var bc = balanceConfig;
+            int cost = bc != null ? bc.MinorHealCost : 2;
+            int amount = bc != null ? bc.MinorHealAmount : 5;
             if (colonyManager.FoodStockpile < cost)
             {
                 Debug.Log($"[HealingManager] OnMinorHeal: insufficient food (need={cost}, have={colonyManager.FoodStockpile})");
@@ -151,9 +158,9 @@ namespace Scurry.UI
 
         private void OnMajorHeal()
         {
-            var bc = BalanceConfigSO.Instance;
-            int cost = bc != null ? bc.majorHealCost : 5;
-            int amount = bc != null ? bc.majorHealAmount : 15;
+            var bc = balanceConfig;
+            int cost = bc != null ? bc.MajorHealCost : 5;
+            int amount = bc != null ? bc.MajorHealAmount : 15;
             if (colonyManager.FoodStockpile < cost)
             {
                 Debug.Log($"[HealingManager] OnMajorHeal: insufficient food (need={cost}, have={colonyManager.FoodStockpile})");
@@ -168,8 +175,8 @@ namespace Scurry.UI
 
         private void OnResupply()
         {
-            var bc = BalanceConfigSO.Instance;
-            int cost = bc != null ? bc.resupplyCost : 3;
+            var bc = balanceConfig;
+            int cost = bc != null ? bc.ResupplyCost : 3;
             if (colonyManager.FoodStockpile < cost)
             {
                 Debug.Log($"[HealingManager] OnResupply: insufficient food (need={cost}, have={colonyManager.FoodStockpile})");
@@ -214,10 +221,10 @@ namespace Scurry.UI
 
             statusText.text = $"Colony HP: {hp}/{maxHp}  |  Food: {food}  |  Wounded Heroes: {woundCount}";
 
-            var bc = BalanceConfigSO.Instance;
-            minorHealBtn.interactable = food >= (bc != null ? bc.minorHealCost : 2) && hp < maxHp;
-            majorHealBtn.interactable = food >= (bc != null ? bc.majorHealCost : 5) && hp < maxHp;
-            resupplyBtn.interactable = food >= (bc != null ? bc.resupplyCost : 3) && woundCount > 0;
+            var bc = balanceConfig;
+            minorHealBtn.interactable = food >= (bc != null ? bc.MinorHealCost : 2) && hp < maxHp;
+            majorHealBtn.interactable = food >= (bc != null ? bc.MajorHealCost : 5) && hp < maxHp;
+            resupplyBtn.interactable = food >= (bc != null ? bc.ResupplyCost : 3) && woundCount > 0;
         }
     }
 }

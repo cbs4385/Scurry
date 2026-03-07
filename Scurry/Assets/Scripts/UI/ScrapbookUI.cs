@@ -3,22 +3,23 @@ using UnityEngine;
 using UnityEngine.UI;
 using Scurry.Core;
 using Scurry.Data;
+using Scurry.Interfaces;
 
 namespace Scurry.UI
 {
     public class ScrapbookUI : MonoBehaviour
     {
-        private MetaProgressionManager metaProgression;
+        private IMetaProgressionManager metaProgression;
         private GameObject panel;
         private GameObject contentParent;
         private Text titleText;
         private Text completionText;
         private string currentTab = "cards";
 
-        private void Awake()
+        private void Start()
         {
-            metaProgression = FindObjectOfType<MetaProgressionManager>();
-            Debug.Log("[ScrapbookUI] Awake: initialized");
+            metaProgression = ServiceLocator.Get<IMetaProgressionManager>();
+            Debug.Log($"[ScrapbookUI] Start: metaProgression={(metaProgression != null ? "OK" : "NULL")}");
         }
 
         public void Open()
@@ -43,7 +44,7 @@ namespace Scurry.UI
             panel = new GameObject("ScrapbookPanel");
             panel.transform.SetParent(transform, false);
 
-            var canvas = FindObjectOfType<Canvas>();
+            var canvas = FindAnyObjectByType<Canvas>();
             if (canvas != null)
                 panel.transform.SetParent(canvas.transform, false);
 
@@ -76,7 +77,6 @@ namespace Scurry.UI
             completionText = compObj.GetComponent<Text>();
 
             // Tab buttons
-            float tabY = 0.8f;
             string[] tabs = { "cards", "enemies", "events", "bosses", "relics", "stats" };
             string[] tabLabels = { "Cards", "Bestiary", "Events", "Bosses", "Relics", "Stats" };
             float tabWidth = 1f / tabs.Length;

@@ -1,9 +1,10 @@
 using UnityEngine;
+using Scurry.Interfaces;
 
 namespace Scurry.Data
 {
     [CreateAssetMenu(fileName = "BalanceConfig", menuName = "Scurry/Balance Config")]
-    public class BalanceConfigSO : ScriptableObject
+    public class BalanceConfigSO : ScriptableObject, IBalanceConfig
     {
         private static BalanceConfigSO _instance;
         public static BalanceConfigSO Instance
@@ -26,6 +27,8 @@ namespace Scurry.Data
 #endif
                     if (_instance == null)
                         Debug.LogWarning("[BalanceConfigSO] Instance: no BalanceConfig asset found — using defaults");
+                    else
+                        Scurry.Core.ServiceLocator.Register<IBalanceConfig>(_instance);
                 }
                 return _instance;
             }
@@ -88,6 +91,12 @@ namespace Scurry.Data
         [Tooltip("Number of cards offered in card draft")]
         public int draftCardCount = 3;
 
+        [Header("Colony Draft")]
+        [Tooltip("Number of colony cards offered to choose from at run start")]
+        public int colonyDraftOfferCount = 12;
+        [Tooltip("Number of colony cards the player picks to form their colony deck")]
+        public int colonyDraftPickCount = 8;
+
         [Header("Encounter Rewards")]
         [Tooltip("Bonus currency for completing an elite encounter")]
         public int eliteBonusCurrency = 3;
@@ -114,5 +123,35 @@ namespace Scurry.Data
                 default: return upgradeCostRare;
             }
         }
+
+        // Explicit IBalanceConfig implementation (fields -> properties)
+        int IBalanceConfig.StartingFood => startingFood;
+        int IBalanceConfig.StartingMaterials => startingMaterials;
+        int IBalanceConfig.StartingCurrency => startingCurrency;
+        int IBalanceConfig.StarvationDamagePerFood => starvationDamagePerFood;
+        int IBalanceConfig.BaseColonyHP => baseColonyHP;
+        int IBalanceConfig.BaseColonyMaxHP => baseColonyMaxHP;
+        int IBalanceConfig.BaseHeroDeckSize => baseHeroDeckSize;
+        int IBalanceConfig.PriceCommon => priceCommon;
+        int IBalanceConfig.PriceUncommon => priceUncommon;
+        int IBalanceConfig.PriceRare => priceRare;
+        int IBalanceConfig.PriceLegendary => priceLegendary;
+        int IBalanceConfig.ShopRerollCost => shopRerollCost;
+        int IBalanceConfig.ShopCardCount => shopCardCount;
+        int IBalanceConfig.UpgradeCostCommon => upgradeCostCommon;
+        int IBalanceConfig.UpgradeCostUncommon => upgradeCostUncommon;
+        int IBalanceConfig.UpgradeCostRare => upgradeCostRare;
+        int IBalanceConfig.MinorHealCost => minorHealCost;
+        int IBalanceConfig.MinorHealAmount => minorHealAmount;
+        int IBalanceConfig.MajorHealCost => majorHealCost;
+        int IBalanceConfig.MajorHealAmount => majorHealAmount;
+        int IBalanceConfig.ResupplyCost => resupplyCost;
+        int IBalanceConfig.RestHealPercent => restHealPercent;
+        float IBalanceConfig.DifficultyScalingFactor => difficultyScalingFactor;
+        int IBalanceConfig.BossFailureDamage => bossFailureDamage;
+        int IBalanceConfig.DraftCardCount => draftCardCount;
+        int IBalanceConfig.ColonyDraftOfferCount => colonyDraftOfferCount;
+        int IBalanceConfig.ColonyDraftPickCount => colonyDraftPickCount;
+        int IBalanceConfig.EliteBonusCurrency => eliteBonusCurrency;
     }
 }

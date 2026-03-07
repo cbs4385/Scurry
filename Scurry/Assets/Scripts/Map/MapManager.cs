@@ -2,10 +2,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using Scurry.Data;
 using Scurry.Core;
+using Scurry.Interfaces;
 
 namespace Scurry.Map
 {
-    public class MapManager : MonoBehaviour
+    public class MapManager : MonoBehaviour, IMapManager
     {
         private List<List<MapNode>> map;
         private MapConfigSO config;

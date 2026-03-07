@@ -66,7 +66,7 @@ namespace Scurry.UI
 
         private void BuildToastPanel()
         {
-            var canvas = FindObjectOfType<Canvas>();
+            var canvas = FindAnyObjectByType<Canvas>();
             if (canvas == null) return;
 
             toastPanel = new GameObject("AchievementToast", typeof(RectTransform), typeof(Image), typeof(CanvasGroup));

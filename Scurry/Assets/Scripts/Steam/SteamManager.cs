@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Text;
+using Steamworks;
 
 namespace Scurry.Steam
 {
@@ -10,6 +11,8 @@ namespace Scurry.Steam
         public static bool Initialized { get; private set; }
 
         private const uint APP_ID = 480; // Spacewar test app — replace with real App ID before release
+
+        private Callback<UserStatsReceived_t> userStatsReceivedCallback;
 
         private void Awake()
         {
@@ -30,7 +33,7 @@ namespace Scurry.Steam
 #if UNITY_EDITOR || UNITY_STANDALONE
             try
             {
-                if (SteamAPI.RestartAppIfNecessary(APP_ID))
+                if (SteamAPI.RestartAppIfNecessary(new AppId_t(APP_ID)))
                 {
                     Debug.Log("[SteamManager] InitSteam: RestartAppIfNecessary returned true — Steam will relaunch the app");
                     Application.Quit();
@@ -41,7 +44,7 @@ namespace Scurry.Steam
                 if (Initialized)
                 {
                     Debug.Log("[SteamManager] InitSteam: Steam API initialized successfully");
-                    SteamUserStats.RequestCurrentStats();
+                    userStatsReceivedCallback = Callback<UserStatsReceived_t>.Create(OnUserStatsReceived);
                 }
                 else
                 {
@@ -62,6 +65,18 @@ namespace Scurry.Steam
             Debug.Log("[SteamManager] InitSteam: Steam not supported on this platform");
             Initialized = false;
 #endif
+        }
+
+        private void OnUserStatsReceived(UserStatsReceived_t result)
+        {
+            if (result.m_eResult == EResult.k_EResultOK)
+            {
+                Debug.Log("[SteamManager] OnUserStatsReceived: stats loaded successfully");
+            }
+            else
+            {
+                Debug.LogWarning($"[SteamManager] OnUserStatsReceived: failed with result={result.m_eResult}");
+            }
         }
 
         private void Update()
@@ -159,6 +174,23 @@ namespace Scurry.Steam
             SetPresence("status", status);
         }
 
+        public static void ClearRichPresence()
+        {
+            if (!Initialized) return;
+
+#if UNITY_EDITOR || UNITY_STANDALONE
+            try
+            {
+                SteamFriends.ClearRichPresence();
+                Debug.Log("[SteamManager] ClearRichPresence: cleared");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"[SteamManager] ClearRichPresence: error — {e.Message}");
+            }
+#endif
+        }
+
         // --- Cloud Save ---
 
         public static bool CloudSave(string fileName, string json)
@@ -173,7 +205,7 @@ namespace Scurry.Steam
             try
             {
                 byte[] data = Encoding.UTF8.GetBytes(json);
-                bool success = SteamRemoteStorage.FileWrite(fileName, data);
+                bool success = SteamRemoteStorage.FileWrite(fileName, data, data.Length);
                 Debug.Log($"[SteamManager] CloudSave: '{fileName}' ({data.Length} bytes) — success={success}");
                 return success;
             }
@@ -204,10 +236,18 @@ namespace Scurry.Steam
                     return null;
                 }
 
-                byte[] data = SteamRemoteStorage.FileRead(fileName);
-                if (data == null)
+                int size = SteamRemoteStorage.GetFileSize(fileName);
+                if (size <= 0)
                 {
-                    Debug.LogWarning($"[SteamManager] CloudLoad: failed to read '{fileName}'");
+                    Debug.LogWarning($"[SteamManager] CloudLoad: '{fileName}' has size {size}");
+                    return null;
+                }
+
+                byte[] data = new byte[size];
+                int bytesRead = SteamRemoteStorage.FileRead(fileName, data, size);
+                if (bytesRead != size)
+                {
+                    Debug.LogWarning($"[SteamManager] CloudLoad: read {bytesRead}/{size} bytes for '{fileName}'");
                     return null;
                 }
 

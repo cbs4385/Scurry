@@ -4,11 +4,14 @@ using UnityEngine.UI;
 using TMPro;
 using Scurry.Data;
 using Scurry.Core;
+using Scurry.Interfaces;
 
 namespace Scurry.UI
 {
     public class RewardSelectionUI : MonoBehaviour
     {
+        private IRelicManager relicManager;
+
         private GameObject rewardPanel;
         private readonly List<GameObject> rewardSlots = new List<GameObject>();
         private List<CardDefinitionSO> rewards;
@@ -18,6 +21,12 @@ namespace Scurry.UI
         private void Awake()
         {
             BuildRewardPanel();
+        }
+
+        private void Start()
+        {
+            relicManager = ServiceLocator.Get<IRelicManager>();
+            Debug.Log($"[RewardSelectionUI] Start: relicManager={(relicManager != null ? "OK" : "NULL")}");
         }
 
         public void ShowRewards(List<CardDefinitionSO> rewardCards, System.Action<CardDefinitionSO> callback, RelicDefinitionSO relic = null)
@@ -184,9 +193,8 @@ namespace Scurry.UI
             if (rewardRelic == null) return;
             Debug.Log($"[RewardSelectionUI] OnRelicSelected: picked relic '{rewardRelic.relicName}'");
 
-            var relicMgr = Core.RelicManager.Instance;
-            if (relicMgr != null)
-                relicMgr.AddRelic(rewardRelic);
+            if (relicManager != null)
+                relicManager.AddRelic(rewardRelic);
 
             rewardPanel.SetActive(false);
             onCardSelected?.Invoke(null);

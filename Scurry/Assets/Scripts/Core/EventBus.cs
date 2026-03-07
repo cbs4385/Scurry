@@ -32,6 +32,9 @@ namespace Scurry.Core
         public static Action<StepType[]> OnStepChoicePresented;
         public static Action<StepType> OnStepChosen;
 
+        // --- M1 Colony Draft events ---
+        public static Action<List<ColonyCardDefinitionSO>> OnColonyDraftComplete;
+
         // --- M1 Colony Management events ---
         public static Action<ColonyConfig> OnColonyManagementComplete;
         public static Action<List<CardDefinitionSO>> OnHeroDeckReady;
@@ -83,6 +86,10 @@ namespace Scurry.Core
         public static Action<CardDefinitionSO> OnCardRemoved;
         public static Action OnEventWoundHero;
 
+        // --- Scene transition events ---
+        public static Action OnEncounterResultDismissed;
+        public static Action OnReturnToMainMenu;
+
         public static void Reset()
         {
             Debug.Log("[EventBus] Reset: clearing all event subscriptions");
@@ -109,6 +116,7 @@ namespace Scurry.Core
             OnStepChosen = null;
 
             // M1 events
+            OnColonyDraftComplete = null;
             OnColonyManagementComplete = null;
             OnHeroDeckReady = null;
             OnMapReady = null;
@@ -142,6 +150,8 @@ namespace Scurry.Core
             OnCardRemoved = null;
             OnEventWoundHero = null;
             OnAchievementUnlocked = null;
+            OnEncounterResultDismissed = null;
+            OnReturnToMainMenu = null;
 
             Debug.Log("[EventBus] Reset: complete — all events nulled");
         }

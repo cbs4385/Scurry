@@ -110,6 +110,7 @@ The game ends when:
 ## 4.2 Run Flow
 ```
 RUN START
+  > Colony Card Draft (pick 8 of 12 offered colony cards)
   > Level 1: Wilderness
     > Colony Management (1 hand of colony cards)
     > Branching Map Traversal (encounters, shops, events, mini-boss, boss)
@@ -122,6 +123,14 @@ RUN START
   > Final Boss: The Pied Piper
 RUN END
 ```
+
+### Colony Card Draft
+At the start of each run (before Level 1), the player is presented with a Colony Card Draft:
+- 12 colony cards are randomly drawn from the full pool of 20
+- The player selects 8 cards to form their colony deck for the run
+- Cards show their name, effect, population cost, and placement requirements
+- This creates strategic variety: each run starts with a different colony deck composition
+- Draft offer/pick counts are configurable via BalanceConfigSO
 
 ## 4.3 Colony Management Phase
 At the start of each level, the player enters Colony Management:
@@ -452,7 +461,51 @@ Warm, hand-drawn cartoon aesthetic inspired by illustrated children's books. Sof
 - Localisation: ScriptableObject-based localisation tables (5 languages)
 - Map Generation: Procedural branching map based on Slay the Spire reference implementation
 
-## 10.2 Data Architecture -- Key Systems
+## 10.2 Multi-Scene Architecture
+
+The game uses a multi-scene architecture with persistent managers surviving across scene transitions via `DontDestroyOnLoad`.
+
+### Scene Layout
+
+| Build Index | Scene | Purpose |
+|---|---|---|
+| 0 | **Bootstrap** | Creates PersistentManagers root (RunManager, ColonyManager, GameSettings, RelicManager, AchievementManager, MetaProgressionManager, LocalizationManager, EventSystem, PersistentCanvas). Loads MainMenu on startup. |
+| 1 | **MainMenu** | Title screen, New Run / Continue buttons. |
+| 2 | **ColonyDraft** | Colony card draft UI (pick 8 of 12). ColonyDraftUI self-initializes in Start(). |
+| 3 | **ColonyManagement** | Colony board placement phase. ColonyBoardManager, ColonyUI, HeroDeckSetAsideUI. |
+| 4 | **MapTraversal** | Branching map navigation. MapManager, ShopManager, HealingManager, UpgradeManager, DraftManager, EventManager, RestManager, MapUI, ResourceUI, SettingsUI. |
+| 5 | **Encounter** | Auto-battle encounters and boss fights. Loaded **additively** on top of MapTraversal. EncounterManager, BossManager, GameManager, BoardManager, PlacementManager, DeckManager, HandManager, GatheringManager, UIManager, BossUI, RewardSelectionUI. |
+| 6 | **RunResult** | Victory/defeat screens. RunScreenManager, ScrapbookUI. |
+| 7 | **M0_Prototype** | Legacy single-scene (retained for reference). |
+
+### Scene Transition Flow
+```
+Bootstrap -> MainMenu
+MainMenu -> ColonyDraft (via RunManager.StartRun)
+ColonyDraft -> ColonyManagement (via OnColonyDraftComplete)
+ColonyManagement -> MapTraversal (via OnHeroDeckReady)
+MapTraversal + Encounter (additive, via OnMapNodeSelected for combat/boss)
+Encounter unloads -> MapTraversal continues (via OnEncounterComplete)
+MapTraversal -> ColonyManagement (via OnLevelComplete, next level)
+Any -> RunResult (via RunComplete/RunFailed)
+RunResult -> ColonyDraft (New Run) or MainMenu (Main Menu)
+```
+
+### Persistent Managers (DontDestroyOnLoad)
+All persistent managers use singleton pattern with duplicate-detection in Awake():
+- **RunManager** -- Master orchestrator, scene loading, run state, deck management
+- **ColonyManager** -- Colony HP, food/materials/currency stockpiles
+- **GameSettings** -- Battle speed, accessibility settings
+- **RelicManager** -- Active relics and effect stacking
+- **AchievementManager** -- 25+ achievements, Steam integration
+- **MetaProgressionManager** -- Cross-run progression, reputation, discoveries
+- **LocalizationManager** -- Multi-language string lookup
+- **PersistentManagersBootstrap** -- Bootstrap entry point, marks root as DontDestroyOnLoad
+
+### Scene Manager Discovery
+RunManager subscribes to `SceneManager.sceneLoaded` and discovers scene-specific managers via `FindAnyObjectByType<T>()` after each scene load. This replaces the previous `[SerializeField]` references that required all managers in a single scene.
+
+## 10.3 Data Architecture -- Key Systems
 - **CardDefinitionSO** -- ScriptableObject for all card data (hero, equipment, colony, colony benefit, hero benefit)
 - **EncounterDefinitionSO** -- ScriptableObject defining an encounter (board layout, enemies, resources, difficulty)
 - **MapConfigSO** -- ScriptableObject defining map generation parameters per level (node counts, node type weights, path branching)
@@ -464,7 +517,7 @@ Warm, hand-drawn cartoon aesthetic inspired by illustrated children's books. Sof
 - **EventBus** -- Static event hub for decoupled communication
 - **MapManager** -- Branching map generation, traversal, and node resolution
 
-## 10.3 Core Namespaces
+## 10.4 Core Namespaces
 - `Scurry.Core` -- GameManager, RunManager, EventBus, SaveManager
 - `Scurry.Data` -- ScriptableObjects, enums, save data
 - `Scurry.Board` -- BoardManager, Tile, Pathfinding

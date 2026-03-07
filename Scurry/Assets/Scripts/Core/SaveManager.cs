@@ -22,15 +22,34 @@ namespace Scurry.Core
 
         public static RunSaveData Load()
         {
-            if (!File.Exists(SavePath))
+            string json = null;
+
+            if (File.Exists(SavePath))
             {
-                Debug.Log($"[SaveManager] Load: no save file found at '{SavePath}'");
+                json = File.ReadAllText(SavePath);
+                Debug.Log($"[SaveManager] Load: loaded from local save at '{SavePath}'");
+            }
+            else
+            {
+                // Fallback to Steam Cloud if local save is missing
+                Debug.Log($"[SaveManager] Load: no local save at '{SavePath}' — trying Steam Cloud");
+                json = Steam.SteamManager.CloudLoad("run_save.json");
+                if (json != null)
+                {
+                    Debug.Log("[SaveManager] Load: restored from Steam Cloud");
+                    // Write cloud save to local disk for future loads
+                    File.WriteAllText(SavePath, json);
+                }
+            }
+
+            if (string.IsNullOrEmpty(json))
+            {
+                Debug.Log("[SaveManager] Load: no save found (local or cloud)");
                 return null;
             }
 
-            string json = File.ReadAllText(SavePath);
             var data = JsonUtility.FromJson<RunSaveData>(json);
-            Debug.Log($"[SaveManager] Load: loaded from '{SavePath}' (level={data.currentLevel}, colonyHP={data.colonyHP}, " +
+            Debug.Log($"[SaveManager] Load: parsed save (level={data.currentLevel}, colonyHP={data.colonyHP}, " +
                       $"heroDeck={data.heroDeckCardNames.Count}, wounded={data.woundedHeroNames.Count}, nodes={data.nodesVisited})");
             return data;
         }

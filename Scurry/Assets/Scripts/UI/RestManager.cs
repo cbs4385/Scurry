@@ -4,13 +4,14 @@ using UnityEngine.UI;
 using TMPro;
 using Scurry.Data;
 using Scurry.Core;
-using Scurry.Colony;
+using Scurry.Interfaces;
 
 namespace Scurry.UI
 {
     public class RestManager : MonoBehaviour
     {
-        [SerializeField] private ColonyManager colonyManager;
+        private IColonyManager colonyManager;
+        private IBalanceConfig balanceConfig;
 
         private GameObject restPanel;
         private Button healButton;
@@ -24,10 +25,16 @@ namespace Scurry.UI
 
         private void Awake()
         {
-            if (colonyManager == null) colonyManager = FindObjectOfType<ColonyManager>();
             BuildRestPanel();
             upgradeManager = GetComponent<UpgradeManager>();
-            if (upgradeManager == null) upgradeManager = FindObjectOfType<UpgradeManager>();
+            if (upgradeManager == null) upgradeManager = FindAnyObjectByType<UpgradeManager>();
+        }
+
+        private void Start()
+        {
+            colonyManager = ServiceLocator.Get<IColonyManager>();
+            balanceConfig = ServiceLocator.Get<IBalanceConfig>();
+            Debug.Log($"[RestManager] Start: colonyManager={(colonyManager != null ? "OK" : "NULL")}, balanceConfig={(balanceConfig != null ? "OK" : "NULL")}");
         }
 
         public void OpenRestSite(List<CardDefinitionSO> heroes, List<ColonyCardDefinitionSO> colony)
@@ -81,8 +88,8 @@ namespace Scurry.UI
             statusText.alignment = TextAlignmentOptions.Center;
             statusText.color = Color.white;
 
-            var bc = BalanceConfigSO.Instance;
-            int pct = bc != null ? bc.restHealPercent : 30;
+            var bc = balanceConfig;
+            int pct = bc != null ? bc.RestHealPercent : 30;
             healButton = CreateButton(restPanel.transform, "HealBtn", new Vector2(0, -100),
                 $"Rest & Heal ({pct}% Colony HP)", new Color(0.2f, 0.6f, 0.3f), OnHealClicked);
 
@@ -131,8 +138,8 @@ namespace Scurry.UI
         {
             if (colonyManager == null) return;
 
-            var bc = BalanceConfigSO.Instance;
-            int pct = bc != null ? bc.restHealPercent : 30;
+            var bc = balanceConfig;
+            int pct = bc != null ? bc.RestHealPercent : 30;
             int healAmount = Mathf.CeilToInt(colonyManager.MaxHP * pct / 100f);
             Debug.Log($"[RestManager] OnHealClicked: healing {healAmount} HP ({pct}% of {colonyManager.MaxHP}), before={colonyManager.CurrentHP}");
             colonyManager.Heal(healAmount);
@@ -178,8 +185,8 @@ namespace Scurry.UI
         {
             if (statusText != null && colonyManager != null)
             {
-                var bc = BalanceConfigSO.Instance;
-                int pctVal = bc != null ? bc.restHealPercent : 30;
+                var bc = balanceConfig;
+                int pctVal = bc != null ? bc.RestHealPercent : 30;
                 int healAmount = Mathf.CeilToInt(colonyManager.MaxHP * pctVal / 100f);
                 statusText.text = $"Colony HP: {colonyManager.CurrentHP}/{colonyManager.MaxHP} (heal would restore {healAmount})";
             }

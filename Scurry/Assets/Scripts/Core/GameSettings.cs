@@ -1,8 +1,9 @@
 using UnityEngine;
+using Scurry.Interfaces;
 
 namespace Scurry.Core
 {
-    public class GameSettings : MonoBehaviour
+    public class GameSettings : MonoBehaviour, IGameSettings
     {
         private const string PREFS_KEY = "GameSettings";
 
@@ -44,6 +45,8 @@ namespace Scurry.Core
                 return;
             }
             instance = this;
+            DontDestroyOnLoad(gameObject);
+            ServiceLocator.Register<IGameSettings>(this);
             Load();
             Debug.Log($"[GameSettings] Awake: speed={BattleSpeedLabel}, colorBlind={colorBlindMode}, textMod={textSizeModifier}");
         }

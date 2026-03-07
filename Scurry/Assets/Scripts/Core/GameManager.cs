@@ -12,9 +12,6 @@ namespace Scurry.Core
 {
     public class GameManager : MonoBehaviour
     {
-        [Header("Mode")]
-        [SerializeField] private bool standaloneMode = false;
-
         [Header("References")]
         [SerializeField] private BoardManager boardManager;
         [SerializeField] private DeckManager deckManager;
@@ -38,12 +35,10 @@ namespace Scurry.Core
 
         private void OnEnable()
         {
-            Debug.Log($"[GameManager] OnEnable: subscribing to EventBus events (standaloneMode={standaloneMode})");
+            Debug.Log("[GameManager] OnEnable: subscribing to EventBus events");
             EventBus.OnTurnEnded += OnEndTurnPressed;
             EventBus.OnGatheringComplete += OnGatheringDone;
             EventBus.OnResourceTokenCollected += OnResourceTokenCollected;
-            if (standaloneMode)
-                EventBus.OnDeckBuildComplete += OnDeckBuildDone;
         }
 
         private void OnDisable()
@@ -52,38 +47,12 @@ namespace Scurry.Core
             EventBus.OnTurnEnded -= OnEndTurnPressed;
             EventBus.OnGatheringComplete -= OnGatheringDone;
             EventBus.OnResourceTokenCollected -= OnResourceTokenCollected;
-            if (standaloneMode)
-                EventBus.OnDeckBuildComplete -= OnDeckBuildDone;
         }
 
         private void Start()
         {
-            Debug.Log($"[GameManager] Start: standaloneMode={standaloneMode}");
+            Debug.Log("[GameManager] Start: waiting for RunManager to drive encounter");
             EventBus.LogSubscriberCounts();
-
-            if (!standaloneMode)
-            {
-                Debug.Log("[GameManager] Start: external mode — waiting for RunManager");
-                return;
-            }
-
-            if (SaveManager.HasSave())
-            {
-                Debug.Log("[GameManager] Start: save file found — loading saved run");
-                LoadRun();
-            }
-            else
-            {
-                Debug.Log("[GameManager] Start: no save file — starting new run");
-                StartRun();
-            }
-        }
-
-        private void StartRun()
-        {
-            Debug.Log("[GameManager] StartRun: entering DeckBuild phase");
-            turnNumber = 0;
-            SetPhase(GamePhase.DeckBuild);
         }
 
         public void StartCardPlacementGame(List<CardDefinitionSO> deck)
@@ -122,23 +91,8 @@ namespace Scurry.Core
 
         private void EndCardPlacementGame(string reason, bool heroesLost = false)
         {
-            Debug.Log($"[GameManager] EndCardPlacementGame: reason='{reason}', heroesLost={heroesLost}, standaloneMode={standaloneMode}");
-            if (standaloneMode)
-            {
-                SaveManager.DeleteSave();
-            }
+            Debug.Log($"[GameManager] EndCardPlacementGame: reason='{reason}', heroesLost={heroesLost}");
             EventBus.OnCardPlacementGameComplete?.Invoke(heroesLost);
-        }
-
-        private void OnDeckBuildDone(List<CardDefinitionSO> selectedCards)
-        {
-            Debug.Log($"[GameManager] OnDeckBuildDone: received {selectedCards.Count} cards, initializing game");
-            deckManager.InitializeDeck(selectedCards);
-            colonyManager.InitializeHP();
-            boardManager.GenerateResourceNodeResources();
-            gatheringManager.SpawnEnemies();
-            Debug.Log("[GameManager] OnDeckBuildDone: initialization complete, starting first turn");
-            StartNewTurn();
         }
 
         private void StartNewTurn()
@@ -188,11 +142,6 @@ namespace Scurry.Core
                 if (suppressExhaustion)
                 {
                     Debug.Log($"[GameManager] OnResourceTokenCollected: '{cardName}' auto-collected — suppressing exhaustion (card stays in deck)");
-                }
-                else if (standaloneMode)
-                {
-                    deckManager.DiscardCard(card);
-                    Debug.Log($"[GameManager] OnResourceTokenCollected: '{cardName}' returned to discard pile (standalone mode)");
                 }
                 else
                 {
@@ -351,24 +300,7 @@ namespace Scurry.Core
 
             // No end condition met — continue to next turn
             Debug.Log("[GameManager] ResolveAndNextTurn: continuing to next turn");
-            if (standaloneMode)
-            {
-                SaveRunState();
-            }
             StartNewTurn();
-        }
-
-        private void SaveRunState()
-        {
-            // Legacy M0 save — no longer used. M1 saves are handled by RunManager.
-            Debug.Log("[GameManager] SaveRunState: legacy M0 save skipped (use RunManager for M1 saves)");
-        }
-
-        private void LoadRun()
-        {
-            // Legacy M0 load — no longer used. M1 loads are handled by RunManager.
-            Debug.LogWarning("[GameManager] LoadRun: legacy M0 load not supported — starting new run");
-            StartRun();
         }
 
         private void SetPhase(GamePhase phase)
@@ -381,7 +313,6 @@ namespace Scurry.Core
 
         public GamePhase CurrentPhase => currentPhase;
         public int TurnNumber => turnNumber;
-        public bool StandaloneMode => standaloneMode;
         public List<CardDefinitionSO> ExhaustedResources => exhaustedResources;
 
         public bool IsHeroWounded(CardDefinitionSO card)

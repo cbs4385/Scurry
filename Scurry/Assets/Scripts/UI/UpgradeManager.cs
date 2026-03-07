@@ -4,13 +4,14 @@ using UnityEngine.UI;
 using TMPro;
 using Scurry.Data;
 using Scurry.Core;
-using Scurry.Colony;
+using Scurry.Interfaces;
 
 namespace Scurry.UI
 {
     public class UpgradeManager : MonoBehaviour
     {
-        [SerializeField] private ColonyManager colonyManager;
+        private IColonyManager colonyManager;
+        private IBalanceConfig balanceConfig;
 
         private GameObject upgradePanel;
         private TextMeshProUGUI materialsText;
@@ -22,8 +23,14 @@ namespace Scurry.UI
 
         private void Awake()
         {
-            if (colonyManager == null) colonyManager = FindObjectOfType<ColonyManager>();
             BuildUpgradePanel();
+        }
+
+        private void Start()
+        {
+            colonyManager = ServiceLocator.Get<IColonyManager>();
+            balanceConfig = ServiceLocator.Get<IBalanceConfig>();
+            Debug.Log($"[UpgradeManager] Start: colonyManager={(colonyManager != null ? "OK" : "NULL")}, balanceConfig={(balanceConfig != null ? "OK" : "NULL")}");
         }
 
         public void OpenUpgrade(List<CardDefinitionSO> heroes, List<ColonyCardDefinitionSO> colony, bool free = false)
@@ -40,7 +47,7 @@ namespace Scurry.UI
         private int GetUpgradeCost(CardRarity rarity)
         {
             if (isFreeUpgrade) return 0;
-            var bc = BalanceConfigSO.Instance;
+            var bc = balanceConfig;
             if (bc != null) return bc.GetUpgradeCost(rarity);
             return rarity switch
             {

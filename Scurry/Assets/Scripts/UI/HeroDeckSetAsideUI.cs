@@ -56,7 +56,7 @@ namespace Scurry.UI
         {
             if (panel != null) Destroy(panel);
 
-            var canvas = FindObjectOfType<Canvas>();
+            var canvas = FindAnyObjectByType<Canvas>();
             if (canvas == null) return;
 
             panel = new GameObject("SetAsidePanel", typeof(RectTransform), typeof(Image));

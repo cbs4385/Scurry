@@ -58,6 +58,7 @@ namespace Scurry.Core
                 return;
             }
             _instance = this;
+            DontDestroyOnLoad(gameObject);
             LoadAchievements();
             Debug.Log($"[AchievementManager] Awake: loaded {unlockedAchievements.Count} unlocked achievements");
         }

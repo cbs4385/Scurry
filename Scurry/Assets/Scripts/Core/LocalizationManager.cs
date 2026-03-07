@@ -23,6 +23,7 @@ namespace Scurry.Core
                 return;
             }
             _instance = this;
+            DontDestroyOnLoad(gameObject);
 
             Debug.Log($"[LocalizationManager] Awake: availableTables={availableTables?.Length ?? 0}, defaultLanguage={defaultLanguage}");
             InitializeTables();

@@ -1,21 +1,31 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 using TMPro;
 using Scurry.Core;
+using Scurry.Interfaces;
 
 namespace Scurry.UI
 {
     public class SettingsUI : MonoBehaviour
     {
+        private IGameSettings gameSettings;
+
         private GameObject panel;
         private TextMeshProUGUI speedLabel;
         private TextMeshProUGUI colorBlindLabel;
         private TextMeshProUGUI textSizeLabel;
 
+        private void Start()
+        {
+            gameSettings = ServiceLocator.Get<IGameSettings>();
+            Debug.Log($"[SettingsUI] Start: gameSettings={(gameSettings != null ? "OK" : "NULL")}");
+        }
+
         private void Update()
         {
             // Toggle settings with Escape key
-            if (Input.GetKeyDown(KeyCode.Escape))
+            if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
             {
                 if (panel != null && panel.activeSelf)
                     Close();
@@ -40,7 +50,7 @@ namespace Scurry.UI
 
         private void BuildPanel()
         {
-            var canvas = FindObjectOfType<Canvas>();
+            var canvas = FindAnyObjectByType<Canvas>();
             if (canvas == null) return;
 
             panel = new GameObject("SettingsPanel", typeof(RectTransform), typeof(Image));
@@ -55,7 +65,7 @@ namespace Scurry.UI
             CreateTMP(panel.transform, "Settings", 28, FontStyles.Bold, Color.white,
                 new Vector2(0, 0.88f), new Vector2(1, 0.98f));
 
-            var settings = GameSettings.Instance;
+            var settings = gameSettings;
             float y = 0.75f;
             float rowH = 0.1f;
 
@@ -112,7 +122,7 @@ namespace Scurry.UI
                 new Vector2(0.3f, 0.03f), new Vector2(0.7f, 0.12f));
         }
 
-        private void UpdateTextSizeLabel(GameSettings settings)
+        private void UpdateTextSizeLabel(IGameSettings settings)
         {
             int mod = settings.TextSizeModifier;
             textSizeLabel.text = mod == 0 ? "Normal" : (mod > 0 ? $"+{mod}" : $"{mod}");

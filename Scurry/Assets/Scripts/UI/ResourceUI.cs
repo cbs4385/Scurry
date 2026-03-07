@@ -2,13 +2,13 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using Scurry.Core;
-using Scurry.Colony;
+using Scurry.Interfaces;
 
 namespace Scurry.UI
 {
     public class ResourceUI : MonoBehaviour
     {
-        [SerializeField] private ColonyManager colonyManager;
+        private IColonyManager colonyManager;
 
         private TextMeshProUGUI foodText;
         private TextMeshProUGUI materialsText;
@@ -18,8 +18,13 @@ namespace Scurry.UI
 
         private void Awake()
         {
-            if (colonyManager == null) colonyManager = FindObjectOfType<ColonyManager>();
             BuildResourceHUD();
+        }
+
+        private void Start()
+        {
+            colonyManager = ServiceLocator.Get<IColonyManager>();
+            Debug.Log($"[ResourceUI] Start: colonyManager resolved via ServiceLocator = {(colonyManager != null ? "OK" : "NULL")}");
         }
 
         private void BuildResourceHUD()

@@ -4,13 +4,13 @@ using UnityEngine.UI;
 using TMPro;
 using Scurry.Data;
 using Scurry.Core;
-using Scurry.Colony;
+using Scurry.Interfaces;
 
 namespace Scurry.UI
 {
     public class EventManager : MonoBehaviour
     {
-        [SerializeField] private ColonyManager colonyManager;
+        private IColonyManager colonyManager;
 
         private GameObject eventPanel;
         private TextMeshProUGUI eventTitle;
@@ -24,8 +24,13 @@ namespace Scurry.UI
 
         private void Awake()
         {
-            if (colonyManager == null) colonyManager = FindObjectOfType<ColonyManager>();
             BuildEventPanel();
+        }
+
+        private void Start()
+        {
+            colonyManager = ServiceLocator.Get<IColonyManager>();
+            Debug.Log($"[EventManager] Start: colonyManager={(colonyManager != null ? "OK" : "NULL")}");
         }
 
         public void OpenEvent(EventDefinitionSO eventDef)

@@ -4,11 +4,14 @@ using UnityEngine.UI;
 using TMPro;
 using Scurry.Data;
 using Scurry.Core;
+using Scurry.Interfaces;
 
 namespace Scurry.UI
 {
     public class DraftManager : MonoBehaviour
     {
+        private IBalanceConfig balanceConfig;
+
         private GameObject draftPanel;
         private GameObject removalPanel;
         private readonly List<GameObject> cardSlots = new List<GameObject>();
@@ -16,17 +19,21 @@ namespace Scurry.UI
 
         private List<CardDefinitionSO> draftOptions = new List<CardDefinitionSO>();
         private List<CardDefinitionSO> playerDeck;
-        private bool inRemovalMode;
 
         private void Awake()
         {
             BuildDraftPanel();
         }
 
+        private void Start()
+        {
+            balanceConfig = ServiceLocator.Get<IBalanceConfig>();
+            Debug.Log($"[DraftManager] Start: balanceConfig={(balanceConfig != null ? "OK" : "NULL")}");
+        }
+
         public void OpenDraft(List<CardDefinitionSO> cardPool, List<CardDefinitionSO> deck)
         {
             playerDeck = deck;
-            inRemovalMode = false;
             Debug.Log($"[DraftManager] OpenDraft: poolSize={cardPool?.Count ?? 0}, deckSize={deck?.Count ?? 0}");
 
             GenerateDraftOptions(cardPool);
@@ -50,8 +57,8 @@ namespace Scurry.UI
                 (shuffled[i], shuffled[j]) = (shuffled[j], shuffled[i]);
             }
 
-            var bc = BalanceConfigSO.Instance;
-            int draftSize = bc != null ? bc.draftCardCount : 3;
+            var bc = balanceConfig;
+            int draftSize = bc != null ? bc.DraftCardCount : 3;
             int count = Mathf.Min(draftSize, shuffled.Count);
             for (int i = 0; i < count; i++)
                 draftOptions.Add(shuffled[i]);
@@ -214,7 +221,6 @@ namespace Scurry.UI
         private void OnSwitchToRemoval()
         {
             Debug.Log("[DraftManager] OnSwitchToRemoval: switching to removal mode");
-            inRemovalMode = true;
             RenderRemovalCards();
         }
 

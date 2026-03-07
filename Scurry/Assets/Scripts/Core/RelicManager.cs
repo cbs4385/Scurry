@@ -1,10 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Scurry.Data;
+using Scurry.Interfaces;
 
 namespace Scurry.Core
 {
-    public class RelicManager : MonoBehaviour
+    public class RelicManager : MonoBehaviour, IRelicManager
     {
         private static RelicManager _instance;
         public static RelicManager Instance => _instance;
@@ -23,6 +24,8 @@ namespace Scurry.Core
                 return;
             }
             _instance = this;
+            DontDestroyOnLoad(gameObject);
+            ServiceLocator.Register<IRelicManager>(this);
             Debug.Log("[RelicManager] Awake: initialized");
         }
 

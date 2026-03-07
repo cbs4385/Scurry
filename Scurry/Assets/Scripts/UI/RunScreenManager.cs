@@ -2,11 +2,15 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using Scurry.Core;
+using Scurry.Interfaces;
 
 namespace Scurry.UI
 {
     public class RunScreenManager : MonoBehaviour
     {
+        private IRunManager runManager;
+        private IMetaProgressionManager metaProgression;
+
         private GameObject runStartPanel;
         private GameObject levelTransitionPanel;
         private GameObject victoryPanel;
@@ -15,8 +19,6 @@ namespace Scurry.UI
         private TextMeshProUGUI defeatStatsText;
         private TextMeshProUGUI levelTransitionText;
 
-        private RunManager runManager;
-        private MetaProgressionManager metaProgression;
         private ScrapbookUI scrapbookUI;
 
         private void OnEnable()
@@ -37,14 +39,19 @@ namespace Scurry.UI
 
         private void Awake()
         {
-            runManager = FindObjectOfType<RunManager>();
-            metaProgression = FindObjectOfType<MetaProgressionManager>();
-            scrapbookUI = FindObjectOfType<ScrapbookUI>();
+            scrapbookUI = FindAnyObjectByType<ScrapbookUI>();
 
             BuildVictoryPanel();
             BuildDefeatPanel();
             BuildLevelTransitionPanel();
             Debug.Log("[RunScreenManager] Awake: all panels built");
+        }
+
+        private void Start()
+        {
+            runManager = ServiceLocator.Get<IRunManager>();
+            metaProgression = ServiceLocator.Get<IMetaProgressionManager>();
+            Debug.Log($"[RunScreenManager] Start: runManager={(runManager != null ? "OK" : "NULL")}, metaProgression={(metaProgression != null ? "OK" : "NULL")}");
         }
 
         // --- Victory ---
@@ -122,11 +129,17 @@ namespace Scurry.UI
 
         private void StartNewRun()
         {
-            Debug.Log("[RunScreenManager] StartNewRun: starting new run");
+            Debug.Log("[RunScreenManager] StartNewRun: starting new run via runManager");
             victoryPanel.SetActive(false);
             defeatPanel.SetActive(false);
             if (runManager != null)
                 runManager.StartRun();
+        }
+
+        private void ReturnToMainMenu()
+        {
+            Debug.Log("[RunScreenManager] ReturnToMainMenu: firing OnReturnToMainMenu");
+            EventBus.OnReturnToMainMenu?.Invoke();
         }
 
         private void OpenScrapbook()
@@ -163,7 +176,11 @@ namespace Scurry.UI
 
             // Scrapbook button
             CreateButton(victoryPanel.transform, "Scrapbook", OpenScrapbook,
-                new Vector2(0.55f, 0.05f), new Vector2(0.8f, 0.15f), new Color(0.3f, 0.3f, 0.5f));
+                new Vector2(0.5f, 0.05f), new Vector2(0.7f, 0.15f), new Color(0.3f, 0.3f, 0.5f));
+
+            // Main Menu button
+            CreateButton(victoryPanel.transform, "Main Menu", ReturnToMainMenu,
+                new Vector2(0.75f, 0.05f), new Vector2(0.95f, 0.15f), new Color(0.4f, 0.3f, 0.2f));
 
             victoryPanel.SetActive(false);
             Debug.Log("[RunScreenManager] BuildVictoryPanel: complete");
@@ -194,7 +211,11 @@ namespace Scurry.UI
 
             // Scrapbook button
             CreateButton(defeatPanel.transform, "Scrapbook", OpenScrapbook,
-                new Vector2(0.55f, 0.05f), new Vector2(0.8f, 0.15f), new Color(0.3f, 0.3f, 0.5f));
+                new Vector2(0.5f, 0.05f), new Vector2(0.7f, 0.15f), new Color(0.3f, 0.3f, 0.5f));
+
+            // Main Menu button
+            CreateButton(defeatPanel.transform, "Main Menu", ReturnToMainMenu,
+                new Vector2(0.75f, 0.05f), new Vector2(0.95f, 0.15f), new Color(0.4f, 0.3f, 0.2f));
 
             defeatPanel.SetActive(false);
             Debug.Log("[RunScreenManager] BuildDefeatPanel: complete");

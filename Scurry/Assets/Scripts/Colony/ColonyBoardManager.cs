@@ -2,10 +2,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using Scurry.Data;
 using Scurry.Core;
+using Scurry.Interfaces;
 
 namespace Scurry.Colony
 {
-    public class ColonyBoardManager : MonoBehaviour
+    public class ColonyBoardManager : MonoBehaviour, IColonyBoardManager
     {
         private int boardSize;
         private ColonyCardDefinitionSO[,] grid;

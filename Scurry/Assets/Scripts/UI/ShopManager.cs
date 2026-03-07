@@ -4,13 +4,15 @@ using UnityEngine.UI;
 using TMPro;
 using Scurry.Data;
 using Scurry.Core;
-using Scurry.Colony;
+using Scurry.Interfaces;
 
 namespace Scurry.UI
 {
     public class ShopManager : MonoBehaviour
     {
-        [SerializeField] private ColonyManager colonyManager;
+        private IColonyManager colonyManager;
+        private IBalanceConfig balanceConfig;
+        private IRelicManager relicManager;
 
         private GameObject shopPanel;
         private TextMeshProUGUI currencyText;
@@ -18,12 +20,18 @@ namespace Scurry.UI
         private List<CardDefinitionSO> shopCards = new List<CardDefinitionSO>();
         private List<CardDefinitionSO> sourcePool;
         private bool hasRerolled;
-        private bool shopOpen;
 
         private void Awake()
         {
-            if (colonyManager == null) colonyManager = FindObjectOfType<ColonyManager>();
             BuildShopPanel();
+        }
+
+        private void Start()
+        {
+            colonyManager = ServiceLocator.Get<IColonyManager>();
+            balanceConfig = ServiceLocator.Get<IBalanceConfig>();
+            relicManager = ServiceLocator.Get<IRelicManager>();
+            Debug.Log($"[ShopManager] Start: colonyManager={(colonyManager != null ? "OK" : "NULL")}, balanceConfig={(balanceConfig != null ? "OK" : "NULL")}, relicManager={(relicManager != null ? "OK" : "NULL")}");
         }
 
         public void OpenShop(List<CardDefinitionSO> cardPool)
@@ -31,7 +39,6 @@ namespace Scurry.UI
             Debug.Log($"[ShopManager] OpenShop: pool size={cardPool?.Count ?? 0}");
             sourcePool = cardPool;
             hasRerolled = false;
-            shopOpen = true;
             GenerateShopOfferings();
             shopPanel.SetActive(true);
             UpdateCurrencyDisplay();
@@ -46,8 +53,8 @@ namespace Scurry.UI
                 return;
             }
 
-            var bc = BalanceConfigSO.Instance;
-            int shopSize = bc != null ? bc.shopCardCount : 5;
+            var bc = balanceConfig;
+            int shopSize = bc != null ? bc.ShopCardCount : 5;
             int count = Mathf.Min(shopSize, sourcePool.Count);
             var shuffled = new List<CardDefinitionSO>(sourcePool);
             for (int i = shuffled.Count - 1; i > 0; i--)
@@ -65,7 +72,7 @@ namespace Scurry.UI
 
         private int GetCardPrice(CardRarity rarity)
         {
-            var bc = BalanceConfigSO.Instance;
+            var bc = balanceConfig;
             int price = bc != null ? bc.GetShopPrice(rarity) : rarity switch
             {
                 CardRarity.Common => 2,
@@ -76,10 +83,9 @@ namespace Scurry.UI
             };
 
             // Apply shop discount relic
-            var relicMgr = Core.RelicManager.Instance;
-            if (relicMgr != null)
+            if (relicManager != null)
             {
-                int discount = relicMgr.GetShopDiscount();
+                int discount = relicManager.GetShopDiscount();
                 if (discount > 0)
                 {
                     price = Mathf.Max(1, price - discount);
@@ -147,8 +153,8 @@ namespace Scurry.UI
             rtRect.anchorMax = Vector2.one;
             rtRect.sizeDelta = Vector2.zero;
             var rtTmp = rerollTextGO.GetComponent<TextMeshProUGUI>();
-            var bcRef = BalanceConfigSO.Instance;
-            rtTmp.text = $"Reroll ({(bcRef != null ? bcRef.shopRerollCost : 2)} Currency)";
+            var bcRef = balanceConfig;
+            rtTmp.text = $"Reroll ({(bcRef != null ? bcRef.ShopRerollCost : 2)} Currency)";
             rtTmp.fontSize = 14;
             rtTmp.alignment = TextAlignmentOptions.Center;
             rtTmp.color = Color.white;
@@ -282,8 +288,8 @@ namespace Scurry.UI
                 Debug.Log("[ShopManager] OnRerollClicked: already rerolled this visit");
                 return;
             }
-            var bc = BalanceConfigSO.Instance;
-            int rerollCost = bc != null ? bc.shopRerollCost : 2;
+            var bc = balanceConfig;
+            int rerollCost = bc != null ? bc.ShopRerollCost : 2;
             if (colonyManager.CurrencyStockpile < rerollCost)
             {
                 Debug.Log($"[ShopManager] OnRerollClicked: insufficient currency for reroll (need={rerollCost}, have={colonyManager.CurrencyStockpile})");
@@ -301,7 +307,6 @@ namespace Scurry.UI
         {
             Debug.Log("[ShopManager] OnLeaveClicked: leaving shop");
             shopPanel.SetActive(false);
-            shopOpen = false;
             EventBus.OnShopComplete?.Invoke();
         }
 
