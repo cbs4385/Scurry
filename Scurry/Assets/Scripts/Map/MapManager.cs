@@ -18,6 +18,12 @@ namespace Scurry.Map
         public int CurrentRow => currentRow;
         public MapConfigSO Config => config;
 
+        private void Awake()
+        {
+            ServiceLocator.Register<IMapManager>(this);
+            Debug.Log("[MapManager] Awake: registered with ServiceLocator");
+        }
+
         public void InitializeMap(MapConfigSO mapConfig)
         {
             config = mapConfig;
@@ -100,7 +106,13 @@ namespace Scurry.Map
 
         public void OnNodeComplete()
         {
-            Debug.Log($"[MapManager] OnNodeComplete: row={currentRow}, type={currentNode?.nodeType}");
+            Debug.Log($"[MapManager] OnNodeComplete: row={currentRow}, type={currentNode?.nodeType}, mapInitialized={map != null}");
+
+            if (map == null)
+            {
+                Debug.LogWarning("[MapManager] OnNodeComplete: map is null — no map initialized, ignoring");
+                return;
+            }
 
             // Check if boss was just defeated
             if (currentNode != null && currentNode.nodeType == NodeType.Boss)

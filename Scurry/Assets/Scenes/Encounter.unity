@@ -151,7 +151,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: edef5dda0364b114e99f25f3ced472ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Scurry.Cards.HandManager
-  cardPrefab: {fileID: 0}
+  cardPrefab: {fileID: 4205595746137597854, guid: de98b3edb5497784b87ab0e0b5ff9f36, type: 3}
   cardSpacing: 1.5
   handY: -3.5
 --- !u!114 &59321513
@@ -180,11 +180,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3802c66275cfe99479482b1c2651dde9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Scurry.Placement.PlacementManager
-  boardManager: {fileID: 0}
-  handManager: {fileID: 0}
-  gameManager: {fileID: 0}
-  heroTokenPrefab: {fileID: 0}
-  resourceTokenPrefab: {fileID: 0}
+  boardManager: {fileID: 59321515}
+  handManager: {fileID: 59321512}
+  gameManager: {fileID: 676081787}
+  heroTokenPrefab: {fileID: 1177486084382018150, guid: cfd3713b355d4b1479cb1b9a4d82c690, type: 3}
+  resourceTokenPrefab: {fileID: 1080244127155495691, guid: 49b0af3867edb3045960d52be02d2c52, type: 3}
 --- !u!114 &59321515
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -197,9 +197,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6009147336cd0474c9417a276bbf629c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Scurry.Board.BoardManager
-  boardLayout: {fileID: 0}
-  tilePrefab: {fileID: 0}
-  resourceTokenPrefab: {fileID: 0}
+  boardLayout: {fileID: 11400000, guid: 26bd791d47c517d4484f30f28ade06ba, type: 2}
+  tilePrefab: {fileID: 2877641624212074132, guid: 6390d3691fb481243b535904d2987b5b, type: 3}
+  resourceTokenPrefab: {fileID: 1080244127155495691, guid: 49b0af3867edb3045960d52be02d2c52, type: 3}
   tileSize: 1.1
   normalColor: {r: 0.4, g: 0.7, b: 0.4, a: 1}
   resourceNodeColor: {r: 0.9, g: 0.85, b: 0.3, a: 1}
@@ -254,8 +254,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a869c246b7778ea44919667d33ea73b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Scurry.UI.UIManager
-  colonyManager: {fileID: 0}
-  runManager: {fileID: 0}
 --- !u!114 &559417997
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -459,7 +457,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9df6310b139300c4580794d39e421ef9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Scurry.Core.GameManager
-  standaloneMode: 0
   boardManager: {fileID: 0}
   deckManager: {fileID: 0}
   handManager: {fileID: 0}
@@ -685,9 +682,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 912af96cd03980240b7fb5d27be1342e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Scurry.Gathering.GatheringManager
-  boardManager: {fileID: 0}
+  boardManager: {fileID: 59321515}
   moveStepDelay: 0.3
-  enemyTokenPrefab: {fileID: 0}
+  enemyTokenPrefab: {fileID: 2225596346204308078, guid: 2c07643a64eff1c4c91936d32f287631, type: 3}
 --- !u!4 &1770377213
 Transform:
   m_ObjectHideFlags: 0

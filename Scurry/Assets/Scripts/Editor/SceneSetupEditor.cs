@@ -246,14 +246,43 @@ public class SceneSetupEditor
 
         // GameManager
         var gameManagerGO = new GameObject("GameManager");
-        gameManagerGO.AddComponent<Scurry.Core.GameManager>();
+        var gameManager = gameManagerGO.AddComponent<Scurry.Core.GameManager>();
 
         // Board
         var boardGO = new GameObject("BoardManager");
-        boardGO.AddComponent<Scurry.Board.BoardManager>();
-        boardGO.AddComponent<Scurry.Placement.PlacementManager>();
+        var boardManager = boardGO.AddComponent<Scurry.Board.BoardManager>();
+        var placementManager = boardGO.AddComponent<Scurry.Placement.PlacementManager>();
         boardGO.AddComponent<Scurry.Cards.DeckManager>();
-        boardGO.AddComponent<Scurry.Cards.HandManager>();
+        var handManager = boardGO.AddComponent<Scurry.Cards.HandManager>();
+
+        // Wire up PlacementManager SerializeField references
+        var pmSO = new SerializedObject(placementManager);
+        pmSO.FindProperty("boardManager").objectReferenceValue = boardManager;
+        pmSO.FindProperty("handManager").objectReferenceValue = handManager;
+        pmSO.FindProperty("gameManager").objectReferenceValue = gameManager;
+
+        // Load and assign prefabs
+        var heroTokenPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/HeroToken.prefab");
+        var resourceTokenPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/ResourceToken.prefab");
+        var cardPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Card.prefab");
+
+        if (heroTokenPrefab != null)
+            pmSO.FindProperty("heroTokenPrefab").objectReferenceValue = heroTokenPrefab;
+        else
+            Debug.LogWarning("[SceneSetupEditor] HeroToken.prefab not found at Assets/Prefabs/HeroToken.prefab");
+        if (resourceTokenPrefab != null)
+            pmSO.FindProperty("resourceTokenPrefab").objectReferenceValue = resourceTokenPrefab;
+        else
+            Debug.LogWarning("[SceneSetupEditor] ResourceToken.prefab not found at Assets/Prefabs/ResourceToken.prefab");
+        pmSO.ApplyModifiedPropertiesWithoutUndo();
+
+        // Wire up HandManager cardPrefab
+        var hmSO = new SerializedObject(handManager);
+        if (cardPrefab != null)
+            hmSO.FindProperty("cardPrefab").objectReferenceValue = cardPrefab;
+        else
+            Debug.LogWarning("[SceneSetupEditor] Card.prefab not found at Assets/Prefabs/Card.prefab");
+        hmSO.ApplyModifiedPropertiesWithoutUndo();
 
         // Gathering
         var gatherGO = new GameObject("GatheringManager");
@@ -281,7 +310,7 @@ public class SceneSetupEditor
         rewardGO.AddComponent<Scurry.UI.RewardSelectionUI>();
 
         EditorSceneManager.SaveScene(scene, "Assets/Scenes/Encounter.unity");
-        Debug.Log("[SceneSetupEditor] Encounter scene set up.");
+        Debug.Log("[SceneSetupEditor] Encounter scene set up (with prefab references wired).");
     }
 
     private static void SetupRunResult()
@@ -340,6 +369,75 @@ public class SceneSetupEditor
         };
         EditorBuildSettings.scenes = scenes.ToArray();
         Debug.Log("[SceneSetupEditor] Build settings updated with 8 scenes (Bootstrap=0).");
+    }
+
+    [MenuItem("Scurry/Fix Encounter Scene Wiring")]
+    public static void FixEncounterSceneWiring()
+    {
+        // Load the Encounter scene
+        var scene = EditorSceneManager.OpenScene("Assets/Scenes/Encounter.unity", OpenSceneMode.Single);
+
+        // Find existing components
+        var boardManager = Object.FindAnyObjectByType<Scurry.Board.BoardManager>();
+        var handManager = Object.FindAnyObjectByType<Scurry.Cards.HandManager>();
+        var placementManager = Object.FindAnyObjectByType<Scurry.Placement.PlacementManager>();
+        var gameManager = Object.FindAnyObjectByType<Scurry.Core.GameManager>();
+
+        // Load prefabs
+        var heroTokenPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/HeroToken.prefab");
+        var resourceTokenPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/ResourceToken.prefab");
+        var cardPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Card.prefab");
+        var tilePrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/BoardTile.prefab");
+        var boardLayout = AssetDatabase.LoadAssetAtPath<ScriptableObject>("Assets/Data/Board/BoardLayout_Wilds_4x4.asset");
+
+        // Wire up BoardManager references
+        if (boardManager != null)
+        {
+            var bmSO = new SerializedObject(boardManager);
+            if (tilePrefab != null) bmSO.FindProperty("tilePrefab").objectReferenceValue = tilePrefab;
+            if (resourceTokenPrefab != null) bmSO.FindProperty("resourceTokenPrefab").objectReferenceValue = resourceTokenPrefab;
+            if (boardLayout != null) bmSO.FindProperty("boardLayout").objectReferenceValue = boardLayout;
+            bmSO.ApplyModifiedPropertiesWithoutUndo();
+            Debug.Log($"[SceneSetupEditor] BoardManager wired: tilePrefab={tilePrefab != null}, resourceToken={resourceTokenPrefab != null}, boardLayout={boardLayout != null}");
+        }
+
+        // Wire up PlacementManager references
+        if (placementManager != null)
+        {
+            var pmSO = new SerializedObject(placementManager);
+            if (boardManager != null) pmSO.FindProperty("boardManager").objectReferenceValue = boardManager;
+            if (handManager != null) pmSO.FindProperty("handManager").objectReferenceValue = handManager;
+            if (gameManager != null) pmSO.FindProperty("gameManager").objectReferenceValue = gameManager;
+            if (heroTokenPrefab != null) pmSO.FindProperty("heroTokenPrefab").objectReferenceValue = heroTokenPrefab;
+            if (resourceTokenPrefab != null) pmSO.FindProperty("resourceTokenPrefab").objectReferenceValue = resourceTokenPrefab;
+            pmSO.ApplyModifiedPropertiesWithoutUndo();
+            Debug.Log("[SceneSetupEditor] PlacementManager wired.");
+        }
+
+        // Wire up HandManager cardPrefab
+        if (handManager != null)
+        {
+            var hmSO = new SerializedObject(handManager);
+            if (cardPrefab != null) hmSO.FindProperty("cardPrefab").objectReferenceValue = cardPrefab;
+            hmSO.ApplyModifiedPropertiesWithoutUndo();
+            Debug.Log("[SceneSetupEditor] HandManager wired.");
+        }
+
+        // Wire up GatheringManager references
+        var gatheringManager = Object.FindAnyObjectByType<Scurry.Gathering.GatheringManager>();
+        if (gatheringManager != null)
+        {
+            var gmSO = new SerializedObject(gatheringManager);
+            if (boardManager != null) gmSO.FindProperty("boardManager").objectReferenceValue = boardManager;
+            var enemyTokenPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/EnemyToken.prefab");
+            if (enemyTokenPrefab != null) gmSO.FindProperty("enemyTokenPrefab").objectReferenceValue = enemyTokenPrefab;
+            gmSO.ApplyModifiedPropertiesWithoutUndo();
+            Debug.Log($"[SceneSetupEditor] GatheringManager wired: boardManager={boardManager != null}, enemyTokenPrefab={enemyTokenPrefab != null}");
+        }
+
+        EditorSceneManager.MarkSceneDirty(scene);
+        EditorSceneManager.SaveScene(scene);
+        Debug.Log("[SceneSetupEditor] Encounter scene wiring fixed — all prefab and component references set.");
     }
 
     private static void ClearScene()

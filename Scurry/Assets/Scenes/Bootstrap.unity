@@ -693,8 +693,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e0af9659441f4d469b3a2bad99d3829, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Scurry.Tests.ValidationTestRunner
-  runOnStart: 1
-  runIntegrationTests: 1
+  runOnStart: 0
+  runIntegrationTests: 0
 --- !u!4 &1995687777
 Transform:
   m_ObjectHideFlags: 0

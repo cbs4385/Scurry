@@ -231,6 +231,11 @@ namespace Scurry.Core
 
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
+            if (!enabled)
+            {
+                Debug.Log($"[RunManager] OnSceneLoaded: SKIPPED (disabled) scene='{scene.name}', mode={mode}");
+                return;
+            }
             Debug.Log($"[RunManager] OnSceneLoaded: scene='{scene.name}', mode={mode}");
 
             switch (scene.name)
