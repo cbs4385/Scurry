@@ -2010,6 +2010,599 @@ namespace Scurry.Tests.PlayMode
             colonyMgr.InitializeHP();
             if (relicMgr != null) relicMgr.ClearRelics();
         }
+
+        private struct GameResult
+        {
+            public int seed;
+            public bool victory;
+            public int levelsCompleted;
+            public int nodesVisited;
+            public int encounters;
+            public int resourcesGathered;
+            public int foodConsumed;
+            public int damageTaken;
+            public int healingReceived;
+            public int finalHP;
+            public int finalFood;
+            public int finalMaterials;
+            public int finalCurrency;
+            public int deathLevel;       // 0 = didn't die
+            public int deathNode;        // node step within level where death occurred
+            public NodeType deathNodeType;
+            public bool diedToStarvation;
+            public Dictionary<NodeType, int> nodeTypeCounts;
+        }
+
+        private GameResult SimulateGame(int seed, MapManager mapMgr, ColonyManager colonyMgr, List<MapConfigSO> configs)
+        {
+            SeededRandom.Initialize(seed);
+
+            colonyMgr.InitializeHP();
+            // Simulate colony management bonus
+            colonyMgr.AddFood(2);
+
+            var result = new GameResult
+            {
+                seed = seed,
+                nodeTypeCounts = new Dictionary<NodeType, int>()
+            };
+
+            int foodConsumption = 1;
+            bool runEnded = false;
+
+            for (int levelIdx = 0; levelIdx < configs.Count && !runEnded; levelIdx++)
+            {
+                var config = configs[levelIdx];
+                mapMgr.InitializeMap(config);
+
+                for (int safety = 0; safety < config.numRows + 2 && !runEnded; safety++)
+                {
+                    var available = mapMgr.GetAvailableNodes();
+                    if (available.Count == 0) break;
+
+                    var node = available[0];
+                    mapMgr.SelectNode(node);
+                    result.nodesVisited++;
+
+                    if (!result.nodeTypeCounts.ContainsKey(node.nodeType))
+                        result.nodeTypeCounts[node.nodeType] = 0;
+                    result.nodeTypeCounts[node.nodeType]++;
+
+                    // Food consumption
+                    int foodAvail = colonyMgr.FoodStockpile;
+                    int shortfall = Mathf.Max(0, foodConsumption - foodAvail);
+                    int toSpend = Mathf.Min(foodConsumption, foodAvail);
+                    if (toSpend > 0) colonyMgr.SpendFood(toSpend);
+                    result.foodConsumed += toSpend;
+
+                    if (shortfall > 0)
+                    {
+                        int starvDmg = shortfall * 2;
+                        colonyMgr.TakeDamage(starvDmg);
+                        result.damageTaken += starvDmg;
+                        result.diedToStarvation = !colonyMgr.IsAlive;
+                    }
+
+                    if (!colonyMgr.IsAlive)
+                    {
+                        runEnded = true;
+                        result.deathLevel = levelIdx + 1;
+                        result.deathNode = result.nodesVisited;
+                        result.deathNodeType = node.nodeType;
+                        break;
+                    }
+
+                    // Simulate node
+                    switch (node.nodeType)
+                    {
+                        case NodeType.ResourceEncounter:
+                        {
+                            result.encounters++;
+                            int f = SeededRandom.Range(2, 5);
+                            int m = SeededRandom.Range(0, 3);
+                            int c = SeededRandom.Range(0, 2);
+                            colonyMgr.AddFood(f);
+                            colonyMgr.AddMaterials(m);
+                            colonyMgr.AddCurrency(c);
+                            result.resourcesGathered += f + m + c;
+                            break;
+                        }
+                        case NodeType.EliteEncounter:
+                        {
+                            result.encounters++;
+                            int f = SeededRandom.Range(3, 7);
+                            int m = SeededRandom.Range(1, 4);
+                            int c = SeededRandom.Range(1, 4);
+                            int dmg = SeededRandom.Range(1, 4);
+                            colonyMgr.AddFood(f);
+                            colonyMgr.AddMaterials(m);
+                            colonyMgr.AddCurrency(c);
+                            colonyMgr.TakeDamage(dmg);
+                            result.resourcesGathered += f + m + c;
+                            result.damageTaken += dmg;
+                            break;
+                        }
+                        case NodeType.Boss:
+                        {
+                            result.encounters++;
+                            int dmg = SeededRandom.Range(3, 8);
+                            colonyMgr.TakeDamage(dmg);
+                            result.damageTaken += dmg;
+                            break;
+                        }
+                        case NodeType.Shop:
+                        {
+                            int spent = Mathf.Min(SeededRandom.Range(2, 5), colonyMgr.CurrencyStockpile);
+                            if (spent > 0) colonyMgr.SpendCurrency(spent);
+                            break;
+                        }
+                        case NodeType.HealingShrine:
+                        {
+                            int healAmt = SeededRandom.Range(3, 8);
+                            int hpBefore = colonyMgr.CurrentHP;
+                            colonyMgr.Heal(healAmt);
+                            result.healingReceived += colonyMgr.CurrentHP - hpBefore;
+                            break;
+                        }
+                        case NodeType.Event:
+                        {
+                            int roll = SeededRandom.Range(0, 3);
+                            if (roll == 0)
+                            {
+                                int gain = SeededRandom.Range(2, 5);
+                                colonyMgr.AddFood(gain);
+                                result.resourcesGathered += gain;
+                            }
+                            else if (roll == 1)
+                            {
+                                int dmg = SeededRandom.Range(1, 4);
+                                colonyMgr.TakeDamage(dmg);
+                                result.damageTaken += dmg;
+                            }
+                            break;
+                        }
+                        case NodeType.RestSite:
+                        {
+                            int restHeal = Mathf.CeilToInt(colonyMgr.MaxHP * 0.3f);
+                            int hpBefore = colonyMgr.CurrentHP;
+                            colonyMgr.Heal(restHeal);
+                            result.healingReceived += colonyMgr.CurrentHP - hpBefore;
+                            break;
+                        }
+                        // CardDraft, UpgradeShrine — no resource/HP effect in simulation
+                    }
+
+                    if (!colonyMgr.IsAlive)
+                    {
+                        runEnded = true;
+                        result.deathLevel = levelIdx + 1;
+                        result.deathNode = result.nodesVisited;
+                        result.deathNodeType = node.nodeType;
+                        break;
+                    }
+
+                    if (node.nodeType == NodeType.Boss)
+                    {
+                        result.levelsCompleted++;
+                        break;
+                    }
+
+                    mapMgr.OnNodeComplete();
+                }
+            }
+
+            if (!runEnded && result.levelsCompleted >= configs.Count)
+                result.victory = true;
+
+            result.finalHP = colonyMgr.CurrentHP;
+            result.finalFood = colonyMgr.FoodStockpile;
+            result.finalMaterials = colonyMgr.MaterialsStockpile;
+            result.finalCurrency = colonyMgr.CurrencyStockpile;
+
+            return result;
+        }
+
+        [UnityTest]
+        public IEnumerator TC27_2_MassSimulation_1000Games_BalanceReport()
+        {
+            yield return null;
+
+            var mapMgr = Object.FindAnyObjectByType<MapManager>();
+            var colonyMgr = ColonyManager.Instance;
+            Assume.That(mapMgr != null, "MapManager not found");
+            Assume.That(colonyMgr != null, "ColonyManager not found");
+
+            var configs = new List<MapConfigSO>();
+            foreach (var guid in UnityEditor.AssetDatabase.FindAssets("t:MapConfigSO"))
+            {
+                var path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
+                var cfg = UnityEditor.AssetDatabase.LoadAssetAtPath<MapConfigSO>(path);
+                if (cfg != null) configs.Add(cfg);
+            }
+            configs.Sort((a, b) => a.levelNumber.CompareTo(b.levelNumber));
+            Assume.That(configs.Count >= 3, "Need at least 3 MapConfigSOs");
+
+            const int TOTAL_GAMES = 1000;
+            var results = new List<GameResult>(TOTAL_GAMES);
+
+            // Suppress MapUI rendering and all logging during mass sim
+            var mapUI = Object.FindAnyObjectByType<Scurry.UI.MapUI>();
+            if (mapUI != null) mapUI.enabled = false;
+            Debug.unityLogger.logEnabled = false;
+
+            for (int i = 0; i < TOTAL_GAMES; i++)
+            {
+                results.Add(SimulateGame(i + 1, mapMgr, colonyMgr, configs));
+            }
+
+            // Re-enable logging and MapUI
+            Debug.unityLogger.logEnabled = true;
+            if (mapUI != null) mapUI.enabled = true;
+
+            // ====== ANALYSIS ======
+            int wins = 0, losses = 0;
+            int deathsL1 = 0, deathsL2 = 0, deathsL3 = 0;
+            int starvationDeaths = 0;
+            float totalNodes = 0, totalEnc = 0, totalRes = 0;
+            float totalDmg = 0, totalHeal = 0, totalFoodConsumed = 0;
+            float totalFinalHP = 0, totalFinalFood = 0, totalFinalMat = 0, totalFinalCur = 0;
+            int minFinalHP = int.MaxValue, maxFinalHP = int.MinValue;
+            int closestWinHP = int.MaxValue;
+            int closestWinSeed = -1;
+            int highestWinHP = 0;
+            int highestWinSeed = -1;
+            int fastestDefeatNode = int.MaxValue;
+            int fastestDefeatSeed = -1;
+
+            // Per-node-type aggregated
+            var globalNodeCounts = new Dictionary<NodeType, int>();
+            var deathByNodeType = new Dictionary<NodeType, int>();
+
+            // Per-level stats for victories
+            float winFinalHP = 0;
+            int winCount = 0;
+
+            // HP distribution buckets (for victories)
+            int[] hpBuckets = new int[7]; // 1-5, 6-10, 11-15, 16-20, 21-25, 26-30, 30+
+
+            // Death node distribution
+            int[] deathNodeBuckets = new int[31]; // node 1-30
+
+            foreach (var r in results)
+            {
+                totalNodes += r.nodesVisited;
+                totalEnc += r.encounters;
+                totalRes += r.resourcesGathered;
+                totalDmg += r.damageTaken;
+                totalHeal += r.healingReceived;
+                totalFoodConsumed += r.foodConsumed;
+
+                foreach (var kvp in r.nodeTypeCounts)
+                {
+                    if (!globalNodeCounts.ContainsKey(kvp.Key))
+                        globalNodeCounts[kvp.Key] = 0;
+                    globalNodeCounts[kvp.Key] += kvp.Value;
+                }
+
+                if (r.victory)
+                {
+                    wins++;
+                    winFinalHP += r.finalHP;
+                    winCount++;
+                    totalFinalHP += r.finalHP;
+                    totalFinalFood += r.finalFood;
+                    totalFinalMat += r.finalMaterials;
+                    totalFinalCur += r.finalCurrency;
+
+                    if (r.finalHP < minFinalHP) minFinalHP = r.finalHP;
+                    if (r.finalHP > maxFinalHP) maxFinalHP = r.finalHP;
+                    if (r.finalHP < closestWinHP) { closestWinHP = r.finalHP; closestWinSeed = r.seed; }
+                    if (r.finalHP > highestWinHP) { highestWinHP = r.finalHP; highestWinSeed = r.seed; }
+
+                    int bucket = Mathf.Clamp((r.finalHP - 1) / 5, 0, 6);
+                    hpBuckets[bucket]++;
+                }
+                else
+                {
+                    losses++;
+                    if (r.deathLevel == 1) deathsL1++;
+                    else if (r.deathLevel == 2) deathsL2++;
+                    else if (r.deathLevel == 3) deathsL3++;
+                    if (r.diedToStarvation) starvationDeaths++;
+
+                    if (!deathByNodeType.ContainsKey(r.deathNodeType))
+                        deathByNodeType[r.deathNodeType] = 0;
+                    deathByNodeType[r.deathNodeType]++;
+
+                    if (r.deathNode < fastestDefeatNode) { fastestDefeatNode = r.deathNode; fastestDefeatSeed = r.seed; }
+
+                    int dn = Mathf.Clamp(r.deathNode - 1, 0, 29);
+                    deathNodeBuckets[dn]++;
+                }
+            }
+
+            float winRate = (float)wins / TOTAL_GAMES * 100f;
+            float avgNodes = totalNodes / TOTAL_GAMES;
+            float avgEnc = totalEnc / TOTAL_GAMES;
+            float avgRes = totalRes / TOTAL_GAMES;
+            float avgDmg = totalDmg / TOTAL_GAMES;
+            float avgHeal = totalHeal / TOTAL_GAMES;
+            float avgFoodConsumed = totalFoodConsumed / TOTAL_GAMES;
+            float avgWinHP = winCount > 0 ? winFinalHP / winCount : 0;
+            float avgWinFood = winCount > 0 ? totalFinalFood / winCount : 0;
+            float avgWinMat = winCount > 0 ? totalFinalMat / winCount : 0;
+            float avgWinCur = winCount > 0 ? totalFinalCur / winCount : 0;
+
+            // Damage per source
+            float avgEliteDmg = 0, avgBossDmg = 0, avgEventDmg = 0, avgStarvDmg = 0;
+            float eliteDmgTotal = 0, bossDmgTotal = 0, eventDmgTotal = 0;
+            // Re-scan for per-source damage (approximate from node counts)
+            // Elites: avg 2 dmg each, Bosses: avg 5.5 dmg each, Events hostile: avg 2 dmg (1/3 chance)
+            int totalElites = globalNodeCounts.ContainsKey(NodeType.EliteEncounter) ? globalNodeCounts[NodeType.EliteEncounter] : 0;
+            int totalBosses = globalNodeCounts.ContainsKey(NodeType.Boss) ? globalNodeCounts[NodeType.Boss] : 0;
+            int totalEvents = globalNodeCounts.ContainsKey(NodeType.Event) ? globalNodeCounts[NodeType.Event] : 0;
+
+            // ====== REPORT ======
+            var rpt = new System.Text.StringBuilder();
+            rpt.AppendLine();
+            rpt.AppendLine("╔══════════════════════════════════════════════════════════════════╗");
+            rpt.AppendLine("║           SCURRY: 1000-GAME BALANCE ANALYSIS REPORT             ║");
+            rpt.AppendLine("╚══════════════════════════════════════════════════════════════════╝");
+            rpt.AppendLine();
+
+            // --- Win Rate ---
+            rpt.AppendLine("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            rpt.AppendLine("  OVERALL WIN RATE");
+            rpt.AppendLine("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            rpt.AppendLine($"  Victories:  {wins}/{TOTAL_GAMES} ({winRate:F1}%)");
+            rpt.AppendLine($"  Defeats:    {losses}/{TOTAL_GAMES} ({100f - winRate:F1}%)");
+            rpt.AppendLine();
+            string balanceVerdict;
+            if (winRate >= 70) balanceVerdict = "TOO EASY — most runs are free wins";
+            else if (winRate >= 55) balanceVerdict = "SLIGHTLY EASY — could use more challenge";
+            else if (winRate >= 40) balanceVerdict = "WELL BALANCED — healthy mix of wins and losses";
+            else if (winRate >= 25) balanceVerdict = "SLIGHTLY HARD — lower end of acceptable";
+            else balanceVerdict = "TOO HARD — most runs end in defeat";
+            rpt.AppendLine($"  Verdict: {balanceVerdict}");
+            rpt.AppendLine();
+
+            // --- Averages ---
+            rpt.AppendLine("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            rpt.AppendLine("  AVERAGES (all games)");
+            rpt.AppendLine("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            rpt.AppendLine($"  Nodes Visited:     {avgNodes:F1}");
+            rpt.AppendLine($"  Encounters:        {avgEnc:F1}");
+            rpt.AppendLine($"  Resources Gained:  {avgRes:F1}");
+            rpt.AppendLine($"  Food Consumed:     {avgFoodConsumed:F1}");
+            rpt.AppendLine($"  Damage Taken:      {avgDmg:F1}");
+            rpt.AppendLine($"  Healing Received:  {avgHeal:F1}");
+            rpt.AppendLine($"  Net HP Change:     {avgHeal - avgDmg:F1} (heal - dmg)");
+            rpt.AppendLine();
+
+            // --- Victory Stats ---
+            if (winCount > 0)
+            {
+                rpt.AppendLine("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+                rpt.AppendLine("  VICTORY STATS");
+                rpt.AppendLine("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+                rpt.AppendLine($"  Avg Final HP:        {avgWinHP:F1}/30");
+                rpt.AppendLine($"  Min Final HP:        {minFinalHP}/30 (seed {closestWinSeed})");
+                rpt.AppendLine($"  Max Final HP:        {maxFinalHP}/30 (seed {highestWinSeed})");
+                rpt.AppendLine($"  Avg Final Food:      {avgWinFood:F1}");
+                rpt.AppendLine($"  Avg Final Materials: {avgWinMat:F1}");
+                rpt.AppendLine($"  Avg Final Currency:  {avgWinCur:F1}");
+                rpt.AppendLine();
+
+                rpt.AppendLine("  Final HP Distribution (victories):");
+                string[] hpLabels = { "1-5", "6-10", "11-15", "16-20", "21-25", "26-30", "30+" };
+                int maxBucket = 1;
+                foreach (var b in hpBuckets) if (b > maxBucket) maxBucket = b;
+                for (int i = 0; i < hpLabels.Length; i++)
+                {
+                    int barLen = (int)((float)hpBuckets[i] / maxBucket * 30);
+                    string bar = new string('█', barLen);
+                    rpt.AppendLine($"    {hpLabels[i],5} HP: {bar} {hpBuckets[i]}");
+                }
+                rpt.AppendLine();
+            }
+
+            // --- Defeat Analysis ---
+            if (losses > 0)
+            {
+                rpt.AppendLine("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+                rpt.AppendLine("  DEFEAT ANALYSIS");
+                rpt.AppendLine("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+                rpt.AppendLine($"  Deaths in Level 1:  {deathsL1} ({(float)deathsL1 / losses * 100:F1}%)");
+                rpt.AppendLine($"  Deaths in Level 2:  {deathsL2} ({(float)deathsL2 / losses * 100:F1}%)");
+                rpt.AppendLine($"  Deaths in Level 3:  {deathsL3} ({(float)deathsL3 / losses * 100:F1}%)");
+                rpt.AppendLine($"  Starvation Deaths:  {starvationDeaths} ({(float)starvationDeaths / losses * 100:F1}%)");
+                rpt.AppendLine($"  Earliest Death:     Node {fastestDefeatNode} (seed {fastestDefeatSeed})");
+                rpt.AppendLine();
+
+                rpt.AppendLine("  Death by Node Type:");
+                foreach (var kvp in deathByNodeType)
+                    rpt.AppendLine($"    {kvp.Key,-20} {kvp.Value} deaths ({(float)kvp.Value / losses * 100:F1}%)");
+                rpt.AppendLine();
+
+                // Death timing histogram
+                rpt.AppendLine("  Death Timing (node # when colony died):");
+                int maxDeathBucket = 1;
+                foreach (var b in deathNodeBuckets) if (b > maxDeathBucket) maxDeathBucket = b;
+                // Group into ranges of 5
+                for (int g = 0; g < 6; g++)
+                {
+                    int start = g * 5;
+                    int sum = 0;
+                    for (int j = start; j < start + 5 && j < 30; j++) sum += deathNodeBuckets[j];
+                    if (sum > 0)
+                    {
+                        int barLen = (int)((float)sum / maxDeathBucket * 20);
+                        if (barLen < 1 && sum > 0) barLen = 1;
+                        string bar = new string('█', barLen);
+                        rpt.AppendLine($"    Node {start + 1,2}-{start + 5,2}: {bar} {sum}");
+                    }
+                }
+                rpt.AppendLine();
+            }
+
+            // --- Node Type Distribution ---
+            rpt.AppendLine("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            rpt.AppendLine("  NODE TYPE DISTRIBUTION (total across all games)");
+            rpt.AppendLine("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            int totalNodeCount = 0;
+            foreach (var kvp in globalNodeCounts) totalNodeCount += kvp.Value;
+            // Sort by count descending
+            var sortedNodes = new List<KeyValuePair<NodeType, int>>(globalNodeCounts);
+            sortedNodes.Sort((a, b) => b.Value.CompareTo(a.Value));
+            foreach (var kvp in sortedNodes)
+            {
+                float pct = (float)kvp.Value / totalNodeCount * 100f;
+                float avgPerGame = (float)kvp.Value / TOTAL_GAMES;
+                rpt.AppendLine($"    {kvp.Key,-20} {kvp.Value,6} total ({pct:F1}%)  avg {avgPerGame:F1}/game");
+            }
+            rpt.AppendLine();
+
+            // --- Economy Analysis ---
+            rpt.AppendLine("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            rpt.AppendLine("  ECONOMY ANALYSIS");
+            rpt.AppendLine("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            float avgResPerNode = avgRes / Mathf.Max(1, avgNodes);
+            float avgFoodPerNode = avgFoodConsumed / Mathf.Max(1, avgNodes);
+            float foodNetPerNode = avgResPerNode - avgFoodPerNode;
+            rpt.AppendLine($"  Avg Resources/Node:  {avgResPerNode:F2}");
+            rpt.AppendLine($"  Avg Food Spent/Node: {avgFoodPerNode:F2}");
+            rpt.AppendLine($"  Net Food Flow/Node:  {foodNetPerNode:F2}");
+            if (foodNetPerNode > 2.0f)
+                rpt.AppendLine("  * Food economy is VERY GENEROUS — surplus grows quickly");
+            else if (foodNetPerNode > 1.0f)
+                rpt.AppendLine("  * Food economy is GENEROUS — rarely run out");
+            else if (foodNetPerNode > 0.2f)
+                rpt.AppendLine("  * Food economy is BALANCED — tight but manageable");
+            else if (foodNetPerNode > -0.5f)
+                rpt.AppendLine("  * Food economy is TIGHT — risk of starvation");
+            else
+                rpt.AppendLine("  * Food economy is PUNISHING — frequent starvation");
+
+            float avgDmgPerNode = avgDmg / Mathf.Max(1, avgNodes);
+            float avgHealPerNode = avgHeal / Mathf.Max(1, avgNodes);
+            float netHPPerNode = avgHealPerNode - avgDmgPerNode;
+            rpt.AppendLine($"  Avg Damage/Node:     {avgDmgPerNode:F2}");
+            rpt.AppendLine($"  Avg Healing/Node:    {avgHealPerNode:F2}");
+            rpt.AppendLine($"  Net HP/Node:         {netHPPerNode:F2}");
+            if (netHPPerNode > -0.2f)
+                rpt.AppendLine("  * HP attrition is LOW — healing outpaces damage");
+            else if (netHPPerNode > -0.5f)
+                rpt.AppendLine("  * HP attrition is MODERATE — gradual wear-down");
+            else if (netHPPerNode > -1.0f)
+                rpt.AppendLine("  * HP attrition is HIGH — significant pressure");
+            else
+                rpt.AppendLine("  * HP attrition is EXTREME — unsustainable");
+            rpt.AppendLine();
+
+            // --- Balance Recommendations ---
+            rpt.AppendLine("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            rpt.AppendLine("  BALANCE RECOMMENDATIONS");
+            rpt.AppendLine("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            int recNum = 1;
+
+            if (winRate > 70)
+            {
+                rpt.AppendLine($"  {recNum++}. Win rate ({winRate:F1}%) is too high. Consider:");
+                rpt.AppendLine("       - Increase food consumption per node (currently 1)");
+                rpt.AppendLine("       - Increase boss/elite damage ranges");
+                rpt.AppendLine("       - Reduce resource gains from encounters");
+                rpt.AppendLine("       - Add more elite encounters to map generation weights");
+            }
+            else if (winRate < 30)
+            {
+                rpt.AppendLine($"  {recNum++}. Win rate ({winRate:F1}%) is too low. Consider:");
+                rpt.AppendLine("       - Decrease food consumption or add more food sources");
+                rpt.AppendLine("       - Reduce boss/elite damage");
+                rpt.AppendLine("       - Add more healing/rest nodes to map weights");
+                rpt.AppendLine("       - Increase starting HP or food");
+            }
+
+            if (starvationDeaths > losses * 0.5f && losses > 0)
+            {
+                rpt.AppendLine($"  {recNum++}. Starvation causes {(float)starvationDeaths / losses * 100:F0}% of deaths.");
+                rpt.AppendLine("       - Food economy may be too punishing");
+                rpt.AppendLine("       - Consider reducing consumption or increasing food gains");
+            }
+            else if (starvationDeaths == 0 && losses > 0)
+            {
+                rpt.AppendLine($"  {recNum++}. Zero starvation deaths — food is never a threat.");
+                rpt.AppendLine("       - Consider increasing food consumption to make it a real risk");
+            }
+
+            if (winCount > 0 && avgWinHP > 25)
+            {
+                rpt.AppendLine($"  {recNum++}. Avg victory HP is {avgWinHP:F0}/30 — too comfortable.");
+                rpt.AppendLine("       - Winners should feel more pressure near the end");
+                rpt.AppendLine("       - Increase late-game elite/boss damage");
+            }
+            else if (winCount > 0 && avgWinHP < 8)
+            {
+                rpt.AppendLine($"  {recNum++}. Avg victory HP is {avgWinHP:F0}/30 — razor thin.");
+                rpt.AppendLine("       - Good tension, but might feel unfair");
+                rpt.AppendLine("       - Consider slightly more healing opportunities");
+            }
+
+            if (winCount > 0 && avgWinFood > 40)
+            {
+                rpt.AppendLine($"  {recNum++}. Winners end with avg {avgWinFood:F0} food surplus.");
+                rpt.AppendLine("       - Food has no end-game pressure — excess is wasted");
+                rpt.AppendLine("       - Consider a food-to-score mechanic or higher consumption");
+            }
+
+            if (deathsL1 > losses * 0.3f && losses > 0)
+            {
+                rpt.AppendLine($"  {recNum++}. {(float)deathsL1 / losses * 100:F0}% of deaths in Level 1 — early game too punishing.");
+                rpt.AppendLine("       - Players may quit before seeing later content");
+                rpt.AppendLine("       - Consider gentler Level 1 or higher starting HP");
+            }
+
+            float elitePct = totalElites > 0 ? (float)totalElites / totalNodeCount * 100 : 0;
+            if (elitePct > 25)
+            {
+                rpt.AppendLine($"  {recNum++}. Elite encounters are {elitePct:F0}% of all nodes — too frequent.");
+                rpt.AppendLine("       - Reduce EliteEncounter weight in map generation");
+            }
+
+            int healingShrineCount = globalNodeCounts.ContainsKey(NodeType.HealingShrine) ? globalNodeCounts[NodeType.HealingShrine] : 0;
+            int restSiteCount = globalNodeCounts.ContainsKey(NodeType.RestSite) ? globalNodeCounts[NodeType.RestSite] : 0;
+            float healingNodePct = (float)(healingShrineCount + restSiteCount) / totalNodeCount * 100;
+            if (healingNodePct < 5 && netHPPerNode < -0.5f)
+            {
+                rpt.AppendLine($"  {recNum++}. Healing nodes are only {healingNodePct:F1}% of nodes with high attrition.");
+                rpt.AppendLine("       - Increase HealingShrine/RestSite weights in map config");
+            }
+
+            if (recNum == 1)
+            {
+                rpt.AppendLine("  No critical balance issues detected — game appears well-tuned.");
+            }
+
+            rpt.AppendLine();
+            rpt.AppendLine("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            rpt.AppendLine("  NOTABLE SEEDS");
+            rpt.AppendLine("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            if (closestWinSeed > 0)
+                rpt.AppendLine($"  Closest Victory:    seed {closestWinSeed} (finished with {closestWinHP} HP)");
+            if (highestWinSeed > 0)
+                rpt.AppendLine($"  Most Dominant Win:  seed {highestWinSeed} (finished with {highestWinHP} HP)");
+            if (fastestDefeatSeed > 0)
+                rpt.AppendLine($"  Fastest Defeat:     seed {fastestDefeatSeed} (died at node {fastestDefeatNode})");
+            rpt.AppendLine();
+
+            Debug.Log(rpt.ToString());
+
+            // Assertions
+            Assert.AreEqual(TOTAL_GAMES, results.Count, "Should have simulated all games");
+            Assert.AreEqual(TOTAL_GAMES, wins + losses, "Wins + losses should equal total games");
+
+            // Cleanup
+            colonyMgr.InitializeHP();
+        }
 #endif
     }
 }
