@@ -43,7 +43,7 @@ namespace Scurry.Colony
         {
             for (int i = colonyDeck.Count - 1; i > 0; i--)
             {
-                int j = Random.Range(0, i + 1);
+                int j = SeededRandom.Range(0, i + 1);
                 var temp = colonyDeck[i];
                 colonyDeck[i] = colonyDeck[j];
                 colonyDeck[j] = temp;

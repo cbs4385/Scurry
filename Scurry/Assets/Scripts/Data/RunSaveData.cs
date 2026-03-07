@@ -10,6 +10,7 @@ namespace Scurry.Data
         public int runState; // RunState enum as int
         public int nodesVisited;
         public string currentSceneName; // For restoring correct scene on Continue
+        public int randomSeed; // SeededRandom seed for reproducibility
 
         // Colony HP
         public int colonyHP;

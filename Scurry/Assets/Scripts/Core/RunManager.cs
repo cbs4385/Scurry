@@ -344,7 +344,9 @@ namespace Scurry.Core
 
         public void StartRun()
         {
-            Debug.Log("[RunManager] StartRun: initializing run state");
+            int seed = System.Environment.TickCount;
+            SeededRandom.Initialize(seed);
+            Debug.Log($"[RunManager] StartRun: initializing run state (seed={seed})");
             runState = RunState.Draft;
             currentLevel = 1;
             encountersCompleted = 0;
@@ -385,6 +387,10 @@ namespace Scurry.Core
                 StartRun();
                 return;
             }
+
+            // Restore seeded random state
+            SeededRandom.Initialize(save.randomSeed);
+            Debug.Log($"[RunManager] ContinueRun: restored seed={save.randomSeed}");
 
             // Restore run state
             currentLevel = save.currentLevel;
@@ -767,7 +773,7 @@ namespace Scurry.Core
                         var evtConfig = levelConfigs[currentLevel - 1];
                         if (evtConfig.eventPool != null && evtConfig.eventPool.Count > 0)
                         {
-                            var randomEvent = evtConfig.eventPool[Random.Range(0, evtConfig.eventPool.Count)];
+                            var randomEvent = evtConfig.eventPool[SeededRandom.Range(0, evtConfig.eventPool.Count)];
                             Debug.Log($"[RunManager] OnMapNodeSelected: selected event '{randomEvent.eventName}'");
                             eventManager.OpenEvent(randomEvent);
                             if (!eventsEncountered.Contains(randomEvent.eventName))
@@ -1011,7 +1017,7 @@ namespace Scurry.Core
 
             if (candidates.Count > 0)
             {
-                var victim = candidates[Random.Range(0, candidates.Count)];
+                var victim = candidates[SeededRandom.Range(0, candidates.Count)];
                 woundedHeroes.Add(victim);
                 Debug.Log($"[RunManager] OnEventWoundHero: wounded '{victim.cardName}' (totalWounded={woundedHeroes.Count})");
             }
@@ -1146,7 +1152,8 @@ namespace Scurry.Core
                 encountersCompleted = encountersCompleted,
                 totalResourcesGathered = totalResourcesGathered,
                 enemiesDefeated = enemiesDefeated,
-                bossesKilled = bossesKilled
+                bossesKilled = bossesKilled,
+                randomSeed = SeededRandom.CurrentSeed
             };
 
             // Hero deck

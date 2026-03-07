@@ -51,7 +51,7 @@ namespace Scurry.UI
             var pool = new List<ColonyCardDefinitionSO>(runManager.ColonyCardPool);
             for (int i = pool.Count - 1; i > 0; i--)
             {
-                int j = Random.Range(0, i + 1);
+                int j = SeededRandom.Range(0, i + 1);
                 var temp = pool[i];
                 pool[i] = pool[j];
                 pool[j] = temp;

@@ -167,7 +167,7 @@ namespace Scurry.Gathering
                 return null;
             }
 
-            var chosen = walkable[Random.Range(0, walkable.Count)];
+            var chosen = walkable[SeededRandom.Range(0, walkable.Count)];
             Debug.Log($"[EnemyAgent] GetRandomAdjacentWalkable: chose {chosen.GridPosition} from {walkable.Count} options");
             return chosen.GridPosition;
         }

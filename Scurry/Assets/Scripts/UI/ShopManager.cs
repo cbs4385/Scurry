@@ -59,7 +59,7 @@ namespace Scurry.UI
             var shuffled = new List<CardDefinitionSO>(sourcePool);
             for (int i = shuffled.Count - 1; i > 0; i--)
             {
-                int j = Random.Range(0, i + 1);
+                int j = SeededRandom.Range(0, i + 1);
                 (shuffled[i], shuffled[j]) = (shuffled[j], shuffled[i]);
             }
 

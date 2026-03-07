@@ -480,6 +480,8 @@ namespace Scurry.Tests.PlayMode
         public IEnumerator TC23_1b_IBalanceConfig_Registered()
         {
             yield return null;
+            // BalanceConfigSO registers lazily on first Instance access
+            var _ = Scurry.Data.BalanceConfigSO.Instance;
             Assert.IsNotNull(ServiceLocator.Get<IBalanceConfig>(), "IBalanceConfig should be registered");
         }
 
@@ -1640,5 +1642,374 @@ namespace Scurry.Tests.PlayMode
             // Re-enable RunManager
             if (runMgr != null) runMgr.enabled = true;
         }
+    }
+
+    // ============================================================
+    // TC-27: Full Seeded Game Playthrough
+    // ============================================================
+    [TestFixture]
+    public class FullGamePlaythroughTests
+    {
+        private const int TEST_SEED = 42;
+
+        [UnitySetUp]
+        public IEnumerator SetUp()
+        {
+            LogAssert.ignoreFailingMessages = true;
+            if (SceneManager.GetActiveScene().name != "Bootstrap")
+            {
+                SceneManager.LoadScene("Bootstrap");
+                yield return null;
+                yield return null;
+                yield return new WaitForSeconds(0.5f);
+            }
+            var runMgr = RunManager.Instance;
+            if (runMgr != null) runMgr.enabled = false;
+
+            SceneManager.LoadScene("MapTraversal");
+            yield return null;
+            yield return null;
+            yield return new WaitForSeconds(0.2f);
+        }
+
+        [UnityTearDown]
+        public IEnumerator TearDown()
+        {
+            var runMgr = RunManager.Instance;
+            if (runMgr != null) runMgr.enabled = true;
+            yield return null;
+        }
+
+#if UNITY_EDITOR
+        [UnityTest]
+        public IEnumerator TC27_1_FullGamePlaythrough_Seeded()
+        {
+            SeededRandom.Initialize(TEST_SEED);
+            yield return null;
+
+            // --- Resolve managers ---
+            var mapMgr = Object.FindAnyObjectByType<MapManager>();
+            var colonyMgr = ColonyManager.Instance;
+            var achMgr = AchievementManager.Instance;
+            var relicMgr = RelicManager.Instance;
+            var metaMgr = MetaProgressionManager.Instance;
+            Assume.That(mapMgr != null, "MapManager not found");
+            Assume.That(colonyMgr != null, "ColonyManager not found");
+
+            // --- Load all level configs ---
+            var configs = new List<MapConfigSO>();
+            foreach (var guid in UnityEditor.AssetDatabase.FindAssets("t:MapConfigSO"))
+            {
+                var path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
+                var cfg = UnityEditor.AssetDatabase.LoadAssetAtPath<MapConfigSO>(path);
+                if (cfg != null) configs.Add(cfg);
+            }
+            configs.Sort((a, b) => a.levelNumber.CompareTo(b.levelNumber));
+            Assume.That(configs.Count >= 3, "Need at least 3 MapConfigSOs");
+
+            // --- Initialize colony ---
+            colonyMgr.InitializeHP();
+            if (relicMgr != null) relicMgr.ClearRelics();
+
+            // Build a ColonyConfig to simulate colony management output
+            var colonyConfig = new ColonyConfig
+            {
+                maxHeroDeckSize = 8,
+                foodConsumptionPerNode = 1,
+                heroCombatBonus = 0,
+                heroMoveBonus = 0,
+                heroCarryBonus = 0,
+                totalPopulation = 8,
+                bonusStartingFood = 2
+            };
+
+            // Apply bonus starting food
+            colonyMgr.AddFood(colonyConfig.bonusStartingFood);
+
+            // --- Report header ---
+            var report = new System.Text.StringBuilder();
+            report.AppendLine("╔══════════════════════════════════════════════════════════╗");
+            report.AppendLine("║       SCURRY: FULL GAME PLAYTHROUGH REPORT              ║");
+            report.AppendLine($"║       Seed: {TEST_SEED,-44}║");
+            report.AppendLine("╚══════════════════════════════════════════════════════════╝");
+            report.AppendLine();
+            report.AppendLine($"Starting Colony HP: {colonyMgr.CurrentHP}/{colonyMgr.MaxHP}");
+            report.AppendLine($"Starting Food: {colonyMgr.FoodStockpile} | Materials: {colonyMgr.MaterialsStockpile} | Currency: {colonyMgr.CurrencyStockpile}");
+            report.AppendLine();
+
+            int totalNodesVisited = 0;
+            int totalEncounters = 0;
+            int totalResourcesGathered = 0;
+            int totalFoodConsumed = 0;
+            int totalDamageTaken = 0;
+            int totalHealing = 0;
+            int levelsCompleted = 0;
+            bool runEnded = false;
+            bool victory = false;
+            var nodeTypeCounts = new Dictionary<NodeType, int>();
+
+            // --- Play each level ---
+            for (int levelIdx = 0; levelIdx < configs.Count && !runEnded; levelIdx++)
+            {
+                var config = configs[levelIdx];
+                int levelNum = levelIdx + 1;
+
+                report.AppendLine($"┌─── LEVEL {levelNum}: {config.levelName} ───────────────────────────");
+                report.AppendLine($"│ Rows: {config.numRows} | Board: {config.boardSize}x{config.boardSize} | Colony Board: {config.colonyBoardSize}x{config.colonyBoardSize}");
+                report.AppendLine($"│ Encounter Pool: {config.encounterPool.Count} | Elite Pool: {config.eliteEncounterPool.Count} | Event Pool: {config.eventPool.Count}");
+                report.AppendLine($"│ Boss: {(config.bossDefinition != null ? config.bossDefinition.bossName : "none")}");
+                report.AppendLine($"│ Colony HP: {colonyMgr.CurrentHP}/{colonyMgr.MaxHP} | Food: {colonyMgr.FoodStockpile} | Mat: {colonyMgr.MaterialsStockpile} | Cur: {colonyMgr.CurrencyStockpile}");
+                report.AppendLine("│");
+
+                // Generate map
+                mapMgr.InitializeMap(config);
+                Assert.IsNotNull(mapMgr.Map, $"L{levelNum} map should not be null");
+                Assert.AreEqual(config.numRows, mapMgr.Map.Count, $"L{levelNum} should have {config.numRows} rows");
+
+                // Log map topology
+                report.AppendLine($"│ Map generated: {mapMgr.Map.Count} rows");
+                for (int row = 0; row < mapMgr.Map.Count; row++)
+                {
+                    var rowNodes = mapMgr.Map[row];
+                    var nodeDescs = new List<string>();
+                    foreach (var n in rowNodes)
+                    {
+                        string enc = n.encounterDefinition != null ? $" ({n.encounterDefinition.encounterName})" : "";
+                        nodeDescs.Add($"{n.nodeType}{enc} d={n.difficulty}");
+                    }
+                    report.AppendLine($"│   Row {row}: [{string.Join(", ", nodeDescs)}]");
+                }
+                report.AppendLine("│");
+
+                // Navigate the map
+                int nodeStep = 0;
+                for (int safety = 0; safety < config.numRows + 2 && !runEnded; safety++)
+                {
+                    var available = mapMgr.GetAvailableNodes();
+                    if (available.Count == 0) break;
+
+                    // Pick first available node (deterministic with seed)
+                    var node = available[0];
+                    mapMgr.SelectNode(node);
+                    totalNodesVisited++;
+                    nodeStep++;
+
+                    // Track node type
+                    if (!nodeTypeCounts.ContainsKey(node.nodeType))
+                        nodeTypeCounts[node.nodeType] = 0;
+                    nodeTypeCounts[node.nodeType]++;
+
+                    // --- Simulate food consumption ---
+                    int foodBefore = colonyMgr.FoodStockpile;
+                    int consumption = colonyConfig.foodConsumptionPerNode;
+                    int foodAvailable = colonyMgr.FoodStockpile;
+                    int shortfall = Mathf.Max(0, consumption - foodAvailable);
+                    int toSpend = Mathf.Min(consumption, foodAvailable);
+                    if (toSpend > 0)
+                        colonyMgr.SpendFood(toSpend);
+                    totalFoodConsumed += toSpend;
+
+                    string foodNote = "";
+                    if (shortfall > 0)
+                    {
+                        int starvDmg = shortfall * 2;
+                        colonyMgr.TakeDamage(starvDmg);
+                        totalDamageTaken += starvDmg;
+                        foodNote = $" *** STARVATION: -{starvDmg} HP ***";
+                    }
+
+                    // --- Simulate node effect ---
+                    string nodeResult = "";
+                    switch (node.nodeType)
+                    {
+                        case NodeType.ResourceEncounter:
+                        {
+                            totalEncounters++;
+                            int foodGain = SeededRandom.Range(2, 5);
+                            int matGain = SeededRandom.Range(0, 3);
+                            int curGain = SeededRandom.Range(0, 2);
+                            colonyMgr.AddFood(foodGain);
+                            colonyMgr.AddMaterials(matGain);
+                            colonyMgr.AddCurrency(curGain);
+                            totalResourcesGathered += foodGain + matGain + curGain;
+                            string encName = node.encounterDefinition != null ? node.encounterDefinition.encounterName : "unknown";
+                            nodeResult = $"Encounter '{encName}' — gathered food+{foodGain} mat+{matGain} cur+{curGain}";
+                            break;
+                        }
+                        case NodeType.EliteEncounter:
+                        {
+                            totalEncounters++;
+                            int foodGain = SeededRandom.Range(3, 7);
+                            int matGain = SeededRandom.Range(1, 4);
+                            int curGain = SeededRandom.Range(1, 4);
+                            int eliteDmg = SeededRandom.Range(1, 4);
+                            colonyMgr.AddFood(foodGain);
+                            colonyMgr.AddMaterials(matGain);
+                            colonyMgr.AddCurrency(curGain);
+                            colonyMgr.TakeDamage(eliteDmg);
+                            totalResourcesGathered += foodGain + matGain + curGain;
+                            totalDamageTaken += eliteDmg;
+                            string eliteName = node.encounterDefinition != null ? node.encounterDefinition.encounterName : "unknown";
+                            nodeResult = $"Elite '{eliteName}' — gathered food+{foodGain} mat+{matGain} cur+{curGain}, took {eliteDmg} dmg";
+                            break;
+                        }
+                        case NodeType.Boss:
+                        {
+                            totalEncounters++;
+                            int bossDmg = SeededRandom.Range(3, 8);
+                            colonyMgr.TakeDamage(bossDmg);
+                            totalDamageTaken += bossDmg;
+                            string bossName = config.bossDefinition != null ? config.bossDefinition.bossName : "unknown";
+                            nodeResult = $"BOSS '{bossName}' defeated! Took {bossDmg} dmg";
+                            break;
+                        }
+                        case NodeType.Shop:
+                        {
+                            int spent = Mathf.Min(SeededRandom.Range(2, 5), colonyMgr.CurrencyStockpile);
+                            if (spent > 0) colonyMgr.SpendCurrency(spent);
+                            nodeResult = $"Shop — spent {spent} currency";
+                            break;
+                        }
+                        case NodeType.HealingShrine:
+                        {
+                            int healAmt = SeededRandom.Range(3, 8);
+                            int hpBefore = colonyMgr.CurrentHP;
+                            colonyMgr.Heal(healAmt);
+                            int actualHeal = colonyMgr.CurrentHP - hpBefore;
+                            totalHealing += actualHeal;
+                            nodeResult = $"Healing Shrine — healed {actualHeal} HP (capped from {healAmt})";
+                            break;
+                        }
+                        case NodeType.UpgradeShrine:
+                        {
+                            nodeResult = "Upgrade Shrine — upgraded a card";
+                            break;
+                        }
+                        case NodeType.CardDraft:
+                        {
+                            nodeResult = "Card Draft — drafted a card";
+                            break;
+                        }
+                        case NodeType.Event:
+                        {
+                            int eventRoll = SeededRandom.Range(0, 3);
+                            if (eventRoll == 0)
+                            {
+                                int gain = SeededRandom.Range(2, 5);
+                                colonyMgr.AddFood(gain);
+                                totalResourcesGathered += gain;
+                                nodeResult = $"Event — favorable: food+{gain}";
+                            }
+                            else if (eventRoll == 1)
+                            {
+                                int dmg = SeededRandom.Range(1, 4);
+                                colonyMgr.TakeDamage(dmg);
+                                totalDamageTaken += dmg;
+                                nodeResult = $"Event — hostile: -{dmg} HP";
+                            }
+                            else
+                            {
+                                nodeResult = "Event — neutral (no effect)";
+                            }
+                            break;
+                        }
+                        case NodeType.RestSite:
+                        {
+                            int restHeal = Mathf.CeilToInt(colonyMgr.MaxHP * 0.3f);
+                            int hpBefore = colonyMgr.CurrentHP;
+                            colonyMgr.Heal(restHeal);
+                            int actualHeal = colonyMgr.CurrentHP - hpBefore;
+                            totalHealing += actualHeal;
+                            nodeResult = $"Rest Site — healed {actualHeal} HP";
+                            break;
+                        }
+                    }
+
+                    report.AppendLine($"│  [{nodeStep}] Row {node.position.x} Col {node.position.y}: {node.nodeType} (d={node.difficulty})");
+                    report.AppendLine($"│       {nodeResult}{foodNote}");
+                    report.AppendLine($"│       HP: {colonyMgr.CurrentHP}/{colonyMgr.MaxHP} | Food: {colonyMgr.FoodStockpile} | Mat: {colonyMgr.MaterialsStockpile} | Cur: {colonyMgr.CurrencyStockpile}");
+
+                    // Check colony death
+                    if (!colonyMgr.IsAlive)
+                    {
+                        report.AppendLine("│");
+                        report.AppendLine("│  *** COLONY DESTROYED — RUN FAILED ***");
+                        runEnded = true;
+                        victory = false;
+                        break;
+                    }
+
+                    // Boss node = level complete
+                    if (node.nodeType == NodeType.Boss)
+                    {
+                        levelsCompleted++;
+                        report.AppendLine($"│  >>> Level {levelNum} complete! ({levelsCompleted}/{configs.Count})");
+                        break;
+                    }
+
+                    // Advance map
+                    mapMgr.OnNodeComplete();
+                }
+
+                report.AppendLine("│");
+                report.AppendLine($"└─── End of Level {levelNum} ─────────────────────────────────");
+                report.AppendLine();
+            }
+
+            // --- Check victory ---
+            if (!runEnded && levelsCompleted >= configs.Count)
+            {
+                victory = true;
+            }
+
+            // --- Achievement checks ---
+            if (achMgr != null && victory)
+                achMgr.TryUnlock(AchievementId.FirstVictory);
+            bool firstVictoryUnlocked = achMgr != null && achMgr.IsUnlocked(AchievementId.FirstVictory);
+
+            // --- Final report ---
+            report.AppendLine("╔══════════════════════════════════════════════════════════╗");
+            report.AppendLine($"║  RESULT: {(victory ? "VICTORY" : "DEFEAT"),-47}║");
+            report.AppendLine("╠══════════════════════════════════════════════════════════╣");
+            report.AppendLine($"║  Levels Completed: {levelsCompleted}/{configs.Count,-35}║");
+            report.AppendLine($"║  Nodes Visited:    {totalNodesVisited,-37}║");
+            report.AppendLine($"║  Encounters:       {totalEncounters,-37}║");
+            report.AppendLine($"║  Resources Gained: {totalResourcesGathered,-37}║");
+            report.AppendLine($"║  Food Consumed:    {totalFoodConsumed,-37}║");
+            report.AppendLine($"║  Damage Taken:     {totalDamageTaken,-37}║");
+            report.AppendLine($"║  Healing Received: {totalHealing,-37}║");
+            report.AppendLine($"║  Final HP:         {colonyMgr.CurrentHP}/{colonyMgr.MaxHP,-34}║");
+            report.AppendLine($"║  Final Food:       {colonyMgr.FoodStockpile,-37}║");
+            report.AppendLine($"║  Final Materials:  {colonyMgr.MaterialsStockpile,-37}║");
+            report.AppendLine($"║  Final Currency:   {colonyMgr.CurrencyStockpile,-37}║");
+            report.AppendLine("╠══════════════════════════════════════════════════════════╣");
+            report.AppendLine("║  Node Type Breakdown:                                    ║");
+            foreach (var kvp in nodeTypeCounts)
+                report.AppendLine($"║    {kvp.Key,-20} x{kvp.Value,-33}║");
+            if (firstVictoryUnlocked)
+                report.AppendLine("║  Achievement Unlocked: FirstVictory                     ║");
+            report.AppendLine("╚══════════════════════════════════════════════════════════╝");
+
+            Debug.Log(report.ToString());
+
+            // --- Assertions ---
+            Assert.Greater(totalNodesVisited, 0, "Should have visited at least 1 node");
+            Assert.Greater(totalEncounters, 0, "Should have had at least 1 encounter");
+
+            if (victory)
+            {
+                Assert.AreEqual(configs.Count, levelsCompleted, "Should complete all levels for victory");
+                Assert.IsTrue(colonyMgr.IsAlive, "Colony should be alive on victory");
+            }
+            else
+            {
+                Assert.IsFalse(colonyMgr.IsAlive, "Colony should be dead on defeat");
+            }
+
+            // Cleanup
+            colonyMgr.InitializeHP();
+            if (relicMgr != null) relicMgr.ClearRelics();
+        }
+#endif
     }
 }

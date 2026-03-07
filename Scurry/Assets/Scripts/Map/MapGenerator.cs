@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Scurry.Data;
+using Scurry.Core;
 
 namespace Scurry.Map
 {
@@ -22,7 +23,7 @@ namespace Scurry.Map
                 if (isLastRow)
                     nodeCount = 1; // Boss node
                 else
-                    nodeCount = Random.Range(config.minNodesPerRow, config.maxNodesPerRow + 1);
+                    nodeCount = SeededRandom.Range(config.minNodesPerRow, config.maxNodesPerRow + 1);
 
                 for (int col = 0; col < nodeCount; col++)
                 {
@@ -54,11 +55,11 @@ namespace Scurry.Map
                     // Assign encounter definition for encounter nodes
                     if (node.nodeType == NodeType.ResourceEncounter && config.encounterPool.Count > 0)
                     {
-                        node.encounterDefinition = config.encounterPool[Random.Range(0, config.encounterPool.Count)];
+                        node.encounterDefinition = config.encounterPool[SeededRandom.Range(0, config.encounterPool.Count)];
                     }
                     else if (node.nodeType == NodeType.EliteEncounter && config.eliteEncounterPool.Count > 0)
                     {
-                        node.encounterDefinition = config.eliteEncounterPool[Random.Range(0, config.eliteEncounterPool.Count)];
+                        node.encounterDefinition = config.eliteEncounterPool[SeededRandom.Range(0, config.eliteEncounterPool.Count)];
                     }
 
                     rowNodes.Add(node);
@@ -104,9 +105,9 @@ namespace Scurry.Map
                         node.connectedNodeIndices.Add(primaryTarget);
 
                         // 50% chance to also connect to an adjacent node for branching
-                        if (Random.value > 0.5f)
+                        if (SeededRandom.Value > 0.5f)
                         {
-                            int secondary = primaryTarget + (Random.value > 0.5f ? 1 : -1);
+                            int secondary = primaryTarget + (SeededRandom.Value > 0.5f ? 1 : -1);
                             secondary = Mathf.Clamp(secondary, 0, nextRow.Count - 1);
                             if (secondary != primaryTarget && !node.connectedNodeIndices.Contains(secondary))
                             {
@@ -151,7 +152,7 @@ namespace Scurry.Map
             foreach (var w in weights)
                 totalWeight += w.weight;
 
-            float roll = Random.Range(0f, totalWeight);
+            float roll = SeededRandom.Range(0f, totalWeight);
             float cumulative = 0f;
             foreach (var w in weights)
             {
