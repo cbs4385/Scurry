@@ -1,0 +1,154 @@
+COMBAT ANALYSIS REPORT — First Logged Game
+============================================
+Date: 2026-03-12
+Run: Single-game autoplay with full logging (batchMode=false)
+Result: DEFEAT on turn 6, allHeroesDown=True
+
+GAME SETUP
+----------
+- 18 heroes deployed, 2 colony cards
+- Deck size: 28 (26 main + 2 colony)
+- Equipment: All heroes equipped with Needle Sword (offensive slot only)
+- Colony: Basic (no structures built, auto-play skips colony phase)
+- Food production: 2/turn (base colony output)
+- Enemies: 14 total (regular + bosses), ~33% node density
+
+COMBAT #1 — Node 2, Turn 1
+---------------------------
+Participants: 6 heroes vs 3 enemies (including zone boss)
+
+  Heroes:
+    Bulwark     (combat=3, HP=5/6 — already starved)
+    Captain     (combat=4, HP=3/4 — already starved)
+    Scout       (combat=3, HP=2/3 — already starved)
+    Messenger   (combat=2, HP=1/2 — already starved)
+    Healer      (combat=2, HP=2/3 — already starved)
+    Assassin    (combat=5, HP=2/2 — AT FULL HP but only 2 max)
+
+  Enemies:
+    Farm Cat          (strength=4,  HP=5)
+    Alley Cat         (strength=5,  HP=6)
+    Tobias & Duchess  (strength=10, HP=20) — ZONE BOSS
+
+  Round 1:
+    Hero total strength:  19
+    Enemy total strength: 19 (TIED)
+
+    Hero damage dealt (19): Farm Cat takes 5 → DEFEATED
+                            Alley Cat takes 6 → DEFEATED
+                            Tobias & Duchess takes 8 → 20→12 HP remaining
+
+    Enemy damage dealt (19): Messenger takes 1 → 1→0 INJURED (was at 1 HP from starvation)
+                             Healer takes 2 → 2→0 INJURED
+                             Bulwark takes 5 → 5→0 INJURED
+                             Scout takes 2 → 2→0 INJURED
+                             Captain takes 3 → 3→0 INJURED
+                             Assassin takes 2 → 2→0 INJURED
+                             (remaining 4 damage unassigned — all heroes down)
+
+  Result: HEROES LOST — all 6 heroes injured, 2 regular enemies defeated
+  Post-combat: Tobias & Duchess survives at 12/20 HP
+
+COMBAT #2 — Node 3, Turn 1
+---------------------------
+Participants: 6 heroes vs 1 enemy (boss, carried over from node 2 somehow — it's the same boss)
+
+  Heroes:
+    Warrior       (combat=5, HP reduced from starvation)
+    Sentinel      (combat=4)
+    Commander     (combat=5)
+    Quartermaster (combat=2)
+    Explorer      (combat=2)
+    Inventor      (combat=3)
+
+  Enemies:
+    Tobias & Duchess  (strength=10, HP=12/20 — damaged from Combat #1)
+
+  Round 1:
+    Hero total strength:  21
+    Enemy total strength: 10
+
+    Hero damage dealt (21): Tobias & Duchess takes 12 → 12→0 DEFEATED
+    Enemy damage dealt (10): Quartermaster takes 1 → INJURED
+                             Explorer takes 1 → INJURED
+                             Inventor takes 1 → INJURED
+                             (remaining 7 damage hits other heroes)
+
+  Result: HEROES WON — boss defeated, but 3+ heroes injured in the process
+
+SUBSEQUENT COMBATS: Turns 2-5
+------------------------------
+- More combats at nodes 3 and 7, all lost by heroes (heroesWon=False)
+- Heroes steadily attrited by combination of starvation + combat
+- Deploy count: 18 → 11 → 4 → 2 → 2 → 0
+
+DEFEAT CONDITIONS
+-----------------
+Turn 6: deployedCount=0, availableHeroes=0 → allHeroesDown=True → DEFEAT
+
+ROOT CAUSE ANALYSIS
+===================
+
+PRIMARY ISSUE: STARVATION (Critical)
+  - 18 deployed heroes need 18 food/turn
+  - Colony produces only 2 food/turn (base rate)
+  - 16 heroes starve EVERY turn, losing 1 HP each
+  - Low-HP heroes (Messenger 2HP, Assassin 2HP, Rogue 2HP) are at 1 HP
+    before their first combat — they die to ANY damage
+  - Even tanky heroes (Bulwark 6HP, Guardian 5HP) lose 1 HP/turn and
+    crumble after 3-4 turns of starvation
+
+  Impact: Starvation deals 16 damage to the party every turn.
+          Over 5 turns, that's 80 total HP drained before combat.
+          The entire hero pool has ~60 total HP — starvation alone
+          kills the party by turn 4-5 even without combat.
+
+SECONDARY ISSUE: COMBAT DAMAGE DISTRIBUTION
+  - Enemy damage is applied to lowest-combat heroes first (per GDD)
+  - But starvation already reduced those heroes to 1 HP
+  - A hero at 1 HP dies to any combat damage, even 1 point
+  - This means every combat kills multiple heroes regardless of strength ratio
+
+  Example: Combat #1, heroes dealt 19 vs enemies' 19 (even match)
+           Heroes killed 2 of 3 enemies BUT all 6 heroes died
+           Why: Heroes had 1-5 HP (avg ~2.5) vs 19 total enemy damage
+                19 damage ÷ ~2.5 avg HP = all 6 heroes killed
+
+TERTIARY ISSUE: RESOURCE LOOP NEVER STARTS
+  - Heroes gather resources on map nodes during Gather phase
+  - But heroes must RETURN to colony to deposit resources
+  - Heroes getting injured drop their carried resources
+  - With starvation killing heroes before they can return,
+    the colony never receives food → starvation continues → death spiral
+
+BALANCE RECOMMENDATIONS
+========================
+
+1. REDUCE FOOD REQUIREMENT
+   - Current: 1 food per deployed hero per turn (18 food for 18 heroes)
+   - Option A: 1 food per 3 heroes (6 food for 18 heroes)
+   - Option B: Only deployed-away-from-colony heroes need food
+   - Option C: Flat food cost (e.g., 5/turn regardless of hero count)
+
+2. INCREASE BASE FOOD PRODUCTION
+   - Current: 2 food/turn from basic colony
+   - Suggested: 8-10 food/turn base, upgradeable via colony cards
+   - This allows 8-10 heroes to be fed without colony investment
+
+3. STARVATION SHOULD NOT KILL
+   - Instead of 1 HP damage, starving heroes could:
+     - Lose 1 combat strength (weakened, not dying)
+     - Be unable to move (grounded until fed)
+     - Take 1 damage every OTHER turn (slower death spiral)
+
+4. HERO HP IS TOO LOW FOR POOLED COMBAT
+   - With pooled damage, low-HP heroes die instantly
+   - Consider: minimum 3 HP for all heroes
+   - Or: damage is split evenly across heroes (not lowest-first)
+   - Or: heroes can only take damage up to their combat value (tougher fighters absorb more)
+
+5. VICTORY CONDITION IS UNREACHABLE
+   - Pied Piper is at the far end of the map
+   - Heroes need 6+ turns just to traverse there
+   - But the colony dies by turn 4-5
+   - Even with perfect balance, the food economy must sustain 10+ turns

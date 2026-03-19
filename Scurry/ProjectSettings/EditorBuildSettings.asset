@@ -12,23 +12,26 @@ EditorBuildSettings:
     path: Assets/Scenes/MainMenu.unity
     guid: 672b6bc7039cc474a9904997505e7d36
   - enabled: 1
-    path: Assets/Scenes/ColonyDraft.unity
-    guid: 0f5337577be0038448596a1e66e25e6f
+    path: Assets/Scenes/DeckConstruction.unity
+    guid: 13309a8f5cdf0c045aede72580433c30
   - enabled: 1
-    path: Assets/Scenes/ColonyManagement.unity
-    guid: 9efbeb5f1e3af314e9a3ab83f1e5c372
+    path: Assets/Scenes/GameMap.unity
+    guid: a3172589bbb283b4ba30eb72874b98cc
   - enabled: 1
-    path: Assets/Scenes/MapTraversal.unity
-    guid: 52e4fe163eda054439b6f1c0b6d78753
+    path: Assets/Scenes/Colony.unity
+    guid: 4961f9e75296e374f8ae73b9b6c68282
   - enabled: 1
-    path: Assets/Scenes/Encounter.unity
-    guid: 67604602e8e0cae4787d5f75a09b53a0
+    path: Assets/Scenes/Deployment.unity
+    guid: 068d7d516a7886d4584b42eb8e58bd31
+  - enabled: 1
+    path: Assets/Scenes/Combat.unity
+    guid: 795c23203ab03a84781e9f3c46d5e0e4
+  - enabled: 1
+    path: Assets/Scenes/CardReward.unity
+    guid: 8467079070b6b2a49ac572dc6acffc84
   - enabled: 1
     path: Assets/Scenes/RunResult.unity
     guid: e2df7f1b954f86c46a0d1d422e75bc84
-  - enabled: 1
-    path: Assets/Scenes/M0_Prototype.unity
-    guid: 7a3a7fd2b8b88ab4abf6a9d2f566f8b6
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

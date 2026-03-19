@@ -66,8 +66,17 @@ namespace Scurry.UI
 
         private void BuildToastPanel()
         {
-            var canvas = FindAnyObjectByType<Canvas>();
-            if (canvas == null) return;
+            // Parent to OUR canvas (the one this component lives on), not any arbitrary canvas.
+            // Using FindAnyObjectByType<Canvas>() could find the PersistentCanvas (DontDestroyOnLoad)
+            // which would orphan the toast panel when this component is destroyed.
+            var canvas = GetComponentInParent<Canvas>();
+            if (canvas == null)
+                canvas = GetComponent<Canvas>();
+            if (canvas == null)
+            {
+                Debug.LogWarning("[AchievementToastUI] BuildToastPanel: no parent Canvas found — cannot create toast");
+                return;
+            }
 
             toastPanel = new GameObject("AchievementToast", typeof(RectTransform), typeof(Image), typeof(CanvasGroup));
             toastPanel.transform.SetParent(canvas.transform, false);

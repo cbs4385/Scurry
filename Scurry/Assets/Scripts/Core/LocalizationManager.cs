@@ -18,13 +18,29 @@ namespace Scurry.Core
         {
             if (_instance != null && _instance != this)
             {
-                Debug.LogWarning("[LocalizationManager] Awake: duplicate instance destroyed");
-                Destroy(gameObject);
+                Debug.LogWarning("[LocalizationManager] Awake: duplicate instance — destroying component only");
+                Destroy(this);
                 return;
             }
             _instance = this;
-            DontDestroyOnLoad(gameObject);
+            if (gameObject.name == "PersistentManagers")
+                DontDestroyOnLoad(gameObject);
 
+            // Auto-load tables if SerializeField is empty (multi-scene architecture)
+#if UNITY_EDITOR
+            if (availableTables == null || availableTables.Length == 0)
+            {
+                var tables = new System.Collections.Generic.List<LocalizationTableSO>();
+                foreach (var guid in UnityEditor.AssetDatabase.FindAssets("t:LocalizationTableSO"))
+                {
+                    var path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
+                    var table = UnityEditor.AssetDatabase.LoadAssetAtPath<LocalizationTableSO>(path);
+                    if (table != null) tables.Add(table);
+                }
+                availableTables = tables.ToArray();
+                Debug.Log($"[LocalizationManager] Awake: auto-loaded {availableTables.Length} localization tables from AssetDatabase");
+            }
+#endif
             Debug.Log($"[LocalizationManager] Awake: availableTables={availableTables?.Length ?? 0}, defaultLanguage={defaultLanguage}");
             InitializeTables();
         }

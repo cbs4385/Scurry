@@ -5,69 +5,129 @@ namespace Scurry.Data
     [System.Serializable]
     public class RunSaveData
     {
-        // Run state
-        public int currentLevel;
-        public int runState; // RunState enum as int
-        public int nodesVisited;
-        public string currentSceneName; // For restoring correct scene on Continue
-        public int randomSeed; // SeededRandom seed for reproducibility
+        // Run metadata
+        public int randomSeed;
+        public int currentTurn;
+        public int runState;
+        public int difficulty; // DifficultyLevel as int
 
-        // Colony HP
-        public int colonyHP;
-        public int colonyMaxHP;
+        // Deck (card IDs)
+        public List<int> deckCardIds = new List<int>();
+        public List<int> colonyDeckCardIds = new List<int>();
 
-        // Stockpiles
+        // Deployed heroes
+        public List<HeroSaveData> deployedHeroes = new List<HeroSaveData>();
+
+        // Injured heroes (card IDs)
+        public List<int> injuredHeroCardIds = new List<int>();
+
+        // Available equipment (card IDs not yet deployed)
+        public List<int> availableEquipmentIds = new List<int>();
+
+        // Deployed equipment (card IDs on heroes)
+        public List<int> deployedEquipmentIds = new List<int>();
+
+        // Available tactical cards
+        public List<int> availableTacticalIds = new List<int>();
+
+        // Used tactical cards (removed from game)
+        public List<int> usedTacticalIds = new List<int>();
+
+        // Colony
+        public List<ColonyCardSaveData> placedColonyCards = new List<ColonyCardSaveData>();
+        public List<int> availableColonyCardIds = new List<int>();
+
+        // Stockpile
         public int foodStockpile;
         public int materialsStockpile;
         public int currencyStockpile;
 
-        // Decks (stored as card names for SO lookup)
-        public List<string> heroDeckCardNames = new List<string>();
-        public List<string> colonyDeckCardNames = new List<string>();
-
-        // Wound tracking
-        public List<string> woundedHeroNames = new List<string>();
-        public List<string> exhaustedHeroNames = new List<string>();
-
-        // Map state
-        public int mapCurrentRow;
-        public int mapCurrentCol;
+        // Map state (node states)
         public List<MapNodeSaveData> mapNodes = new List<MapNodeSaveData>();
 
-        // Colony config (cached from colony management)
-        public ColonyConfigSaveData colonyConfig;
+        // Enemy state
+        public List<EnemySaveData> enemies = new List<EnemySaveData>();
 
-        // Relics
-        public List<string> activeRelicNames = new List<string>();
+        // Mid-run card rewards (Phase 3)
+        public List<int> acquiredCardIds = new List<int>();
 
-        // Score
-        public int encountersCompleted;
+        // Stats
         public int totalResourcesGathered;
-        public int enemiesDefeated;
-        public int bossesKilled;
+        public int totalEnemiesDefeated;
+        public int zoneBossesDefeated;
+        public bool piedPiperDefeated;
+        public int colonyCardsPlayed;
+        public List<int> heroesEverInjuredIds = new List<int>();
+    }
+
+    [System.Serializable]
+    public class HeroSaveData
+    {
+        public int cardId;
+        public int tokenId;
+        public int currentNodeId;
+        public int targetNodeId;
+        public int currentHP;
+        public int offensiveEquipId;  // -1 if none
+        public int defensiveEquipId;  // -1 if none
+        public int utilityEquipId;    // -1 if none
+        public List<ResourceAmount> carriedResources = new List<ResourceAmount>();
+
+        public HeroSaveData()
+        {
+            offensiveEquipId = -1;
+            defensiveEquipId = -1;
+            utilityEquipId = -1;
+        }
+    }
+
+    [System.Serializable]
+    public class ResourceAmount
+    {
+        public int resourceType; // ResourceType as int
+        public int amount;
+
+        public ResourceAmount() { }
+
+        public ResourceAmount(ResourceType type, int amt)
+        {
+            resourceType = (int)type;
+            amount = amt;
+        }
+    }
+
+    [System.Serializable]
+    public class ColonyCardSaveData
+    {
+        public int cardId;
+        public int placedId;
+        public float posX;
+        public float posY;
+        public List<int> adjacentPlacedIds = new List<int>();
     }
 
     [System.Serializable]
     public class MapNodeSaveData
     {
-        public int row;
-        public int col;
-        public int nodeType; // NodeType enum as int
+        public int nodeId;
+        public int zone; // NodeType as int
         public bool visited;
-        public List<int> connectedIndices = new List<int>();
-        public int difficulty;
-        public string encounterName; // for SO lookup
+        public int fogState; // FogState as int
+        public List<ResourceAmount> resources = new List<ResourceAmount>();
+        public float posX;
+        public float posY;
+        public List<int> neighborIds = new List<int>();
     }
 
     [System.Serializable]
-    public class ColonyConfigSaveData
+    public class EnemySaveData
     {
-        public int maxHeroDeckSize;
-        public int foodConsumptionPerNode;
-        public int heroCombatBonus;
-        public int heroMoveBonus;
-        public int heroCarryBonus;
-        public int totalPopulation;
-        public int bonusStartingFood;
+        public int tokenId;
+        public int enemyDefId;
+        public string enemyName;
+        public int currentNodeId;
+        public int currentHP;
+        public bool isDefeated;
+        public int respawnTimer;
     }
 }

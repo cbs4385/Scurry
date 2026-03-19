@@ -32,6 +32,10 @@ namespace Scurry.Data
         public List<string> discoveredLore = new List<string>();
         public int scrapbookCompletion; // Percentage (0-100)
 
+        // Last Constructed Deck (pre-populate next run's deck construction)
+        public List<int> lastDeckCardIds = new List<int>();
+        public List<int> lastColonyDeckCardIds = new List<int>();
+
         // Best Run Stats
         public int bestLevelReached;
         public int bestResourcesInSingleRun;

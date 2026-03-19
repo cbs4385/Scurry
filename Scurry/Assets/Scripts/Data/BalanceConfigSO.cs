@@ -34,15 +34,15 @@ namespace Scurry.Data
             }
         }
 
-        [Header("Economy - Food")]
+        [Header("Economy")]
         [Tooltip("Base food stockpile at run start")]
-        public int startingFood = 15;
+        public int startingFood = 25;
         [Tooltip("Base materials stockpile at run start")]
-        public int startingMaterials = 5;
+        public int startingMaterials = 8;
         [Tooltip("Base currency stockpile at run start")]
         public int startingCurrency = 5;
 
-        [Header("Economy - Starvation")]
+        [Header("Starvation")]
         [Tooltip("HP damage per unpaid food unit")]
         public int starvationDamagePerFood = 2;
 
@@ -51,107 +51,114 @@ namespace Scurry.Data
         public int baseColonyHP = 30;
         [Tooltip("Base colony max HP")]
         public int baseColonyMaxHP = 30;
-        [Tooltip("Base hero deck size before colony bonuses")]
-        public int baseHeroDeckSize = 8;
-
-        [Header("Shop Prices")]
-        public int priceCommon = 2;
-        public int priceUncommon = 4;
-        public int priceRare = 7;
-        public int priceLegendary = 12;
-        [Tooltip("Currency cost to reroll shop")]
-        public int shopRerollCost = 2;
-        [Tooltip("Number of cards offered in shop")]
-        public int shopCardCount = 5;
-
-        [Header("Upgrade Costs (Materials)")]
-        public int upgradeCostCommon = 2;
-        public int upgradeCostUncommon = 4;
-        public int upgradeCostRare = 7;
-
-        [Header("Healing Costs (Food)")]
-        public int minorHealCost = 2;
-        public int minorHealAmount = 5;
-        public int majorHealCost = 5;
-        public int majorHealAmount = 15;
-        public int resupplyCost = 3;
-
-        [Header("Rest Site")]
-        [Tooltip("Percentage of max HP restored at rest site (0-100)")]
-        [Range(0, 100)]
-        public int restHealPercent = 30;
 
         [Header("Combat")]
         [Tooltip("Difficulty scaling multiplier per difficulty point")]
         public float difficultyScalingFactor = 0.15f;
-        [Tooltip("Colony HP damage on boss fight failure")]
-        public int bossFailureDamage = 10;
+        [Tooltip("Per-hero combat bonus when 2 heroes fight together")]
+        public int groupCombatBonus2Heroes = 2;
+        [Tooltip("Per-hero combat bonus when 3 heroes fight together")]
+        public int groupCombatBonus3Heroes = 3;
+        [Tooltip("Per-hero combat bonus when 4+ heroes fight together")]
+        public int groupCombatBonus4PlusHeroes = 4;
 
-        [Header("Draft")]
-        [Tooltip("Number of cards offered in card draft")]
-        public int draftCardCount = 3;
+        [Header("Enemies")]
+        [Tooltip("Base chance (0-1) that a non-boss enemy spawns per node")]
+        public float enemySpawnChance = 0.65f;
+        [Tooltip("Number of zone bosses that must be defeated before Pied Piper node is accessible")]
+        public int bossesRequiredForPiper = 2;
 
-        [Header("Colony Draft")]
-        [Tooltip("Number of colony cards offered to choose from at run start")]
-        public int colonyDraftOfferCount = 12;
-        [Tooltip("Number of colony cards the player picks to form their colony deck")]
-        public int colonyDraftPickCount = 8;
+        [Header("Colony Card Costs")]
+        [Tooltip("Food cost to place a Food & Storage tier colony card")]
+        public int colonyFoodStorageFoodCost = 1;
+        [Tooltip("Materials cost to place a Food & Storage tier colony card")]
+        public int colonyFoodStorageMaterialsCost = 1;
+        [Tooltip("Food cost to place a Structure & Defense tier colony card")]
+        public int colonyStructureDefenseFoodCost = 1;
+        [Tooltip("Materials cost to place a Structure & Defense tier colony card")]
+        public int colonyStructureDefenseMaterialsCost = 2;
+        [Tooltip("Food cost to place an Advanced tier colony card")]
+        public int colonyAdvancedFoodCost = 1;
+        [Tooltip("Materials cost to place an Advanced tier colony card")]
+        public int colonyAdvancedMaterialsCost = 2;
 
-        [Header("Encounter Rewards")]
-        [Tooltip("Bonus currency for completing an elite encounter")]
-        public int eliteBonusCurrency = 3;
+        [Header("Deployment")]
+        [Tooltip("Max hero deploys per turn per difficulty: Easy, Normal, Hard")]
+        public int[] maxHeroDeploysPerDifficulty = { 4, 3, 2 };
 
-        public int GetShopPrice(CardRarity rarity)
+        [Header("Food Economy")]
+        [Tooltip("Base food production per turn from colony")]
+        public int baseFoodProduction = 5;
+        [Tooltip("Food bonus per N heroes per difficulty: Easy, Normal, Hard (1 food per this many heroes)")]
+        public int[] foodBonusPerNHeroesPerDifficulty = { 2, 3, 5 };
+        [Tooltip("Heroes at colony node do not consume food")]
+        public bool heroesAtColonyFreeFood = true;
+
+        [Header("Difficulty")]
+        [Tooltip("Current difficulty level")]
+        public DifficultyLevel difficulty = DifficultyLevel.Normal;
+        [Tooltip("Enemy strength multiplier per difficulty: Easy, Normal, Hard")]
+        public float[] enemyStrengthMultipliers = { 0.5f, 1.0f, 1.5f };
+        [Tooltip("Enemy spawn chance per difficulty: Easy, Normal, Hard")]
+        public float[] enemySpawnChances = { 0.25f, 0.40f, 0.65f };
+        [Tooltip("Easy mode: bonus starting food")]
+        public int easyBonusFood = 10;
+        [Tooltip("Easy mode: bonus starting materials")]
+        public int easyBonusMaterials = 5;
+        [Tooltip("Easy mode: bonus HP for all heroes")]
+        public int easyBonusHeroHP = 2;
+        [Tooltip("Easy mode: bonus combat for all heroes")]
+        public int easyBonusHeroCombat = 1;
+
+        /// <summary>Returns the max hero deploys per turn for the current difficulty.</summary>
+        public int GetMaxHeroDeploysPerTurn()
         {
-            switch (rarity)
-            {
-                case CardRarity.Common: return priceCommon;
-                case CardRarity.Uncommon: return priceUncommon;
-                case CardRarity.Rare: return priceRare;
-                case CardRarity.Legendary: return priceLegendary;
-                default: return priceCommon;
-            }
+            int idx = (int)difficulty;
+            if (idx >= 0 && idx < maxHeroDeploysPerDifficulty.Length)
+                return maxHeroDeploysPerDifficulty[idx];
+            return 2;
         }
 
-        public int GetUpgradeCost(CardRarity rarity)
+        /// <summary>Returns the food bonus divisor (1 food per N heroes) for the current difficulty.</summary>
+        public int GetFoodBonusPerNHeroes()
         {
-            switch (rarity)
-            {
-                case CardRarity.Common: return upgradeCostCommon;
-                case CardRarity.Uncommon: return upgradeCostUncommon;
-                case CardRarity.Rare: return upgradeCostRare;
-                default: return upgradeCostRare;
-            }
+            int idx = (int)difficulty;
+            if (idx >= 0 && idx < foodBonusPerNHeroesPerDifficulty.Length)
+                return foodBonusPerNHeroesPerDifficulty[idx];
+            return 3;
         }
 
-        // Explicit IBalanceConfig implementation (fields -> properties)
+        /// <summary>Returns the enemy strength multiplier for the current difficulty.</summary>
+        public float GetEnemyStrengthMultiplier()
+        {
+            int idx = (int)difficulty;
+            if (idx >= 0 && idx < enemyStrengthMultipliers.Length)
+                return enemyStrengthMultipliers[idx];
+            return 1f;
+        }
+
+        /// <summary>Returns the enemy spawn chance for the current difficulty.</summary>
+        public float GetEnemySpawnChance()
+        {
+            int idx = (int)difficulty;
+            if (idx >= 0 && idx < enemySpawnChances.Length)
+                return enemySpawnChances[idx];
+            return enemySpawnChance;
+        }
+
+        // IBalanceConfig implementation
         int IBalanceConfig.StartingFood => startingFood;
         int IBalanceConfig.StartingMaterials => startingMaterials;
         int IBalanceConfig.StartingCurrency => startingCurrency;
         int IBalanceConfig.StarvationDamagePerFood => starvationDamagePerFood;
         int IBalanceConfig.BaseColonyHP => baseColonyHP;
         int IBalanceConfig.BaseColonyMaxHP => baseColonyMaxHP;
-        int IBalanceConfig.BaseHeroDeckSize => baseHeroDeckSize;
-        int IBalanceConfig.PriceCommon => priceCommon;
-        int IBalanceConfig.PriceUncommon => priceUncommon;
-        int IBalanceConfig.PriceRare => priceRare;
-        int IBalanceConfig.PriceLegendary => priceLegendary;
-        int IBalanceConfig.ShopRerollCost => shopRerollCost;
-        int IBalanceConfig.ShopCardCount => shopCardCount;
-        int IBalanceConfig.UpgradeCostCommon => upgradeCostCommon;
-        int IBalanceConfig.UpgradeCostUncommon => upgradeCostUncommon;
-        int IBalanceConfig.UpgradeCostRare => upgradeCostRare;
-        int IBalanceConfig.MinorHealCost => minorHealCost;
-        int IBalanceConfig.MinorHealAmount => minorHealAmount;
-        int IBalanceConfig.MajorHealCost => majorHealCost;
-        int IBalanceConfig.MajorHealAmount => majorHealAmount;
-        int IBalanceConfig.ResupplyCost => resupplyCost;
-        int IBalanceConfig.RestHealPercent => restHealPercent;
         float IBalanceConfig.DifficultyScalingFactor => difficultyScalingFactor;
-        int IBalanceConfig.BossFailureDamage => bossFailureDamage;
-        int IBalanceConfig.DraftCardCount => draftCardCount;
-        int IBalanceConfig.ColonyDraftOfferCount => colonyDraftOfferCount;
-        int IBalanceConfig.ColonyDraftPickCount => colonyDraftPickCount;
-        int IBalanceConfig.EliteBonusCurrency => eliteBonusCurrency;
+        float IBalanceConfig.EnemySpawnChance => enemySpawnChance;
+        int IBalanceConfig.BossesRequiredForPiper => bossesRequiredForPiper;
+        int IBalanceConfig.GroupCombatBonus2 => groupCombatBonus2Heroes;
+        int IBalanceConfig.GroupCombatBonus3 => groupCombatBonus3Heroes;
+        int IBalanceConfig.GroupCombatBonus4Plus => groupCombatBonus4PlusHeroes;
+        int IBalanceConfig.BaseFoodProduction => baseFoodProduction;
     }
 }

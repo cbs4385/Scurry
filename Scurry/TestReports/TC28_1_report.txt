@@ -1,0 +1,343 @@
+╔══════════════════════════════════════════════════════════╗
+║    SCURRY: UI-DRIVEN INTEGRATION TEST (with UI verify)  ║
+║    Seed: 42                                              ║
+╚══════════════════════════════════════════════════════════╝
+
+━━━ PHASE 1: Main Menu ━━━
+  [OK] Scene 'MainMenu' loaded
+  [SNAP] #1: MainMenu_loaded
+  Clicking 'NewRunButton'...
+  [SNAP] #2: MainMenu_NewRun_clicked
+
+━━━ PHASE 2: Colony Draft ━━━
+  [OK] Scene 'ColonyDraft' loaded
+  [SNAP] #3: ColonyDraft_loaded
+  Draft cards shown: 12
+  [SNAP] #4: ColonyDraft_pick_1
+  [SNAP] #5: ColonyDraft_pick_2
+  [SNAP] #6: ColonyDraft_pick_3
+  [SNAP] #7: ColonyDraft_pick_4
+  [SNAP] #8: ColonyDraft_pick_5
+  [SNAP] #9: ColonyDraft_pick_6
+  [SNAP] #10: ColonyDraft_pick_7
+  [SNAP] #11: ColonyDraft_pick_8
+  Selected 8 colony cards
+  Clicking Confirm...
+  [SNAP] #12: ColonyDraft_confirm_clicked
+
+━━━ PHASE 3: Colony Management ━━━
+  [OK] Scene 'ColonyManagement' loaded
+  [SNAP] #13: ColonyManagement_loaded
+  Hand cards shown: 5
+  Grid slots shown: 9
+  Placing card 'HandCard_0' → slot 'Slot_2_2'
+  [SNAP] #14: Colony_place_1_HandCard_0
+  Placing card 'HandCard_2' → slot 'Slot_1_1'
+  [SNAP] #15: Colony_place_2_HandCard_2
+  Placing card 'HandCard_2' → slot 'Slot_0_1'
+  [SNAP] #16: Colony_place_3_HandCard_2
+  Placing card 'HandCard_0' → slot 'Slot_0_1'
+  [SNAP] #17: Colony_place_4_HandCard_0
+  Placing card 'HandCard_0' → slot 'Slot_0_1'
+  [SNAP] #18: Colony_place_5_HandCard_0
+  Placed 5 colony cards on grid
+  [SNAP] #19: ColonyManagement_cards_placed
+  Clicking 'Finish Colony'...
+  [SNAP] #20: ColonyManagement_finish_clicked
+  [SNAP] #21: DeckBuilder_appeared
+  Hero deck builder appeared with 20 pool cards
+  Hero deck builder appeared — adding cards from pool...
+  [SNAP] #22: DeckBuilder_add_1
+  [SNAP] #23: DeckBuilder_add_2
+  [SNAP] #24: DeckBuilder_add_3
+  [SNAP] #25: DeckBuilder_add_4
+  [SNAP] #26: DeckBuilder_add_5
+  [SNAP] #27: DeckBuilder_add_6
+  [SNAP] #28: DeckBuilder_add_7
+  [SNAP] #29: DeckBuilder_add_8
+  Added 8 heroes to deck — clicking Confirm...
+  [SNAP] #30: DeckBuilder_confirmed
+  [SNAP] #31: ColonyManagement_complete
+
+━━━ PHASE 4: Map Traversal ━━━
+  [OK] Scene 'MapTraversal' loaded
+  [SNAP] #32: MapTraversal_loaded
+  Initial available nodes: 2
+  Colony HP: 30/30
+  Food: 20 | Materials: 5 | Currency: 5
+  [1] Clicking 'Node_0_1' (HP=30, Food=20)
+  [SNAP] #33: Map_before_node_1
+  [SNAP] #34: Map_after_node_click_1
+    → Encounter #1 loaded
+  [SNAP] #35: Encounter_1_setup
+    → Camera: ortho=True, size=6, pos=(0.00, 0.00, -10.00)
+    → Disabled overlay canvases: 3
+    → Board: 4x4
+    → Heroes on board: 4
+    → Heroes with visible sprites: 4/4
+    → Enemies on board: 2
+    → Enemies with visible sprites: 2/2
+    → Visible tiles: 16/16
+  [SNAP] #36: Encounter_1_board_verified
+  [SNAP] #37: Encounter_1_battle_t2s
+  [SNAP] #38: Encounter_1_battle_t4s
+  [SNAP] #39: Encounter_1_battle_t6s
+  [SNAP] #40: Encounter_1_result
+    → Result: success=True, resources=2
+  [SNAP] #41: PostEncounter_1_map_restored
+    → Post-encounter: HP=28 (was 30), Food=25 (was 20)
+  [2] Clicking 'Node_1_1' (HP=28, Food=25)
+  [SNAP] #42: Map_before_node_2
+  [SNAP] #43: Map_after_node_click_2
+    → Encounter #2 loaded
+  [SNAP] #44: Encounter_2_setup
+    → Camera: ortho=True, size=6, pos=(0.00, 0.00, -10.00)
+    → Disabled overlay canvases: 3
+    → Board: 4x4
+    → Heroes on board: 4
+    → Heroes with visible sprites: 4/4
+    → Enemies on board: 2
+    → Enemies with visible sprites: 2/2
+    → Visible tiles: 16/16
+  [SNAP] #45: Encounter_2_board_verified
+  [SNAP] #46: Encounter_2_battle_t2s
+  [SNAP] #47: Encounter_2_battle_t4s
+  [SNAP] #48: Encounter_2_battle_t6s
+  [SNAP] #49: Encounter_2_result
+    → Result: success=True, resources=2
+  [SNAP] #50: PostEncounter_2_map_restored
+    → Post-encounter: HP=27 (was 28), Food=32 (was 25)
+  [3] Clicking 'Node_2_2' (HP=27, Food=32)
+  [SNAP] #51: Map_before_node_3
+  [SNAP] #52: Map_after_node_click_3
+    → Encounter #3 loaded
+  [SNAP] #53: Encounter_3_setup
+    → Camera: ortho=True, size=6, pos=(0.00, 0.00, -10.00)
+    → Disabled overlay canvases: 3
+    → Board: 4x4
+    → Heroes on board: 2
+    → Heroes with visible sprites: 2/2
+    → Enemies on board: 2
+    → Enemies with visible sprites: 2/2
+    → Visible tiles: 16/16
+  [SNAP] #54: Encounter_3_board_verified
+  [SNAP] #55: Encounter_3_battle_t2s
+  [SNAP] #56: Encounter_3_battle_t4s
+  [SNAP] #57: Encounter_3_result
+    → Result: success=False, resources=0
+  [SNAP] #58: PostEncounter_3_map_restored
+    → Post-encounter: HP=30 (was 27), Food=34 (was 32)
+  [4] Clicking 'Node_3_1' (HP=30, Food=34)
+  [SNAP] #59: Map_before_node_4
+  [SNAP] #60: Map_after_node_click_4
+    → Overlay: Event
+  [SNAP] #61: Overlay_Event_1
+    → Event overlay — clicking 'Choice_1'
+  [SNAP] #62: Overlay_Event_choice
+    → Event outcome — clicking Continue
+  [SNAP] #63: Overlay_Event_continue
+  [SNAP] #64: PostOverlay_4
+  [5] Clicking 'Node_4_2' (HP=30, Food=33)
+  [SNAP] #65: Map_before_node_5
+  [SNAP] #66: Map_after_node_click_5
+    → Shop: 5 cards
+    → Overlay: Shop
+  [SNAP] #67: Overlay_Shop_2
+    → Shop overlay — clicking Leave
+  [SNAP] #68: Overlay_Shop_leave
+  [SNAP] #69: PostOverlay_5
+  [6] Clicking 'Node_5_1' (HP=30, Food=32)
+  [SNAP] #70: Map_before_node_6
+  [SNAP] #71: Map_after_node_click_6
+    → Overlay: Upgrade
+  [SNAP] #72: Overlay_Upgrade_3
+    → Rest site overlay — clicking Heal
+  [SNAP] #73: Overlay_Rest_heal
+  [SNAP] #74: PostOverlay_6
+  [7] Clicking 'Node_6_2' (HP=30, Food=31)
+  [SNAP] #75: Map_before_node_7
+  [SNAP] #76: Map_after_node_click_7
+    → Overlay: Event
+  [SNAP] #77: Overlay_Event_4
+    → Event overlay — clicking 'Choice_1'
+  [SNAP] #78: Overlay_Event_choice
+    → Event outcome — clicking Continue
+  [SNAP] #79: Overlay_Event_continue
+  [SNAP] #80: PostOverlay_7
+  [8] Clicking 'Node_7_0' (HP=30, Food=35)
+  [SNAP] #81: Map_before_node_8
+  [SNAP] #82: Map_after_node_click_8
+    → Encounter #4 loaded
+  [SNAP] #83: Encounter_4_setup
+    → Camera: ortho=True, size=6, pos=(0.00, 0.00, -10.00)
+    → Disabled overlay canvases: 3
+    → Board: 4x4
+    → Boss fight (no encounter layout — board-less)
+    → Heroes on board: 0
+    → Heroes with visible sprites: 0/0
+    → Enemies on board: 0
+    → Enemies with visible sprites: 0/0
+    → Visible tiles: 16/16
+  [SNAP] #84: Encounter_4_board_verified
+  [SNAP] #85: Encounter_4_result
+    → Result: success=False, resources=0
+  [SNAP] #86: PostEncounter_4_map_restored
+    → Post-encounter: HP=20 (was 30), Food=34 (was 35)
+
+━━━ Level Transition: Colony Management ━━━
+  [SNAP] #87: LevelTransition_ColonyManagement
+  Placing card 'HandCard_0' → slot 'Slot_2_2'
+  [SNAP] #88: Colony_place_1_HandCard_0
+  Placing card 'HandCard_2' → slot 'Slot_3_0'
+  [SNAP] #89: Colony_place_2_HandCard_2
+  Placing card 'HandCard_0' → slot 'Slot_3_3'
+  [SNAP] #90: Colony_place_3_HandCard_0
+  Placing card 'HandCard_1' → slot 'Slot_2_0'
+  [SNAP] #91: Colony_place_4_HandCard_1
+  Placing card 'HandCard_1' → slot 'Slot_0_3'
+  [SNAP] #92: Colony_place_5_HandCard_1
+  Placed 5 colony cards on grid
+  Drawing next hand #2...
+  [SNAP] #93: Colony_hand_2
+  Placing card 'HandCard_2' → slot 'Slot_1_0'
+  [SNAP] #94: Colony_place_1_HandCard_2
+  Placing card 'HandCard_1' → slot 'Slot_1_1'
+  [SNAP] #95: Colony_place_2_HandCard_1
+  Placing card 'HandCard_0' → slot 'Slot_1_1'
+  [SNAP] #96: Colony_place_3_HandCard_0
+  Placed 3 colony cards on grid
+  [SNAP] #97: LevelTransition_cards_placed
+  [SNAP] #98: LevelTransition_finish_clicked
+  Hero deck builder appeared — adding cards from pool...
+  [SNAP] #99: DeckBuilder_add_1
+  [SNAP] #100: DeckBuilder_add_2
+  [SNAP] #101: DeckBuilder_add_3
+  [SNAP] #102: DeckBuilder_add_4
+  [SNAP] #103: DeckBuilder_add_5
+  [SNAP] #104: DeckBuilder_add_6
+  [SNAP] #105: DeckBuilder_add_7
+  [SNAP] #106: DeckBuilder_add_8
+  Added 8 heroes to deck — clicking Confirm...
+  [SNAP] #107: DeckBuilder_confirmed
+  [SNAP] #108: LevelTransition_setaside_done
+  [OK] Scene 'MapTraversal' loaded
+  [SNAP] #109: LevelTransition_map_reloaded
+  [9] Clicking 'Node_0_0' (HP=20, Food=34)
+  [SNAP] #110: Map_before_node_9
+  [SNAP] #111: Map_after_node_click_9
+    → Encounter #5 loaded
+  [SNAP] #112: Encounter_5_setup
+    → Camera: ortho=True, size=6, pos=(0.00, 0.00, -10.00)
+    → Disabled overlay canvases: 3
+    → Board: 5x5
+    → Heroes on board: 5
+    → Heroes with visible sprites: 5/5
+    → Enemies on board: 2
+    → Enemies with visible sprites: 2/2
+    → Visible tiles: 25/25
+  [SNAP] #113: Encounter_5_board_verified
+  [SNAP] #114: Encounter_5_battle_t2s
+  [SNAP] #115: Encounter_5_battle_t4s
+  [SNAP] #116: Encounter_5_battle_t6s
+  [SNAP] #117: Encounter_5_battle_t8s
+  [SNAP] #118: Encounter_5_result
+    → Result: success=True, resources=2
+  [SNAP] #119: PostEncounter_5_map_restored
+    → Post-encounter: HP=10 (was 20), Food=33 (was 34)
+  [10] Clicking 'Node_1_0' (HP=10, Food=33)
+  [SNAP] #120: Map_before_node_10
+  [SNAP] #121: Map_after_node_click_10
+    → Overlay: Healing
+  [SNAP] #122: Overlay_Healing_5
+    → Healing/Rest overlay — clicking Leave
+  [SNAP] #123: Overlay_Healing_leave
+  [SNAP] #124: PostOverlay_10
+  [11] Clicking 'Node_2_0' (HP=10, Food=32)
+  [SNAP] #125: Map_before_node_11
+  [SNAP] #126: Map_after_node_click_11
+    → Encounter #6 loaded
+  [SNAP] #127: Encounter_6_setup
+    → Camera: ortho=True, size=6, pos=(0.00, 0.00, -10.00)
+    → Disabled overlay canvases: 3
+    → Board: 5x5
+    → Heroes on board: 5
+    → Heroes with visible sprites: 5/5
+    → Enemies on board: 3
+    → Enemies with visible sprites: 3/3
+    → Visible tiles: 25/25
+  [SNAP] #128: Encounter_6_board_verified
+  [SNAP] #129: Encounter_6_battle_t2s
+  [SNAP] #130: Encounter_6_battle_t4s
+  [SNAP] #131: Encounter_6_battle_t6s
+  [SNAP] #132: Encounter_6_battle_t8s
+  [SNAP] #133: Encounter_6_result
+    → Result: success=True, resources=2
+  [SNAP] #134: PostEncounter_6_map_restored
+    → Post-encounter: HP=3 (was 10), Food=35 (was 32)
+  [12] Clicking 'Node_3_0' (HP=3, Food=35)
+  [SNAP] #135: Map_before_node_12
+  [SNAP] #136: Map_after_node_click_12
+    → Overlay: Event
+  [SNAP] #137: Overlay_Event_6
+    → Event overlay — clicking 'Choice_0'
+  [SNAP] #138: Overlay_Event_choice
+    → Event outcome — clicking Continue
+  [SNAP] #139: Overlay_Event_continue
+  [SNAP] #140: PostOverlay_12
+  [13] Clicking 'Node_4_0' (HP=3, Food=42)
+  [SNAP] #141: Map_before_node_13
+  [SNAP] #142: Map_after_node_click_13
+    → Encounter #7 loaded
+  [SNAP] #143: Encounter_7_setup
+    → Camera: ortho=True, size=6, pos=(0.00, 0.00, -10.00)
+    → Disabled overlay canvases: 3
+    → Board: 5x5
+    → Heroes on board: 2
+    → Heroes with visible sprites: 2/2
+    → Enemies on board: 2
+    → Enemies with visible sprites: 2/2
+    → Visible tiles: 25/25
+  [SNAP] #144: Encounter_7_board_verified
+  [SNAP] #145: Encounter_7_battle_t2s
+  [SNAP] #146: Encounter_7_battle_t4s
+  [SNAP] #147: Encounter_7_battle_t6s
+  [SNAP] #148: Encounter_7_battle_t8s
+  [SNAP] #149: Encounter_7_result
+    → Result: success=False, resources=0
+  [SNAP] #150: PostEncounter_7_map_restored
+    → Post-encounter: HP=0 (was 3), Food=41 (was 42)
+  Colony died! HP=0
+  [SNAP] #151: Colony_died
+
+━━━ PHASE 5: Run Result ━━━
+  [SNAP] #152: RunResult_loaded
+  Active TMP elements: 5
+    TMP 'DefeatTitle': "DEFEAT"
+    TMP 'Label': "Scrapbook"
+    TMP 'Label': "Main Menu"
+    TMP 'Label': "Try Again"
+    TMP 'DefeatStats': "The Colony Has Fallen...
+
+Level Reached: 2
+Food: 41  Materia"
+    BTN 'Btn_Try Again' interactable=True
+    BTN 'Btn_Scrapbook' interactable=True
+    BTN 'Btn_Main Menu' interactable=True
+  Main Menu button: 'Btn_Main Menu'
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  RESULTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Run Ended: True
+  Victory: False
+  Nodes Visited (UI): 13
+  Encounters: 7
+  Overlay Nodes: 6
+  Final Scene: RunResult
+  Final Colony HP: 0/30
+  Final Food: 41 | Materials: 27 | Currency: 17
+  Iterations: 14
+
+  UI Verifications: 195 passed, 0 failed
+  Screenshots: 152 captured to C:/Users/chris/source/repos/Scurry/Scurry/Assets\..\TestReports\Screenshots
+  Exceptions: 0

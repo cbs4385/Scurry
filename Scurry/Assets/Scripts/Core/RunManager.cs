@@ -2,15 +2,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Scurry.Data;
-using Scurry.Colony;
-using Scurry.Map;
-using Scurry.Encounter;
-using Scurry.Gathering;
-using Scurry.UI;
-using Scurry.Board;
-using Scurry.Cards;
-using Scurry.Placement;
 using Scurry.Interfaces;
+using Scurry.Map;
 
 namespace Scurry.Core
 {
@@ -19,1215 +12,578 @@ namespace Scurry.Core
         private static RunManager _instance;
         public static RunManager Instance => _instance;
 
-        [Header("Level Configs")]
-        [SerializeField] private MapConfigSO[] levelConfigs; // Index 0 = Level 1, etc.
-
-        [Header("Colony Deck")]
-        [SerializeField] private List<ColonyCardDefinitionSO> colonyDeck = new List<ColonyCardDefinitionSO>();
-
-        [Header("Hero Deck")]
-        [SerializeField] private List<CardDefinitionSO> heroDeck = new List<CardDefinitionSO>();
-
-        // Scene-specific managers (discovered dynamically after scene loads)
-        private GameManager gameManager;
-        private ColonyBoardManager colonyBoardManager;
-        private MapManager mapManager;
-        private EncounterManager encounterManager;
-        private BossManager bossManager;
-        private ShopManager shopManager;
-        private HealingManager healingManager;
-        private UpgradeManager upgradeManager;
-        private DraftManager draftManager;
-        private EventManager eventManager;
-        private RestManager restManager;
-        private HeroDeckSetAsideUI heroDeckSetAsideUI;
-
         // Run state
-        private RunState runState;
-        private int currentLevel; // 1-indexed
-        private ColonyConfig colonyConfig;
+        private RunState currentState = RunState.GameOver;
+        private int randomSeed;
+        private List<CardDefinitionSO> constructedDeck = new List<CardDefinitionSO>();
+        private List<ColonyCardDefinitionSO> constructedColonyDeck = new List<ColonyCardDefinitionSO>();
 
-        // Hero wound tracking
-        private HashSet<CardDefinitionSO> woundedHeroes = new HashSet<CardDefinitionSO>();
-        private HashSet<CardDefinitionSO> exhaustedHeroes = new HashSet<CardDefinitionSO>();
+        // Current turn (1-based, no fixed limit)
+        private int currentTurn;
 
-        // Score
-        private int encountersCompleted;
+        // Stats tracked across run
         private int totalResourcesGathered;
-        private int enemiesDefeated;
-        private int bossesKilled;
-        private int nodesVisited;
+        private int totalEnemiesDefeated;
+        private int zoneBossesDefeated;
+        private bool piedPiperDefeated;
+        private int colonyCardsPlayed;
+        private HashSet<int> heroesInjured = new HashSet<int>();
 
-        // Discovery tracking for meta-progression
-        private List<string> enemiesEncountered = new List<string>();
-        private List<string> eventsEncountered = new List<string>();
-        private List<string> bossesEncountered = new List<string>();
+        // Stockpiles
+        private int foodStockpile;
+        private int materialsStockpile;
+        private int currencyStockpile;
 
-        // Track last node type for encounter rewards
-        private NodeType lastNodeType;
+        // --- Public properties ---
+        public RunState CurrentState => currentState;
+        public RunState CurrentRunState => currentState;
+        public int RandomSeed => randomSeed;
+        public IReadOnlyList<CardDefinitionSO> ConstructedDeck => constructedDeck;
+        public IReadOnlyList<ColonyCardDefinitionSO> ConstructedColonyDeck => constructedColonyDeck;
+        public int CurrentTurn => currentTurn;
+        public int TotalResourcesGathered => totalResourcesGathered;
+        public int TotalEnemiesDefeated => totalEnemiesDefeated;
+        public int ZoneBossesDefeated => zoneBossesDefeated;
+        public bool PiedPiperDefeated => piedPiperDefeated;
+        public int ColonyCardsPlayed => colonyCardsPlayed;
 
-        // Pending encounter data (for cross-scene communication)
-        private EncounterDefinitionSO pendingEncounterDef;
-        private int pendingDifficulty;
-        private NodeType pendingNodeType;
-        private bool pendingIsBoss;
-        private BossDefinitionSO pendingBossDef;
-
-        // Public accessors
-        public RunState CurrentRunState => runState;
-        public int CurrentLevel => currentLevel;
-        public ColonyConfig ActiveColonyConfig => colonyConfig;
-        public List<ColonyCardDefinitionSO> ColonyCardPool => colonyDeck;
-        public IReadOnlyList<CardDefinitionSO> HeroDeck => heroDeck;
-        public IReadOnlyCollection<CardDefinitionSO> WoundedHeroes => woundedHeroes;
-        public MapConfigSO CurrentLevelConfig => levelConfigs != null && currentLevel > 0 && currentLevel <= levelConfigs.Length ? levelConfigs[currentLevel - 1] : null;
-        public int FoodStockpile => ColonyManager.Instance != null ? ColonyManager.Instance.FoodStockpile : 0;
-        public int MaterialsStockpile => ColonyManager.Instance != null ? ColonyManager.Instance.MaterialsStockpile : 0;
-        public int CurrencyStockpile => ColonyManager.Instance != null ? ColonyManager.Instance.CurrencyStockpile : 0;
-
-        // Legacy compatibility
-        public ZoneSO CurrentZone => null;
-        public int CurrentStageIndex => currentLevel - 1;
-        public int CurrentStepIndex => nodesVisited;
+        // IRunManager interface properties (legacy compat)
+        public int CurrentLevel => currentTurn;
+        public int FoodStockpile => foodStockpile;
+        public int MaterialsStockpile => materialsStockpile;
+        public int CurrencyStockpile => currencyStockpile;
+        public List<ColonyCardDefinitionSO> ColonyCardPool => new List<ColonyCardDefinitionSO>(constructedColonyDeck);
+        public int CurrentStageIndex => 0;
+        public int CurrentStepIndex => currentTurn;
 
         private void Awake()
         {
+            Debug.Log($"[RunManager] Awake: checking for existing instance (instance={(_instance != null ? _instance.GetInstanceID().ToString() : "NULL")})");
+
             if (_instance != null && _instance != this)
             {
-                Debug.Log("[RunManager] Awake: duplicate instance — destroying self");
-                Destroy(gameObject);
+                // Re-register existing instance in case ServiceLocator was cleared
+                ServiceLocator.Register<IRunManager>(_instance);
+                ServiceLocator.Register<RunManager>(_instance);
+                Debug.Log($"[RunManager] Awake: duplicate instance detected — re-registered existing and destroying component only (self={GetInstanceID()}, existing={_instance.GetInstanceID()})");
+                Destroy(this);
                 return;
             }
+
             _instance = this;
-            DontDestroyOnLoad(gameObject);
+            if (gameObject.name == "PersistentManagers")
+                DontDestroyOnLoad(gameObject);
 
-#if UNITY_EDITOR
-            // Auto-load level configs if not set
-            if (levelConfigs == null || levelConfigs.Length == 0)
-            {
-                var allConfigs = new List<MapConfigSO>();
-                foreach (var guid in UnityEditor.AssetDatabase.FindAssets("t:MapConfigSO"))
-                {
-                    var path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
-                    var config = UnityEditor.AssetDatabase.LoadAssetAtPath<MapConfigSO>(path);
-                    if (config != null) allConfigs.Add(config);
-                }
-                allConfigs.Sort((a, b) => a.levelNumber.CompareTo(b.levelNumber));
-                levelConfigs = allConfigs.ToArray();
-                Debug.Log($"[RunManager] Awake: auto-loaded {levelConfigs.Length} level configs from AssetDatabase");
-            }
-
-            // Auto-load colony deck if empty
-            if (colonyDeck == null || colonyDeck.Count == 0)
-            {
-                colonyDeck = new List<ColonyCardDefinitionSO>();
-                foreach (var guid in UnityEditor.AssetDatabase.FindAssets("t:ColonyCardDefinitionSO"))
-                {
-                    var path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
-                    var card = UnityEditor.AssetDatabase.LoadAssetAtPath<ColonyCardDefinitionSO>(path);
-                    if (card != null) colonyDeck.Add(card);
-                }
-                Debug.Log($"[RunManager] Awake: auto-loaded {colonyDeck.Count} colony cards from AssetDatabase");
-            }
-
-            // Auto-load hero deck if empty (exclude old Resource-type cards)
-            if (heroDeck == null || heroDeck.Count == 0)
-            {
-                heroDeck = new List<CardDefinitionSO>();
-                foreach (var guid in UnityEditor.AssetDatabase.FindAssets("t:CardDefinitionSO"))
-                {
-                    var path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
-                    var card = UnityEditor.AssetDatabase.LoadAssetAtPath<CardDefinitionSO>(path);
-                    if (card != null && card.cardType != CardType.Resource)
-                        heroDeck.Add(card);
-                }
-                Debug.Log($"[RunManager] Awake: auto-loaded {heroDeck.Count} hero deck cards from AssetDatabase (excluded Resource-type cards)");
-            }
-#endif
-
-            SceneManager.sceneLoaded += OnSceneLoaded;
             ServiceLocator.Register<IRunManager>(this);
-
-            Debug.Log($"[RunManager] Awake: levelConfigs={levelConfigs?.Length ?? 0}, colonyDeck={colonyDeck?.Count ?? 0}, heroDeck={heroDeck?.Count ?? 0}");
-        }
-
-        private void OnDestroy()
-        {
-            if (_instance == this)
-            {
-                Debug.Log("[RunManager] OnDestroy: clearing singleton, unsubscribing from SceneManager");
-                SceneManager.sceneLoaded -= OnSceneLoaded;
-                _instance = null;
-            }
+            ServiceLocator.Register<RunManager>(this);
+            Debug.Log($"[RunManager] Awake: registered with ServiceLocator (instanceId={GetInstanceID()})");
         }
 
         private void OnEnable()
         {
-            Debug.Log("[RunManager] OnEnable: subscribing to events");
-            EventBus.OnColonyDraftComplete += OnColonyDraftComplete;
-            EventBus.OnColonyManagementComplete += OnColonyManagementComplete;
-            EventBus.OnMapNodeSelected += OnMapNodeSelected;
-            EventBus.OnMapNodeComplete += OnMapNodeComplete;
-            EventBus.OnLevelComplete += OnLevelComplete;
-            EventBus.OnEncounterComplete += OnEncounterComplete;
-            EventBus.OnHeroDeckReady += OnHeroDeckReady;
-            EventBus.OnShopComplete += OnNodeHandlerComplete;
-            EventBus.OnHealingComplete += OnNodeHandlerComplete;
-            EventBus.OnUpgradeComplete += OnNodeHandlerComplete;
-            EventBus.OnDraftComplete += OnNodeHandlerComplete;
-            EventBus.OnEventComplete += OnNodeHandlerComplete;
-            EventBus.OnRestComplete += OnNodeHandlerComplete;
-            EventBus.OnBossDefeated += OnBossDefeated;
-            EventBus.OnCardPurchased += OnCardPurchased;
-            EventBus.OnCardDrafted += OnCardDrafted;
-            EventBus.OnCardRemoved += OnCardRemoved;
-            EventBus.OnEventWoundHero += OnEventWoundHero;
-            EventBus.OnReturnToMainMenu += OnReturnToMainMenu;
+            Debug.Log("[RunManager] OnEnable: subscribing to EventBus events");
+            EventBus.OnRunComplete += HandleRunComplete;
+            EventBus.OnTurnStarted += HandleTurnStarted;
+            EventBus.OnColonyCardPlayed += HandleColonyCardPlayed;
+            EventBus.OnReturnToMainMenu += HandleReturnToMainMenu;
+            EventBus.OnResourceGathered += HandleResourceGathered;
+            EventBus.OnResourceDeposited += HandleResourceDeposited;
+            EventBus.OnCombatEnded += HandleCombatEnded;
         }
 
         private void OnDisable()
         {
-            Debug.Log("[RunManager] OnDisable: unsubscribing from events");
-            EventBus.OnColonyDraftComplete -= OnColonyDraftComplete;
-            EventBus.OnColonyManagementComplete -= OnColonyManagementComplete;
-            EventBus.OnMapNodeSelected -= OnMapNodeSelected;
-            EventBus.OnMapNodeComplete -= OnMapNodeComplete;
-            EventBus.OnLevelComplete -= OnLevelComplete;
-            EventBus.OnEncounterComplete -= OnEncounterComplete;
-            EventBus.OnHeroDeckReady -= OnHeroDeckReady;
-            EventBus.OnShopComplete -= OnNodeHandlerComplete;
-            EventBus.OnHealingComplete -= OnNodeHandlerComplete;
-            EventBus.OnUpgradeComplete -= OnNodeHandlerComplete;
-            EventBus.OnDraftComplete -= OnNodeHandlerComplete;
-            EventBus.OnEventComplete -= OnNodeHandlerComplete;
-            EventBus.OnRestComplete -= OnNodeHandlerComplete;
-            EventBus.OnBossDefeated -= OnBossDefeated;
-            EventBus.OnCardPurchased -= OnCardPurchased;
-            EventBus.OnCardDrafted -= OnCardDrafted;
-            EventBus.OnCardRemoved -= OnCardRemoved;
-            EventBus.OnEventWoundHero -= OnEventWoundHero;
-            EventBus.OnReturnToMainMenu -= OnReturnToMainMenu;
+            Debug.Log("[RunManager] OnDisable: unsubscribing from EventBus events");
+            EventBus.OnRunComplete -= HandleRunComplete;
+            EventBus.OnTurnStarted -= HandleTurnStarted;
+            EventBus.OnColonyCardPlayed -= HandleColonyCardPlayed;
+            EventBus.OnReturnToMainMenu -= HandleReturnToMainMenu;
+            EventBus.OnResourceGathered -= HandleResourceGathered;
+            EventBus.OnResourceDeposited -= HandleResourceDeposited;
+            EventBus.OnCombatEnded -= HandleCombatEnded;
         }
 
-        // --- Scene Management ---
-
-        private void LoadGameScene(string sceneName)
+        private void OnDestroy()
         {
-            Debug.Log($"[RunManager] LoadGameScene: loading '{sceneName}'");
-            SceneManager.LoadScene(sceneName);
-        }
-
-        private void LoadEncounterScene()
-        {
-            Debug.Log("[RunManager] LoadEncounterScene: loading Encounter scene additively");
-            SceneManager.LoadScene("Encounter", LoadSceneMode.Additive);
-        }
-
-        private void UnloadEncounterScene()
-        {
-            Debug.Log("[RunManager] UnloadEncounterScene: unloading Encounter scene");
-            SceneManager.UnloadSceneAsync("Encounter");
-        }
-
-        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-        {
-            if (!enabled)
+            Debug.Log($"[RunManager] OnDestroy: instanceId={GetInstanceID()}");
+            if (_instance == this)
             {
-                Debug.Log($"[RunManager] OnSceneLoaded: SKIPPED (disabled) scene='{scene.name}', mode={mode}");
-                return;
-            }
-            Debug.Log($"[RunManager] OnSceneLoaded: scene='{scene.name}', mode={mode}");
-
-            switch (scene.name)
-            {
-                case "ColonyDraft":
-                    // ColonyDraftUI self-initializes via OnRunStarted event
-                    Debug.Log("[RunManager] OnSceneLoaded: ColonyDraft — waiting for player to complete draft");
-                    break;
-
-                case "ColonyManagement":
-                    colonyBoardManager = FindAnyObjectByType<ColonyBoardManager>();
-                    heroDeckSetAsideUI = FindAnyObjectByType<HeroDeckSetAsideUI>();
-                    Debug.Log($"[RunManager] OnSceneLoaded: ColonyManagement — colonyBoard={colonyBoardManager != null}, setAsideUI={heroDeckSetAsideUI != null}");
-                    if (colonyBoardManager != null && runState == RunState.ColonyManagement)
-                    {
-                        var config = levelConfigs[currentLevel - 1];
-                        colonyBoardManager.StartColonyManagement(currentLevel, config, new List<ColonyCardDefinitionSO>(colonyDeck));
-                        EventBus.OnLevelStarted?.Invoke(currentLevel);
-                    }
-                    break;
-
-                case "MapTraversal":
-                    DiscoverMapManagers();
-                    if (mapManager != null && runState == RunState.MapTraversal)
-                    {
-                        var config = levelConfigs[currentLevel - 1];
-                        mapManager.InitializeMap(config);
-                    }
-                    break;
-
-                case "Encounter":
-                    encounterManager = FindAnyObjectByType<EncounterManager>();
-                    bossManager = FindAnyObjectByType<BossManager>();
-                    gameManager = FindAnyObjectByType<GameManager>();
-                    Debug.Log($"[RunManager] OnSceneLoaded: Encounter — encounter={encounterManager != null}, boss={bossManager != null}, game={gameManager != null}");
-                    StartPendingEncounter();
-                    break;
-
-                case "RunResult":
-                    Debug.Log("[RunManager] OnSceneLoaded: RunResult — screen self-initializes");
-                    break;
+                _instance = null;
+                ServiceLocator.Unregister<IRunManager>();
+                ServiceLocator.Unregister<RunManager>();
+                Debug.Log("[RunManager] OnDestroy: unregistered from ServiceLocator");
             }
         }
 
-        private void DiscoverMapManagers()
+        // ── Scene Flow ───────────────────────────────────────────────────
+
+        /// <summary>
+        /// Starts a brand new run. Deletes any existing save and loads the DeckConstruction scene.
+        /// </summary>
+        public void StartNewRun()
         {
-            mapManager = FindAnyObjectByType<MapManager>();
-            shopManager = FindAnyObjectByType<ShopManager>();
-            healingManager = FindAnyObjectByType<HealingManager>();
-            upgradeManager = FindAnyObjectByType<UpgradeManager>();
-            draftManager = FindAnyObjectByType<DraftManager>();
-            eventManager = FindAnyObjectByType<EventManager>();
-            restManager = FindAnyObjectByType<RestManager>();
-            Debug.Log($"[RunManager] DiscoverMapManagers: map={mapManager != null}, shop={shopManager != null}, " +
-                      $"healing={healingManager != null}, upgrade={upgradeManager != null}, " +
-                      $"draft={draftManager != null}, event={eventManager != null}, rest={restManager != null}");
+            Debug.Log("[RunManager] StartNewRun: deleting save and transitioning to DeckConstruction");
+
+            // Stop any active TurnManager coroutines from a previous run
+            var turnManager = FindAnyObjectByType<TurnManager>();
+            if (turnManager != null && turnManager.RunActive)
+            {
+                Debug.Log("[RunManager] StartNewRun: stopping active TurnManager from previous run");
+                turnManager.EndRun(false);
+            }
+
+            // Reset event bus to clear stale subscriptions from destroyed scene objects
+            EventBus.Reset();
+            Debug.Log("[RunManager] StartNewRun: EventBus reset");
+
+            // Re-subscribe RunManager events (we just cleared them)
+            OnEnable();
+
+            SaveManager.DeleteSave();
+            ResetRunState();
+
+            currentState = RunState.DeckConstruction;
+            Debug.Log($"[RunManager] StartNewRun: state set to {currentState}");
+
+            SceneManager.LoadScene("DeckConstruction");
+            Debug.Log("[RunManager] StartNewRun: LoadScene('DeckConstruction') called");
         }
 
-        private void StartPendingEncounter()
-        {
-            if (encounterManager == null)
-            {
-                Debug.LogError("[RunManager] StartPendingEncounter: no EncounterManager found in Encounter scene!");
-                return;
-            }
-
-            if (pendingIsBoss)
-            {
-                if (pendingBossDef != null && bossManager != null)
-                {
-                    Debug.Log($"[RunManager] StartPendingEncounter: starting boss fight '{pendingBossDef.bossName}'");
-                    if (pendingEncounterDef != null)
-                    {
-                        encounterManager.StartEncounter(pendingEncounterDef, new List<CardDefinitionSO>(heroDeck), colonyConfig, woundedHeroes, pendingDifficulty);
-                    }
-                    else
-                    {
-                        Debug.Log("[RunManager] StartPendingEncounter: no encounter layout — boss fight runs without board");
-                        bossManager.StartBossFight(pendingBossDef, new List<HeroAgent>());
-                    }
-                }
-                else
-                {
-                    Debug.LogWarning("[RunManager] StartPendingEncounter: no boss definition or BossManager — auto-completing level");
-                    EventBus.OnLevelComplete?.Invoke();
-                }
-            }
-            else if (pendingEncounterDef != null)
-            {
-                Debug.Log($"[RunManager] StartPendingEncounter: starting encounter '{pendingEncounterDef.encounterName}', difficulty={pendingDifficulty}");
-                encounterManager.StartEncounter(pendingEncounterDef, new List<CardDefinitionSO>(heroDeck), colonyConfig, woundedHeroes, pendingDifficulty);
-            }
-            else
-            {
-                Debug.LogWarning("[RunManager] StartPendingEncounter: no pending encounter data — returning to map");
-                UnloadEncounterScene();
-                if (mapManager != null) mapManager.OnNodeComplete();
-            }
-
-            // Clear pending state
-            pendingEncounterDef = null;
-            pendingBossDef = null;
-        }
-
-        // --- Run Lifecycle ---
-
+        /// <summary>
+        /// IRunManager compat: alias for StartNewRun.
+        /// </summary>
         public void StartRun()
         {
-            int seed = System.Environment.TickCount;
-            SeededRandom.Initialize(seed);
-            Debug.Log($"[RunManager] StartRun: initializing run state (seed={seed})");
-            runState = RunState.Draft;
-            currentLevel = 1;
-            encountersCompleted = 0;
-            totalResourcesGathered = 0;
-            enemiesDefeated = 0;
-            bossesKilled = 0;
-            nodesVisited = 0;
-            woundedHeroes.Clear();
-            exhaustedHeroes.Clear();
-            enemiesEncountered.Clear();
-            eventsEncountered.Clear();
-            bossesEncountered.Clear();
-
-            var colMgr = ColonyManager.Instance;
-            if (colMgr != null) colMgr.InitializeHP();
-
-            // Clear relics for new run
-            var relicMgr = RelicManager.Instance;
-            if (relicMgr != null) relicMgr.ClearRelics();
-
-            // Track no-starvation for achievements
-            var achMgr = AchievementManager.Instance;
-            if (achMgr != null) achMgr.OnRunStarted();
-
-            EventBus.OnRunStarted?.Invoke();
-
-            Debug.Log("[RunManager] StartRun: loading ColonyDraft scene");
-            LoadGameScene("ColonyDraft");
+            Debug.Log("[RunManager] StartRun: delegating to StartNewRun");
+            StartNewRun();
         }
 
+        /// <summary>
+        /// Continues a saved run. Loads save data and transitions to GameMap scene.
+        /// </summary>
         public void ContinueRun()
         {
-            Debug.Log("[RunManager] ContinueRun: loading saved run state");
-            var save = SaveManager.Load();
+            Debug.Log("[RunManager] ContinueRun: loading save data");
+
+            RunSaveData save = SaveManager.Load();
             if (save == null)
             {
-                Debug.LogWarning("[RunManager] ContinueRun: no save data found — starting new run instead");
-                StartRun();
+                Debug.LogWarning("[RunManager] ContinueRun: no save data found — cannot continue, returning to main menu");
+                ReturnToMainMenu();
                 return;
             }
 
-            // Restore seeded random state
-            SeededRandom.Initialize(save.randomSeed);
-            Debug.Log($"[RunManager] ContinueRun: restored seed={save.randomSeed}");
+            RestoreFromSave(save);
 
-            // Restore run state
-            currentLevel = save.currentLevel;
-            runState = (RunState)save.runState;
-            nodesVisited = save.nodesVisited;
-            encountersCompleted = save.encountersCompleted;
-            totalResourcesGathered = save.totalResourcesGathered;
-            enemiesDefeated = save.enemiesDefeated;
-            bossesKilled = save.bossesKilled;
-            Debug.Log($"[RunManager] ContinueRun: restored runState={runState}, level={currentLevel}, nodes={nodesVisited}, encounters={encountersCompleted}");
+            currentState = RunState.InRun;
+            Debug.Log($"[RunManager] ContinueRun: state set to {currentState} (turn={currentTurn}, seed={randomSeed})");
 
-            // Restore colony state
-            var colMgr = ColonyManager.Instance;
-            if (colMgr != null)
-            {
-                colMgr.RestoreState(save.colonyHP, save.colonyMaxHP, save.currencyStockpile, save.foodStockpile, save.materialsStockpile);
-                Debug.Log($"[RunManager] ContinueRun: restored colony HP={save.colonyHP}/{save.colonyMaxHP}, food={save.foodStockpile}, materials={save.materialsStockpile}, currency={save.currencyStockpile}");
-            }
-
-            // Restore hero deck from saved card names
-            heroDeck.Clear();
-            woundedHeroes.Clear();
-            exhaustedHeroes.Clear();
-#if UNITY_EDITOR
-            var allHeroCards = new Dictionary<string, CardDefinitionSO>();
-            foreach (var guid in UnityEditor.AssetDatabase.FindAssets("t:CardDefinitionSO"))
-            {
-                var path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
-                var card = UnityEditor.AssetDatabase.LoadAssetAtPath<CardDefinitionSO>(path);
-                if (card != null && !allHeroCards.ContainsKey(card.cardName))
-                    allHeroCards[card.cardName] = card;
-            }
-
-            foreach (var name in save.heroDeckCardNames)
-            {
-                if (allHeroCards.TryGetValue(name, out var card))
-                {
-                    heroDeck.Add(card);
-                }
-                else
-                {
-                    Debug.LogWarning($"[RunManager] ContinueRun: could not find hero card '{name}' — skipping");
-                }
-            }
-            Debug.Log($"[RunManager] ContinueRun: restored {heroDeck.Count} hero cards from {save.heroDeckCardNames.Count} saved names");
-
-            // Restore wounded heroes
-            foreach (var name in save.woundedHeroNames)
-            {
-                if (allHeroCards.TryGetValue(name, out var card))
-                {
-                    woundedHeroes.Add(card);
-                    Debug.Log($"[RunManager] ContinueRun: restored wounded hero '{name}'");
-                }
-            }
-
-            // Restore exhausted heroes
-            foreach (var name in save.exhaustedHeroNames)
-            {
-                if (allHeroCards.TryGetValue(name, out var card))
-                {
-                    exhaustedHeroes.Add(card);
-                    Debug.Log($"[RunManager] ContinueRun: restored exhausted hero '{name}'");
-                }
-            }
-
-            // Restore colony deck
-            colonyDeck.Clear();
-            var allColonyCards = new Dictionary<string, ColonyCardDefinitionSO>();
-            foreach (var guid in UnityEditor.AssetDatabase.FindAssets("t:ColonyCardDefinitionSO"))
-            {
-                var path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
-                var card = UnityEditor.AssetDatabase.LoadAssetAtPath<ColonyCardDefinitionSO>(path);
-                if (card != null && !allColonyCards.ContainsKey(card.cardName))
-                    allColonyCards[card.cardName] = card;
-            }
-            foreach (var name in save.colonyDeckCardNames)
-            {
-                if (allColonyCards.TryGetValue(name, out var card))
-                {
-                    colonyDeck.Add(card);
-                }
-                else
-                {
-                    Debug.LogWarning($"[RunManager] ContinueRun: could not find colony card '{name}' — skipping");
-                }
-            }
-            Debug.Log($"[RunManager] ContinueRun: restored {colonyDeck.Count} colony cards");
-#else
-            // Runtime: load from Resources
-            var heroCardPool = Resources.LoadAll<CardDefinitionSO>("");
-            var heroLookup = new Dictionary<string, CardDefinitionSO>();
-            foreach (var c in heroCardPool)
-            {
-                if (c != null && !heroLookup.ContainsKey(c.cardName))
-                    heroLookup[c.cardName] = c;
-            }
-            foreach (var name in save.heroDeckCardNames)
-            {
-                if (heroLookup.TryGetValue(name, out var card))
-                    heroDeck.Add(card);
-                else
-                    Debug.LogWarning($"[RunManager] ContinueRun: could not find hero card '{name}' — skipping");
-            }
-            foreach (var name in save.woundedHeroNames)
-            {
-                if (heroLookup.TryGetValue(name, out var card))
-                    woundedHeroes.Add(card);
-            }
-            foreach (var name in save.exhaustedHeroNames)
-            {
-                if (heroLookup.TryGetValue(name, out var card))
-                    exhaustedHeroes.Add(card);
-            }
-            Debug.Log($"[RunManager] ContinueRun: restored {heroDeck.Count} hero cards (runtime)");
-
-            var colonyCardPool = Resources.LoadAll<ColonyCardDefinitionSO>("");
-            var colonyLookup = new Dictionary<string, ColonyCardDefinitionSO>();
-            foreach (var c in colonyCardPool)
-            {
-                if (c != null && !colonyLookup.ContainsKey(c.cardName))
-                    colonyLookup[c.cardName] = c;
-            }
-            colonyDeck.Clear();
-            foreach (var name in save.colonyDeckCardNames)
-            {
-                if (colonyLookup.TryGetValue(name, out var card))
-                    colonyDeck.Add(card);
-                else
-                    Debug.LogWarning($"[RunManager] ContinueRun: could not find colony card '{name}' — skipping");
-            }
-            Debug.Log($"[RunManager] ContinueRun: restored {colonyDeck.Count} colony cards (runtime)");
-#endif
-
-            // Restore colony config
-            if (save.colonyConfig != null)
-            {
-                colonyConfig = new ColonyConfig
-                {
-                    maxHeroDeckSize = save.colonyConfig.maxHeroDeckSize,
-                    foodConsumptionPerNode = save.colonyConfig.foodConsumptionPerNode,
-                    heroCombatBonus = save.colonyConfig.heroCombatBonus,
-                    heroMoveBonus = save.colonyConfig.heroMoveBonus,
-                    heroCarryBonus = save.colonyConfig.heroCarryBonus,
-                    totalPopulation = save.colonyConfig.totalPopulation,
-                    bonusStartingFood = save.colonyConfig.bonusStartingFood
-                };
-                Debug.Log($"[RunManager] ContinueRun: restored colonyConfig (maxDeck={colonyConfig.maxHeroDeckSize}, foodPerNode={colonyConfig.foodConsumptionPerNode})");
-            }
-
-            // Restore relics
-            var relicMgr = RelicManager.Instance;
-            if (relicMgr != null && save.activeRelicNames != null && save.activeRelicNames.Count > 0)
-            {
-                relicMgr.RestoreRelics(save.activeRelicNames);
-                Debug.Log($"[RunManager] ContinueRun: restored {save.activeRelicNames.Count} relics");
-            }
-
-            // Determine which scene to load based on saved state
-            string targetScene = save.currentSceneName;
-            if (string.IsNullOrEmpty(targetScene))
-            {
-                // Fallback: infer from runState
-                switch (runState)
-                {
-                    case RunState.Draft:
-                        targetScene = "ColonyDraft";
-                        break;
-                    case RunState.ColonyManagement:
-                        targetScene = "ColonyManagement";
-                        break;
-                    case RunState.MapTraversal:
-                        targetScene = "MapTraversal";
-                        break;
-                    case RunState.InEncounter:
-                    case RunState.InBoss:
-                        targetScene = "MapTraversal"; // Can't restore mid-encounter, go back to map
-                        runState = RunState.MapTraversal;
-                        break;
-                    default:
-                        targetScene = "MapTraversal";
-                        runState = RunState.MapTraversal;
-                        break;
-                }
-                Debug.Log($"[RunManager] ContinueRun: no saved scene name — inferred '{targetScene}' from runState={runState}");
-            }
-
-            Debug.Log($"[RunManager] ContinueRun: loading scene '{targetScene}'");
-            LoadGameScene(targetScene);
+            SceneManager.LoadScene("GameMap");
+            Debug.Log("[RunManager] ContinueRun: LoadScene('GameMap') called");
         }
 
-        private void OnColonyDraftComplete(List<ColonyCardDefinitionSO> draftedDeck)
+        /// <summary>
+        /// Called by DeckConstructionManager when the player confirms their deck.
+        /// Stores the decks, generates a seed, and transitions to GameMap.
+        /// </summary>
+        public void OnDeckConstructionComplete(List<CardDefinitionSO> deck, List<ColonyCardDefinitionSO> colonyDeck)
         {
-            Debug.Log($"[RunManager] OnColonyDraftComplete: received {draftedDeck.Count} colony cards, starting level 1");
-            colonyDeck = new List<ColonyCardDefinitionSO>(draftedDeck);
-            StartLevel(currentLevel);
+            Debug.Log($"[RunManager] OnDeckConstructionComplete: received deck (cards={deck.Count}, colonyCards={colonyDeck.Count})");
+
+            constructedDeck.Clear();
+            constructedDeck.AddRange(deck);
+
+            constructedColonyDeck.Clear();
+            constructedColonyDeck.AddRange(colonyDeck);
+
+            // Log each card in the constructed deck
+            for (int i = 0; i < constructedDeck.Count; i++)
+            {
+                var card = constructedDeck[i];
+                Debug.Log($"[RunManager] OnDeckConstructionComplete: deck[{i}] = '{card.cardName}' (id={card.cardId}, type={card.cardType}, cost={card.deckCost})");
+            }
+            for (int i = 0; i < constructedColonyDeck.Count; i++)
+            {
+                var card = constructedColonyDeck[i];
+                Debug.Log($"[RunManager] OnDeckConstructionComplete: colonyDeck[{i}] = '{card.cardName}' (id={card.cardId}, tier={card.colonyTier}, cost={card.deckCost})");
+            }
+
+            // Save last deck to meta-progression for next run pre-population
+            var meta = MetaProgressionManager.Instance;
+            if (meta != null)
+            {
+                var deckIds = deck.ConvertAll(c => c.cardId);
+                var colonyIds = colonyDeck.ConvertAll(c => c.cardId);
+                meta.SaveLastDeck(deckIds, colonyIds);
+            }
+
+            // Generate random seed for this run
+            randomSeed = System.Environment.TickCount;
+            Debug.Log($"[RunManager] OnDeckConstructionComplete: generated seed={randomSeed}");
+
+            currentState = RunState.InRun;
+            currentTurn = 0;
+            Debug.Log($"[RunManager] OnDeckConstructionComplete: state={currentState}, transitioning to GameMap");
+
+            // Fire run started event
+            EventBus.OnRunStarted?.Invoke();
+            Debug.Log("[RunManager] OnDeckConstructionComplete: fired EventBus.OnRunStarted");
+
+            SceneManager.LoadScene("GameMap");
+            Debug.Log("[RunManager] OnDeckConstructionComplete: LoadScene('GameMap') called");
         }
 
-        private void StartLevel(int level)
+        /// <summary>
+        /// Called when the run ends (victory or defeat). Calculates score and transitions to RunResult.
+        /// </summary>
+        public void OnRunComplete(bool victory, int turnsUsed)
         {
-            currentLevel = level;
-            Debug.Log($"[RunManager] StartLevel: level={level}");
+            Debug.Log($"[RunManager] OnRunComplete: victory={victory}, turnsUsed={turnsUsed}");
 
-            if (levelConfigs == null || level - 1 >= levelConfigs.Length || levelConfigs[level - 1] == null)
-            {
-                Debug.LogError($"[RunManager] StartLevel: no MapConfigSO for level {level}!");
-                return;
-            }
+            currentState = victory ? RunState.RunComplete : RunState.GameOver;
 
-            var config = levelConfigs[level - 1];
-            Debug.Log($"[RunManager] StartLevel: config='{config.levelName}', boardSize={config.boardSize}, colonyBoardSize={config.colonyBoardSize}");
+            // Calculate score: fewer turns + smaller deck = higher score (per GDD)
+            int score = CalculateScore(victory, turnsUsed);
+            Debug.Log($"[RunManager] OnRunComplete: finalScore={score}");
 
-            // Steam Rich Presence
-            Steam.SteamManager.SetRichPresenceStatus($"Level {level}: {config.levelName}");
+            EventBus.OnScoreCalculated?.Invoke(score);
+            Debug.Log("[RunManager] OnRunComplete: fired EventBus.OnScoreCalculated");
 
-            // Restore exhausted heroes at level start
-            if (exhaustedHeroes.Count > 0)
-            {
-                Debug.Log($"[RunManager] StartLevel: restoring {exhaustedHeroes.Count} exhausted heroes");
-                exhaustedHeroes.Clear();
-            }
+            // Save final stats before transitioning
+            SaveRunState();
+            Debug.Log("[RunManager] OnRunComplete: saved final run state");
 
-            // Clear wounds at level start
-            woundedHeroes.Clear();
-
-            // Load colony management scene (ColonyBoardManager.StartColonyManagement called in OnSceneLoaded)
-            runState = RunState.ColonyManagement;
-            LoadGameScene("ColonyManagement");
+            SceneManager.LoadScene("RunResult");
+            Debug.Log("[RunManager] OnRunComplete: LoadScene('RunResult') called");
         }
 
-        private void OnColonyManagementComplete(ColonyConfig config)
+        /// <summary>
+        /// Returns to the main menu scene.
+        /// </summary>
+        public void ReturnToMainMenu()
         {
-            colonyConfig = config;
-            Debug.Log($"[RunManager] OnColonyManagementComplete: {config}");
+            Debug.Log("[RunManager] ReturnToMainMenu: transitioning to MainMenu");
 
-            var colMgr = ColonyManager.Instance;
+            currentState = RunState.GameOver;
+            Debug.Log($"[RunManager] ReturnToMainMenu: state set to {currentState}");
 
-            // Apply bonus starting food
-            if (config.bonusStartingFood > 0 && colMgr != null)
-            {
-                colMgr.AddFood(config.bonusStartingFood);
-                Debug.Log($"[RunManager] OnColonyManagementComplete: added {config.bonusStartingFood} bonus starting food");
-            }
-
-            // Check if hero deck exceeds max — need set-aside
-            int maxDeckSize = config.maxHeroDeckSize;
-            int currentDeckSize = CountHeroCards();
-            Debug.Log($"[RunManager] OnColonyManagementComplete: heroDeck heroes={currentDeckSize}, maxDeckSize={maxDeckSize}");
-
-            if (currentDeckSize > maxDeckSize)
-            {
-                Debug.Log($"[RunManager] OnColonyManagementComplete: deck exceeds max — need to set aside {currentDeckSize - maxDeckSize} cards");
-
-                if (heroDeckSetAsideUI != null)
-                {
-                    heroDeckSetAsideUI.Open(new List<CardDefinitionSO>(heroDeck), maxDeckSize, (trimmedDeck) =>
-                    {
-                        heroDeck = trimmedDeck;
-                        Debug.Log($"[RunManager] OnColonyManagementComplete: set-aside complete, deck now {heroDeck.Count} cards");
-                        EventBus.OnHeroDeckReady?.Invoke(new List<CardDefinitionSO>(heroDeck));
-                    });
-                    return;
-                }
-                else
-                {
-                    // Fallback: auto-trim lowest-stat heroes
-                    int toRemove = currentDeckSize - maxDeckSize;
-                    Debug.Log($"[RunManager] OnColonyManagementComplete: no SetAsideUI — auto-trimming {toRemove} hero cards");
-                }
-            }
-
-            // Proceed to map
-            EventBus.OnHeroDeckReady?.Invoke(new List<CardDefinitionSO>(heroDeck));
+            SceneManager.LoadScene("MainMenu");
+            Debug.Log("[RunManager] ReturnToMainMenu: LoadScene('MainMenu') called");
         }
 
-        private void OnHeroDeckReady(List<CardDefinitionSO> deck)
+        // ── Stat Tracking ────────────────────────────────────────────────
+
+        /// <summary>
+        /// Records resources gathered by heroes (before deposit to colony).
+        /// </summary>
+        public void RecordResourceGathered(int amount)
         {
-            Debug.Log($"[RunManager] OnHeroDeckReady: deck size={deck.Count}, loading MapTraversal scene");
-            runState = RunState.MapTraversal;
-            LoadGameScene("MapTraversal");
-            // mapManager.InitializeMap called in OnSceneLoaded
+            int previousTotal = totalResourcesGathered;
+            totalResourcesGathered += amount;
+            Debug.Log($"[RunManager] RecordResourceGathered: amount={amount}, total={previousTotal}->{totalResourcesGathered}");
         }
 
-        // --- Map Node Handling ---
-
-        private void OnMapNodeSelected(MapNode node)
+        /// <summary>
+        /// Records an enemy defeat. Tracks boss and Pied Piper defeats separately.
+        /// </summary>
+        public void RecordEnemyDefeated(bool isBoss, bool isPiper)
         {
-            nodesVisited++;
-            lastNodeType = node.nodeType;
-            Debug.Log($"[RunManager] OnMapNodeSelected: {node}, totalNodesVisited={nodesVisited}");
-
-            // Steam Rich Presence — show current activity
-            Steam.SteamManager.SetRichPresenceStatus($"Level {currentLevel} — {node.nodeType}");
-
-            // Consume food
-            ConsumeFood();
-
-            var colMgr = ColonyManager.Instance;
-
-            // Check colony death
-            if (colMgr != null && !colMgr.IsAlive)
-            {
-                Debug.Log("[RunManager] OnMapNodeSelected: colony died from starvation — run failed");
-                RunFailed();
-                return;
-            }
-
-            // Route to node handler
-            switch (node.nodeType)
-            {
-                case NodeType.ResourceEncounter:
-                case NodeType.EliteEncounter:
-                    runState = RunState.InEncounter;
-                    PrepareEncounter(node, false);
-                    break;
-
-                case NodeType.Boss:
-                    runState = RunState.InBoss;
-                    PrepareEncounter(node, true);
-                    break;
-
-                case NodeType.Shop:
-                    Debug.Log("[RunManager] OnMapNodeSelected: Shop — opening shop");
-                    if (shopManager != null)
-                    {
-                        var config = levelConfigs[currentLevel - 1];
-                        shopManager.OpenShop(config.shopCardPool);
-                    }
-                    else
-                    {
-                        Debug.LogWarning("[RunManager] OnMapNodeSelected: no ShopManager — auto-completing");
-                        EventBus.OnShopComplete?.Invoke();
-                    }
-                    break;
-
-                case NodeType.HealingShrine:
-                    Debug.Log("[RunManager] OnMapNodeSelected: HealingShrine — opening healing");
-                    if (healingManager != null)
-                    {
-                        healingManager.OpenHealing(woundedHeroes);
-                    }
-                    else
-                    {
-                        Debug.LogWarning("[RunManager] OnMapNodeSelected: no HealingManager — auto-completing");
-                        EventBus.OnHealingComplete?.Invoke();
-                    }
-                    break;
-
-                case NodeType.UpgradeShrine:
-                    Debug.Log("[RunManager] OnMapNodeSelected: UpgradeShrine — opening upgrade");
-                    if (upgradeManager != null)
-                    {
-                        upgradeManager.OpenUpgrade(heroDeck, colonyDeck);
-                    }
-                    else
-                    {
-                        Debug.LogWarning("[RunManager] OnMapNodeSelected: no UpgradeManager — auto-completing");
-                        EventBus.OnUpgradeComplete?.Invoke();
-                    }
-                    break;
-
-                case NodeType.CardDraft:
-                    Debug.Log("[RunManager] OnMapNodeSelected: CardDraft — opening draft");
-                    if (draftManager != null)
-                    {
-                        var draftConfig = levelConfigs[currentLevel - 1];
-                        draftManager.OpenDraft(draftConfig.shopCardPool, heroDeck);
-                    }
-                    else
-                    {
-                        Debug.LogWarning("[RunManager] OnMapNodeSelected: no DraftManager — auto-completing");
-                        EventBus.OnDraftComplete?.Invoke();
-                    }
-                    break;
-
-                case NodeType.Event:
-                    Debug.Log("[RunManager] OnMapNodeSelected: Event — opening event");
-                    if (eventManager != null)
-                    {
-                        var evtConfig = levelConfigs[currentLevel - 1];
-                        if (evtConfig.eventPool != null && evtConfig.eventPool.Count > 0)
-                        {
-                            var randomEvent = evtConfig.eventPool[SeededRandom.Range(0, evtConfig.eventPool.Count)];
-                            Debug.Log($"[RunManager] OnMapNodeSelected: selected event '{randomEvent.eventName}'");
-                            eventManager.OpenEvent(randomEvent);
-                            if (!eventsEncountered.Contains(randomEvent.eventName))
-                                eventsEncountered.Add(randomEvent.eventName);
-                        }
-                        else
-                        {
-                            Debug.LogWarning("[RunManager] OnMapNodeSelected: empty event pool — auto-completing");
-                            EventBus.OnEventComplete?.Invoke();
-                        }
-                    }
-                    else
-                    {
-                        Debug.LogWarning("[RunManager] OnMapNodeSelected: no EventManager — auto-completing");
-                        EventBus.OnEventComplete?.Invoke();
-                    }
-                    break;
-
-                case NodeType.RestSite:
-                    Debug.Log("[RunManager] OnMapNodeSelected: RestSite — opening rest site");
-                    if (restManager != null)
-                    {
-                        restManager.OpenRestSite(heroDeck, colonyDeck);
-                    }
-                    else
-                    {
-                        var colMgr2 = ColonyManager.Instance;
-                        Debug.LogWarning("[RunManager] OnMapNodeSelected: no RestManager — healing 30% and completing");
-                        if (colMgr2 != null)
-                        {
-                            int healAmount = Mathf.CeilToInt(colMgr2.MaxHP * 0.3f);
-                            colMgr2.Heal(healAmount);
-                        }
-                        EventBus.OnRestComplete?.Invoke();
-                    }
-                    break;
-
-                default:
-                    Debug.LogWarning($"[RunManager] OnMapNodeSelected: unknown node type {node.nodeType}");
-                    if (mapManager != null) mapManager.OnNodeComplete();
-                    break;
-            }
-        }
-
-        private void PrepareEncounter(MapNode node, bool isBoss)
-        {
-            pendingIsBoss = isBoss;
-            pendingDifficulty = node.difficulty;
-            pendingNodeType = node.nodeType;
+            totalEnemiesDefeated++;
+            Debug.Log($"[RunManager] RecordEnemyDefeated: isBoss={isBoss}, isPiper={isPiper}, totalDefeated={totalEnemiesDefeated}");
 
             if (isBoss)
             {
-                var config = levelConfigs[currentLevel - 1];
-                pendingBossDef = config.bossDefinition;
-                pendingEncounterDef = node.encounterDefinition;
-                if (pendingBossDef != null && !bossesEncountered.Contains(pendingBossDef.bossName))
-                    bossesEncountered.Add(pendingBossDef.bossName);
-                Debug.Log($"[RunManager] PrepareEncounter: boss='{pendingBossDef?.bossName}', hasEncounterLayout={pendingEncounterDef != null}");
-            }
-            else
-            {
-                pendingEncounterDef = node.encounterDefinition;
-                pendingBossDef = null;
-
-                // Track enemy discoveries for meta-progression
-                if (pendingEncounterDef != null && pendingEncounterDef.enemySpawns != null)
-                {
-                    foreach (var spawn in pendingEncounterDef.enemySpawns)
-                    {
-                        if (spawn.enemyDefinition != null && !enemiesEncountered.Contains(spawn.enemyDefinition.name))
-                            enemiesEncountered.Add(spawn.enemyDefinition.name);
-                    }
-                }
-                Debug.Log($"[RunManager] PrepareEncounter: encounter='{pendingEncounterDef?.encounterName}', difficulty={pendingDifficulty}");
+                zoneBossesDefeated++;
+                Debug.Log($"[RunManager] RecordEnemyDefeated: zoneBossesDefeated={zoneBossesDefeated}");
             }
 
-            // Load encounter scene additively (MapTraversal stays loaded)
-            LoadEncounterScene();
-        }
-
-        // --- Encounter Results ---
-
-        private void OnEncounterComplete(EncounterResult result)
-        {
-            Debug.Log($"[RunManager] OnEncounterComplete: {result}");
-            encountersCompleted++;
-
-            var colMgr = ColonyManager.Instance;
-
-            // Apply resources to stockpile
-            if (result.success && colMgr != null)
+            if (isPiper)
             {
-                foreach (var kvp in result.resourcesGathered)
-                {
-                    switch (kvp.Key)
-                    {
-                        case ResourceType.Food:
-                            colMgr.AddFood(kvp.Value);
-                            break;
-                        case ResourceType.Materials:
-                            colMgr.AddMaterials(kvp.Value);
-                            break;
-                        case ResourceType.Currency:
-                            colMgr.AddCurrency(kvp.Value);
-                            break;
-                    }
-                    totalResourcesGathered += kvp.Value;
-                }
-
-                // Elite encounter bonus currency
-                if (lastNodeType == NodeType.EliteEncounter)
-                {
-                    var bc = BalanceConfigSO.Instance;
-                    int bonus = bc != null ? bc.eliteBonusCurrency : 3;
-                    colMgr.AddCurrency(bonus);
-                    Debug.Log($"[RunManager] OnEncounterComplete: elite bonus currency +{bonus}");
-                }
-            }
-
-            // Track wounds
-            foreach (var hero in result.woundedHeroes)
-            {
-                woundedHeroes.Add(hero);
-                Debug.Log($"[RunManager] OnEncounterComplete: hero '{hero.cardName}' added to wounded set");
-            }
-
-            foreach (var hero in result.exhaustedHeroes)
-            {
-                exhaustedHeroes.Add(hero);
-                woundedHeroes.Remove(hero);
-                Debug.Log($"[RunManager] OnEncounterComplete: hero '{hero.cardName}' exhausted — removed from deck this level");
-            }
-
-            // Check colony death from encounter
-            if (colMgr != null && !colMgr.IsAlive)
-            {
-                Debug.Log("[RunManager] OnEncounterComplete: colony died — run failed");
-                RunFailed();
-                return;
-            }
-
-            runState = RunState.MapTraversal;
-            SaveRunState();
-
-            // Unload encounter scene and return to map
-            UnloadEncounterScene();
-            if (mapManager != null)
-            {
-                mapManager.OnNodeComplete();
-            }
-            else
-            {
-                Debug.LogWarning("[RunManager] OnEncounterComplete: mapManager is null — cannot advance map");
+                piedPiperDefeated = true;
+                Debug.Log("[RunManager] RecordEnemyDefeated: PIED PIPER DEFEATED!");
             }
         }
 
-        private void OnNodeHandlerComplete()
+        /// <summary>
+        /// Records a colony card being played during the Colony phase.
+        /// </summary>
+        public void RecordColonyCardPlayed()
         {
-            Debug.Log("[RunManager] OnNodeHandlerComplete: non-combat node done, returning to map");
-            runState = RunState.MapTraversal;
-            SaveRunState();
-            if (mapManager != null) mapManager.OnNodeComplete();
+            colonyCardsPlayed++;
+            Debug.Log($"[RunManager] RecordColonyCardPlayed: total={colonyCardsPlayed}");
         }
 
-        private void OnLevelComplete()
+        /// <summary>
+        /// Records a hero being injured. Tracked by card ID.
+        /// </summary>
+        public void RecordHeroInjured(int heroCardId)
         {
-            Debug.Log($"[RunManager] OnLevelComplete: level {currentLevel} complete!");
-            bossesKilled++;
-
-            if (currentLevel >= levelConfigs.Length)
-            {
-                Debug.Log("[RunManager] OnLevelComplete: final level — run complete!");
-                RunComplete();
-            }
-            else
-            {
-                Debug.Log($"[RunManager] OnLevelComplete: advancing to level {currentLevel + 1}");
-                runState = RunState.LevelComplete;
-                EventBus.OnLevelAdvanced?.Invoke(currentLevel + 1);
-                StartLevel(currentLevel + 1);
-            }
+            bool wasNew = heroesInjured.Add(heroCardId);
+            Debug.Log($"[RunManager] RecordHeroInjured: heroCardId={heroCardId}, wasNew={wasNew}, totalUniqueInjured={heroesInjured.Count}");
         }
 
-        private void OnMapNodeComplete()
+        /// <summary>
+        /// Updates stockpile values. Called by ResourceManager when stockpiles change.
+        /// </summary>
+        public void UpdateStockpiles(int food, int materials, int currency)
         {
-            // Heal heroes who sat out one encounter
-            // Note: wound healing happens per-encounter — heroes sit out ONE encounter then auto-heal
-            // This is tracked by the encounter system checking woundedHeroes set
+            Debug.Log($"[RunManager] UpdateStockpiles: food={foodStockpile}->{food}, materials={materialsStockpile}->{materials}, currency={currencyStockpile}->{currency}");
+            foodStockpile = food;
+            materialsStockpile = materials;
+            currencyStockpile = currency;
         }
 
-        private void OnBossDefeated()
+        // ── Save / Load ──────────────────────────────────────────────────
+
+        /// <summary>
+        /// Saves the current run state to disk.
+        /// </summary>
+        public void SaveRunState()
         {
-            Debug.Log("[RunManager] OnBossDefeated: boss defeated — completing encounter as success");
-            var result = new EncounterResult
-            {
-                success = true,
-                recalled = false,
-                rewardCards = bossManager != null ? bossManager.GetRewardCards() : null,
-                rewardRelic = bossManager != null ? bossManager.GetRewardRelic() : null
-            };
-
-            // If there are reward cards, show reward selection
-            if (result.rewardCards != null && result.rewardCards.Count > 0)
-            {
-                Debug.Log($"[RunManager] OnBossDefeated: {result.rewardCards.Count} reward cards available");
-                // Reward selection is handled by RewardSelectionUI subscribing to OnBossDefeated
-            }
-
-            OnEncounterComplete(result);
-        }
-
-        // --- Card Management ---
-
-        private void OnCardPurchased(CardDefinitionSO card)
-        {
-            Debug.Log($"[RunManager] OnCardPurchased: adding '{card.cardName}' to hero deck (deckSize={heroDeck.Count} -> {heroDeck.Count + 1})");
-            heroDeck.Add(card);
-        }
-
-        private void OnCardDrafted(CardDefinitionSO card)
-        {
-            Debug.Log($"[RunManager] OnCardDrafted: adding '{card.cardName}' to hero deck (deckSize={heroDeck.Count} -> {heroDeck.Count + 1})");
-            heroDeck.Add(card);
-        }
-
-        private void OnCardRemoved(CardDefinitionSO card)
-        {
-            bool removed = heroDeck.Remove(card);
-            Debug.Log($"[RunManager] OnCardRemoved: '{card.cardName}' removed={removed} (deckSize={heroDeck.Count})");
-        }
-
-        private void OnEventWoundHero()
-        {
-            // Wound a random non-wounded hero
-            var candidates = new List<CardDefinitionSO>();
-            foreach (var card in heroDeck)
-            {
-                if (card.cardType == CardType.Hero && !woundedHeroes.Contains(card) && !exhaustedHeroes.Contains(card))
-                    candidates.Add(card);
-            }
-
-            if (candidates.Count > 0)
-            {
-                var victim = candidates[SeededRandom.Range(0, candidates.Count)];
-                woundedHeroes.Add(victim);
-                Debug.Log($"[RunManager] OnEventWoundHero: wounded '{victim.cardName}' (totalWounded={woundedHeroes.Count})");
-            }
-            else
-            {
-                Debug.Log("[RunManager] OnEventWoundHero: no eligible heroes to wound");
-            }
-        }
-
-        // --- Food Consumption ---
-
-        private void ConsumeFood()
-        {
-            if (colonyConfig == null) return;
-
-            var colMgr = ColonyManager.Instance;
-            if (colMgr == null) return;
-
-            int consumption = colonyConfig.foodConsumptionPerNode;
-            int available = colMgr.FoodStockpile;
-            int shortfall = Mathf.Max(0, consumption - available);
-
-            Debug.Log($"[RunManager] ConsumeFood: consumption={consumption}, available={available}, shortfall={shortfall}");
-
-            int toSpend = Mathf.Min(consumption, available);
-            if (toSpend > 0)
-                colMgr.SpendFood(toSpend);
-
-            EventBus.OnFoodConsumed?.Invoke(colMgr.FoodStockpile);
-
-            if (shortfall > 0)
-            {
-                var bc = BalanceConfigSO.Instance;
-                int dmgPerFood = bc != null ? bc.starvationDamagePerFood : 2;
-                int damage = shortfall * dmgPerFood;
-                Debug.Log($"[RunManager] ConsumeFood: STARVATION — shortfall={shortfall}, dmgPerFood={dmgPerFood}, damage={damage}");
-                colMgr.TakeDamage(damage);
-                EventBus.OnStarvationDamage?.Invoke(damage);
-
-                string msg = $"Starvation! -{damage} Colony HP";
-                EventBus.OnGatheringNotification?.Invoke(msg, new Color(1f, 0.2f, 0.2f));
-            }
-        }
-
-        private int CountHeroCards()
-        {
-            int count = 0;
-            foreach (var card in heroDeck)
-            {
-                if (card.cardType == CardType.Hero && !exhaustedHeroes.Contains(card))
-                    count++;
-            }
-            return count;
-        }
-
-        // --- Navigation ---
-
-        private void OnReturnToMainMenu()
-        {
-            Debug.Log("[RunManager] OnReturnToMainMenu: returning to main menu");
-            LoadGameScene("MainMenu");
-        }
-
-        // --- Run End ---
-
-        private void RunComplete()
-        {
-            runState = RunState.RunComplete;
-            Debug.Log($"[RunManager] RunComplete: Victory! encounters={encountersCompleted}, resources={totalResourcesGathered}, bosses={bossesKilled}, nodes={nodesVisited}");
-            SaveManager.DeleteSave();
-            Steam.SteamManager.SetRichPresenceStatus("Victory!");
-
-            // Process meta-progression
-            var metaProg = MetaProgressionManager.Instance;
-            if (metaProg != null)
-            {
-                metaProg.ProcessRunEnd(true, currentLevel, totalResourcesGathered,
-                    bossesKilled, nodesVisited, heroDeck, enemiesEncountered, eventsEncountered, bossesEncountered);
-            }
-
-            EventBus.OnRunComplete_M1?.Invoke(true);
-            EventBus.OnRunComplete?.Invoke();
-
-            string msg = "Victory! The Pack survives!";
-            EventBus.OnGatheringNotification?.Invoke(msg, new Color(1f, 0.9f, 0.3f));
-
-            LoadGameScene("RunResult");
-        }
-
-        private void RunFailed()
-        {
-            runState = RunState.GameOver;
-            Debug.Log($"[RunManager] RunFailed: Defeat. encounters={encountersCompleted}, resources={totalResourcesGathered}, nodes={nodesVisited}");
-            SaveManager.DeleteSave();
-            Steam.SteamManager.SetRichPresenceStatus("Defeated...");
-
-            // Process meta-progression
-            var metaProg = MetaProgressionManager.Instance;
-            if (metaProg != null)
-            {
-                metaProg.ProcessRunEnd(false, currentLevel, totalResourcesGathered,
-                    bossesKilled, nodesVisited, heroDeck, enemiesEncountered, eventsEncountered, bossesEncountered);
-            }
-
-            EventBus.OnRunFailed_M1?.Invoke();
-            EventBus.OnRunFailed?.Invoke();
-
-            string msg = "The Colony Has Fallen...";
-            EventBus.OnGatheringNotification?.Invoke(msg, new Color(1f, 0.2f, 0.2f));
-
-            LoadGameScene("RunResult");
-        }
-
-        // --- Save/Load ---
-
-        private void SaveRunState()
-        {
-            var colMgr = ColonyManager.Instance;
-            if (colMgr == null) return;
+            Debug.Log("[RunManager] SaveRunState: building save data");
 
             var save = new RunSaveData
             {
-                currentLevel = currentLevel,
-                runState = (int)runState,
-                nodesVisited = nodesVisited,
-                currentSceneName = SceneManager.GetActiveScene().name,
-                colonyHP = colMgr.CurrentHP,
-                colonyMaxHP = colMgr.MaxHP,
-                foodStockpile = colMgr.FoodStockpile,
-                materialsStockpile = colMgr.MaterialsStockpile,
-                currencyStockpile = colMgr.CurrencyStockpile,
-                encountersCompleted = encountersCompleted,
+                randomSeed = randomSeed,
+                currentTurn = currentTurn,
+                runState = (int)currentState,
+                foodStockpile = foodStockpile,
+                materialsStockpile = materialsStockpile,
+                currencyStockpile = currencyStockpile,
                 totalResourcesGathered = totalResourcesGathered,
-                enemiesDefeated = enemiesDefeated,
-                bossesKilled = bossesKilled,
-                randomSeed = SeededRandom.CurrentSeed
+                totalEnemiesDefeated = totalEnemiesDefeated,
+                zoneBossesDefeated = zoneBossesDefeated,
+                piedPiperDefeated = piedPiperDefeated,
+                colonyCardsPlayed = colonyCardsPlayed
             };
 
-            // Hero deck
-            foreach (var card in heroDeck)
+            // Save deck card IDs
+            foreach (var card in constructedDeck)
             {
-                if (card != null)
-                    save.heroDeckCardNames.Add(card.cardName);
+                save.deckCardIds.Add(card.cardId);
+                Debug.Log($"[RunManager] SaveRunState: saved deck card '{card.cardName}' (id={card.cardId})");
             }
 
-            // Colony deck
-            foreach (var card in colonyDeck)
+            // Save colony deck card IDs
+            foreach (var card in constructedColonyDeck)
             {
-                if (card != null)
-                    save.colonyDeckCardNames.Add(card.cardName);
+                save.colonyDeckCardIds.Add(card.cardId);
+                Debug.Log($"[RunManager] SaveRunState: saved colony card '{card.cardName}' (id={card.cardId})");
             }
 
-            // Wounds
-            foreach (var hero in woundedHeroes)
+            // Save injured hero IDs
+            foreach (int heroId in heroesInjured)
             {
-                if (hero != null)
-                    save.woundedHeroNames.Add(hero.cardName);
-            }
-            foreach (var hero in exhaustedHeroes)
-            {
-                if (hero != null)
-                    save.exhaustedHeroNames.Add(hero.cardName);
-            }
-
-            // Relics
-            var relicMgr = RelicManager.Instance;
-            if (relicMgr != null)
-                save.activeRelicNames = relicMgr.GetRelicNames();
-
-            // Map state
-            if (mapManager != null && mapManager.Map != null)
-            {
-                save.mapCurrentRow = mapManager.CurrentRow;
-                save.mapCurrentCol = mapManager.CurrentNode != null ? mapManager.CurrentNode.position.y : -1;
-
-                foreach (var row in mapManager.Map)
-                {
-                    foreach (var node in row)
-                    {
-                        var nodeSave = new MapNodeSaveData
-                        {
-                            row = node.position.x,
-                            col = node.position.y,
-                            nodeType = (int)node.nodeType,
-                            visited = node.visited,
-                            difficulty = node.difficulty,
-                            encounterName = node.encounterDefinition != null ? node.encounterDefinition.encounterName : "",
-                            connectedIndices = new System.Collections.Generic.List<int>(node.connectedNodeIndices)
-                        };
-                        save.mapNodes.Add(nodeSave);
-                    }
-                }
-            }
-
-            // Colony config
-            if (colonyConfig != null)
-            {
-                save.colonyConfig = new ColonyConfigSaveData
-                {
-                    maxHeroDeckSize = colonyConfig.maxHeroDeckSize,
-                    foodConsumptionPerNode = colonyConfig.foodConsumptionPerNode,
-                    heroCombatBonus = colonyConfig.heroCombatBonus,
-                    heroMoveBonus = colonyConfig.heroMoveBonus,
-                    heroCarryBonus = colonyConfig.heroCarryBonus,
-                    totalPopulation = colonyConfig.totalPopulation,
-                    bonusStartingFood = colonyConfig.bonusStartingFood
-                };
+                save.heroesEverInjuredIds.Add(heroId);
+                Debug.Log($"[RunManager] SaveRunState: saved injured heroId={heroId}");
             }
 
             SaveManager.Save(save);
+            Debug.Log($"[RunManager] SaveRunState: save complete (turn={currentTurn}, deckSize={save.deckCardIds.Count}, colonyDeckSize={save.colonyDeckCardIds.Count})");
+        }
+
+        /// <summary>
+        /// Restores run state from saved data.
+        /// </summary>
+        private void RestoreFromSave(RunSaveData save)
+        {
+            Debug.Log($"[RunManager] RestoreFromSave: restoring (seed={save.randomSeed}, turn={save.currentTurn}, state={save.runState})");
+
+            randomSeed = save.randomSeed;
+            currentTurn = save.currentTurn;
+            currentState = (RunState)save.runState;
+            foodStockpile = save.foodStockpile;
+            materialsStockpile = save.materialsStockpile;
+            currencyStockpile = save.currencyStockpile;
+            totalResourcesGathered = save.totalResourcesGathered;
+            totalEnemiesDefeated = save.totalEnemiesDefeated;
+            zoneBossesDefeated = save.zoneBossesDefeated;
+            piedPiperDefeated = save.piedPiperDefeated;
+            colonyCardsPlayed = save.colonyCardsPlayed;
+
+            Debug.Log($"[RunManager] RestoreFromSave: stockpiles — food={foodStockpile}, materials={materialsStockpile}, currency={currencyStockpile}");
+            Debug.Log($"[RunManager] RestoreFromSave: stats — resources={totalResourcesGathered}, enemies={totalEnemiesDefeated}, bosses={zoneBossesDefeated}, piper={piedPiperDefeated}");
+
+            // Restore decks from card IDs via CardDatabase
+            constructedDeck.Clear();
+            var cardDb = CardDatabase.Instance;
+            foreach (int cardId in save.deckCardIds)
+            {
+                var card = cardDb.GetCard(cardId);
+                if (card != null)
+                {
+                    constructedDeck.Add(card);
+                    Debug.Log($"[RunManager] RestoreFromSave: restored deck card '{card.cardName}' (id={cardId})");
+                }
+                else
+                {
+                    Debug.LogWarning($"[RunManager] RestoreFromSave: deck card not found in database (id={cardId})");
+                }
+            }
+
+            constructedColonyDeck.Clear();
+            foreach (int cardId in save.colonyDeckCardIds)
+            {
+                var card = cardDb.GetColonyCard(cardId);
+                if (card != null)
+                {
+                    constructedColonyDeck.Add(card);
+                    Debug.Log($"[RunManager] RestoreFromSave: restored colony card '{card.cardName}' (id={cardId})");
+                }
+                else
+                {
+                    Debug.LogWarning($"[RunManager] RestoreFromSave: colony card not found in database (id={cardId})");
+                }
+            }
+
+            // Restore injured heroes
+            heroesInjured.Clear();
+            foreach (int heroId in save.heroesEverInjuredIds)
+            {
+                heroesInjured.Add(heroId);
+                Debug.Log($"[RunManager] RestoreFromSave: restored injured heroId={heroId}");
+            }
+
+            Debug.Log($"[RunManager] RestoreFromSave: complete (deck={constructedDeck.Count}, colonyDeck={constructedColonyDeck.Count}, injured={heroesInjured.Count})");
+        }
+
+        // ── Score Calculation ────────────────────────────────────────────
+
+        /// <summary>
+        /// Calculates the final score. Per GDD: fewer turns + smaller deck = higher score.
+        /// </summary>
+        private int CalculateScore(bool victory, int turnsUsed)
+        {
+            Debug.Log($"[RunManager] CalculateScore: victory={victory}, turnsUsed={turnsUsed}");
+
+            int score = 0;
+
+            // Base score for victory
+            if (victory)
+            {
+                score += 1000;
+                Debug.Log("[RunManager] CalculateScore: +1000 for victory");
+            }
+
+            // Turn bonus: fewer turns = higher score (baseline 30 turns)
+            int turnBonus = Mathf.Max(0, (30 - turnsUsed) * 50);
+            score += turnBonus;
+            Debug.Log($"[RunManager] CalculateScore: +{turnBonus} turn bonus (turnsUsed={turnsUsed})");
+
+            // Deck efficiency: smaller deck = higher score
+            int totalDeckSize = constructedDeck.Count + constructedColonyDeck.Count;
+            int deckBonus = Mathf.Max(0, (30 - totalDeckSize) * 20);
+            score += deckBonus;
+            Debug.Log($"[RunManager] CalculateScore: +{deckBonus} deck efficiency bonus (deckSize={totalDeckSize})");
+
+            // Resource bonus
+            int resourceBonus = totalResourcesGathered * 5;
+            score += resourceBonus;
+            Debug.Log($"[RunManager] CalculateScore: +{resourceBonus} resource bonus (totalGathered={totalResourcesGathered})");
+
+            // Enemy bonus
+            int enemyBonus = totalEnemiesDefeated * 10;
+            score += enemyBonus;
+            Debug.Log($"[RunManager] CalculateScore: +{enemyBonus} enemy bonus (totalDefeated={totalEnemiesDefeated})");
+
+            // Boss bonus
+            int bossBonus = zoneBossesDefeated * 100;
+            score += bossBonus;
+            Debug.Log($"[RunManager] CalculateScore: +{bossBonus} boss bonus (bossesDefeated={zoneBossesDefeated})");
+
+            // Pied Piper bonus
+            if (piedPiperDefeated)
+            {
+                score += 500;
+                Debug.Log("[RunManager] CalculateScore: +500 Pied Piper defeated bonus");
+            }
+
+            // Colony card bonus
+            int colonyBonus = colonyCardsPlayed * 15;
+            score += colonyBonus;
+            Debug.Log($"[RunManager] CalculateScore: +{colonyBonus} colony bonus (cardsPlayed={colonyCardsPlayed})");
+
+            Debug.Log($"[RunManager] CalculateScore: finalScore={score}");
+            return score;
+        }
+
+        // ── Event Handlers ───────────────────────────────────────────────
+
+        private void HandleRunComplete(bool victory)
+        {
+            Debug.Log($"[RunManager] HandleRunComplete: victory={victory}, currentTurn={currentTurn}");
+            OnRunComplete(victory, currentTurn);
+        }
+
+        private void HandleTurnStarted(int turnNumber)
+        {
+            currentTurn = turnNumber;
+            Debug.Log($"[RunManager] HandleTurnStarted: turn={currentTurn}");
+
+            // Auto-save at the start of each turn
+            SaveRunState();
+            Debug.Log($"[RunManager] HandleTurnStarted: auto-saved at turn={currentTurn}");
+        }
+
+        private void HandleColonyCardPlayed(ColonyCardDefinitionSO card)
+        {
+            Debug.Log($"[RunManager] HandleColonyCardPlayed: card='{card.cardName}' (id={card.cardId})");
+            RecordColonyCardPlayed();
+        }
+
+        private void HandleReturnToMainMenu()
+        {
+            Debug.Log("[RunManager] HandleReturnToMainMenu: saving and returning to menu");
+            if (currentState == RunState.InRun)
+            {
+                SaveRunState();
+                Debug.Log("[RunManager] HandleReturnToMainMenu: saved in-progress run");
+            }
+            ReturnToMainMenu();
+        }
+
+        private void HandleResourceGathered(HeroToken hero, ResourceType type, int amount)
+        {
+            Debug.Log($"[RunManager] HandleResourceGathered: type={type}, amount={amount}");
+            RecordResourceGathered(amount);
+        }
+
+        private void HandleResourceDeposited(HeroToken hero, ResourceType type, int amount)
+        {
+            Debug.Log($"[RunManager] HandleResourceDeposited: type={type}, amount={amount}");
+            // Stockpile updates come from the ResourceManager/ColonyManager, not tracked here directly
+        }
+
+        private void HandleCombatEnded(int nodeId, bool heroesWon)
+        {
+            Debug.Log($"[RunManager] HandleCombatEnded: nodeId={nodeId}, heroesWon={heroesWon}");
+            // Individual enemy defeat tracking happens via RecordEnemyDefeated called by CombatResolver
+        }
+
+        // ── Internal Helpers ─────────────────────────────────────────────
+
+        /// <summary>
+        /// Resets all run state to defaults for a new run.
+        /// </summary>
+        private void ResetRunState()
+        {
+            Debug.Log("[RunManager] ResetRunState: clearing all run data");
+
+            randomSeed = 0;
+            currentTurn = 0;
+            totalResourcesGathered = 0;
+            totalEnemiesDefeated = 0;
+            zoneBossesDefeated = 0;
+            piedPiperDefeated = false;
+            colonyCardsPlayed = 0;
+            heroesInjured.Clear();
+            constructedDeck.Clear();
+            constructedColonyDeck.Clear();
+            foodStockpile = 0;
+            materialsStockpile = 0;
+            currencyStockpile = 0;
+
+            Debug.Log("[RunManager] ResetRunState: complete — all state zeroed");
         }
     }
 }

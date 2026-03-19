@@ -40,13 +40,16 @@ namespace Scurry.UI
 
         private void BuildPanel()
         {
-            // Create main panel
-            panel = new GameObject("ScrapbookPanel");
-            panel.transform.SetParent(transform, false);
+            // Parent to our own canvas — never search globally which could find DontDestroyOnLoad canvases
+            var canvas = GetComponentInParent<Canvas>();
+            if (canvas == null)
+                canvas = GetComponent<Canvas>();
 
-            var canvas = FindAnyObjectByType<Canvas>();
+            panel = new GameObject("ScrapbookPanel");
             if (canvas != null)
                 panel.transform.SetParent(canvas.transform, false);
+            else
+                panel.transform.SetParent(transform, false);
 
             var panelRect = panel.AddComponent<RectTransform>();
             panelRect.anchorMin = Vector2.zero;

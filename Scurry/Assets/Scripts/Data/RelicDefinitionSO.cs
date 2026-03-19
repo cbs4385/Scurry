@@ -8,7 +8,7 @@ namespace Scurry.Data
         public string relicName;
         [Tooltip("Localization key prefix, e.g. 'relic.feather'. Name = key+'.name', desc = key+'.desc'")]
         public string localizationKey;
-        public RelicEffect effect;
+        [TextArea] public string effectDescription;
         public int effectValue = 1;
         public Sprite artwork;
         public Color placeholderColor = Color.cyan;

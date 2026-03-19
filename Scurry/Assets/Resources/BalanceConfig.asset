@@ -12,29 +12,38 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4153bf2f556e3c64ea57cc73df21573a, type: 3}
   m_Name: BalanceConfig
   m_EditorClassIdentifier: Assembly-CSharp::Scurry.Data.BalanceConfigSO
-  startingFood: 15
+  startingFood: 20
   startingMaterials: 5
   startingCurrency: 5
   starvationDamagePerFood: 2
   baseColonyHP: 30
   baseColonyMaxHP: 30
-  baseHeroDeckSize: 8
-  priceCommon: 2
-  priceUncommon: 4
-  priceRare: 7
-  priceLegendary: 12
-  shopRerollCost: 2
-  shopCardCount: 5
-  upgradeCostCommon: 2
-  upgradeCostUncommon: 4
-  upgradeCostRare: 7
-  minorHealCost: 2
-  minorHealAmount: 5
-  majorHealCost: 5
-  majorHealAmount: 15
-  resupplyCost: 3
-  restHealPercent: 30
   difficultyScalingFactor: 0.15
-  bossFailureDamage: 10
-  draftCardCount: 3
-  eliteBonusCurrency: 3
+  groupCombatBonus2Heroes: 1
+  groupCombatBonus3Heroes: 2
+  groupCombatBonus4PlusHeroes: 3
+  enemySpawnChance: 0.65
+  bossesRequiredForPiper: 2
+  colonyFoodStorageFoodCost: 1
+  colonyFoodStorageMaterialsCost: 1
+  colonyStructureDefenseFoodCost: 1
+  colonyStructureDefenseMaterialsCost: 2
+  colonyAdvancedFoodCost: 1
+  colonyAdvancedMaterialsCost: 2
+  maxHeroDeploysPerDifficulty: 030000000200000002000000
+  baseFoodProduction: 3
+  foodBonusPerNHeroesPerDifficulty: 020000000300000005000000
+  heroesAtColonyFreeFood: 1
+  difficulty: 1
+  enemyStrengthMultipliers:
+  - 0.5
+  - 1
+  - 1.5
+  enemySpawnChances:
+  - 0.4
+  - 0.65
+  - 0.9
+  easyBonusFood: 10
+  easyBonusMaterials: 5
+  easyBonusHeroHP: 2
+  easyBonusHeroCombat: 1

@@ -1,0 +1,147 @@
+{
+    "enemies": [
+        {
+            "enemyId": 0,
+            "enemyName": "Field Mouse",
+            "strength": 1,
+            "hp": 2,
+            "speed": 1,
+            "behavior": "Patrol",
+            "homeZone": "Wilderness",
+            "description": "A timid field mouse that scurries along forest paths. Weak alone but can overwhelm in numbers.",
+            "tokenColor": "#8B7355"
+        },
+        {
+            "enemyId": 1,
+            "enemyName": "Grass Snake",
+            "strength": 2,
+            "hp": 3,
+            "speed": 2,
+            "behavior": "Ambush",
+            "homeZone": "Wilderness",
+            "description": "A patient predator that lurks in tall grass, striking when prey wanders too close.",
+            "tokenColor": "#4A7023"
+        },
+        {
+            "enemyId": 2,
+            "enemyName": "Hawk Scout",
+            "strength": 3,
+            "hp": 3,
+            "speed": 3,
+            "behavior": "Chase",
+            "homeZone": "Wilderness",
+            "description": "A sharp-eyed hawk that patrols the skies, diving at any rat caught in the open.",
+            "tokenColor": "#8B6914"
+        },
+        {
+            "enemyId": 3,
+            "enemyName": "Elder Silas the Owl",
+            "strength": 6,
+            "hp": 12,
+            "speed": 1,
+            "behavior": "Guard",
+            "homeZone": "Wilderness",
+            "description": "The ancient owl who rules the wilderness. His talons are razor-sharp and his gaze freezes prey in place.",
+            "tokenColor": "#4A3728"
+        },
+        {
+            "enemyId": 4,
+            "enemyName": "Farm Cat",
+            "strength": 3,
+            "hp": 4,
+            "speed": 2,
+            "behavior": "Chase",
+            "homeZone": "Farmland",
+            "description": "A well-fed barn cat that hunts rats for sport. Fast and relentless once it spots its prey.",
+            "tokenColor": "#FF8C00"
+        },
+        {
+            "enemyId": 5,
+            "enemyName": "Rat Trap",
+            "strength": 5,
+            "hp": 1,
+            "speed": 0,
+            "behavior": "Ambush",
+            "homeZone": "Farmland",
+            "description": "A spring-loaded trap baited with cheese. Devastating on contact but easily destroyed once sprung.",
+            "tokenColor": "#808080"
+        },
+        {
+            "enemyId": 6,
+            "enemyName": "Terrier",
+            "strength": 4,
+            "hp": 5,
+            "speed": 2,
+            "behavior": "Patrol",
+            "homeZone": "Farmland",
+            "description": "A terrier bred for ratting. Tireless and fearless, it patrols the barns and fields relentlessly.",
+            "tokenColor": "#D2691E"
+        },
+        {
+            "enemyId": 7,
+            "enemyName": "Tobias & Duchess the Barn Cats",
+            "strength": 8,
+            "hp": 18,
+            "speed": 2,
+            "behavior": "Chase",
+            "homeZone": "Farmland",
+            "description": "A bonded pair of barn cats who hunt as a team. Tobias flushes prey while Duchess delivers the killing blow.",
+            "tokenColor": "#CD853F"
+        },
+        {
+            "enemyId": 8,
+            "enemyName": "Alley Cat",
+            "strength": 5,
+            "hp": 6,
+            "speed": 2,
+            "behavior": "Chase",
+            "homeZone": "Town",
+            "description": "A scrappy street cat hardened by urban survival. Hunts rats to protect its territory.",
+            "tokenColor": "#696969"
+        },
+        {
+            "enemyId": 9,
+            "enemyName": "Rat-Catcher",
+            "strength": 6,
+            "hp": 8,
+            "speed": 1,
+            "behavior": "Patrol",
+            "homeZone": "Town",
+            "description": "A professional exterminator armed with traps and poison. Methodical and thorough in his rounds.",
+            "tokenColor": "#8B0000"
+        },
+        {
+            "enemyId": 10,
+            "enemyName": "Poison Trap",
+            "strength": 7,
+            "hp": 1,
+            "speed": 0,
+            "behavior": "Ambush",
+            "homeZone": "Town",
+            "description": "A hidden bait station laced with deadly poison. One taste can fell even the strongest rat.",
+            "tokenColor": "#9400D3"
+        },
+        {
+            "enemyId": 11,
+            "enemyName": "Aldric Fenn the Rat-Catcher Captain",
+            "strength": 10,
+            "hp": 25,
+            "speed": 1,
+            "behavior": "Guard",
+            "homeZone": "Town",
+            "description": "The ruthless captain of the town's rat-catchers guild. His cunning traps and trained ferrets have cleared entire warrens.",
+            "tokenColor": "#800000"
+        },
+        {
+            "enemyId": 12,
+            "enemyName": "The Pied Piper",
+            "strength": 12,
+            "hp": 40,
+            "speed": 0,
+            "behavior": "Guard",
+            "homeZone": "PiedPiper",
+            "description": "The legendary Pied Piper whose enchanted flute can bend rats to his will. The final threat to the colony's freedom.",
+            "tokenColor": "#FFD700"
+        }
+    ]
+}

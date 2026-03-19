@@ -1,5 +1,6 @@
 using UnityEngine;
 
+
 namespace Scurry.Core
 {
     public static class SeededRandom
@@ -18,7 +19,7 @@ namespace Scurry.Core
         {
             currentSeed = seed;
             rng = new System.Random(seed);
-            Debug.Log($"[SeededRandom] Initialize: seed={seed}");
+            if (!SimulationFlags.SuppressLogging) Debug.Log($"[SeededRandom] Initialize: seed={seed}");
         }
 
         /// <summary>

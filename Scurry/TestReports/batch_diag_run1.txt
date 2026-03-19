@@ -1,0 +1,11 @@
+Run #1 Diagnostics
+victory=False, turns=3
+enemies=4, bosses=0
+resources=2, colony=3
+heroes=8, deck=18, colonyDeck=12
+food=0, materials=0
+RunManager.TotalEnemiesDefeated=4
+RunManager.TotalResourcesGathered=2
+RunManager.CurrentTurn=3
+RunManager.CurrentRunState=GameOver
+TurnManager=NULL

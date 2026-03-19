@@ -1,171 +1,180 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 using Scurry.Data;
-using Scurry.Colony;
-using Scurry.Encounter;
+using Scurry.Map;
 
 namespace Scurry.Core
 {
+    /// <summary>
+    /// Central event bus for Scurry v2.0. All events are static Actions.
+    /// Subscribe in OnEnable, unsubscribe in OnDisable. Call Reset() on scene teardown.
+    /// </summary>
     public static class EventBus
     {
-        // --- Legacy M0 events (kept for backward compatibility until full rewrite) ---
+        // ── Turn Flow ──────────────────────────────────────────────────
+        public static Action<int> OnTurnStarted;
         public static Action<GamePhase> OnPhaseChanged;
-        public static Action<CardDefinitionSO> OnCardDrawn;
-        public static Action<CardDefinitionSO, Vector2Int> OnCardPlaced;
-        public static Action<Vector2Int> OnHeroMoved;
-        public static Action<Vector2Int> OnEnemyMoved;
-        public static Action<int, int, bool> OnCombatResolved; // heroCombat, enemyStrength, won
-        public static Action<ResourceType, int> OnResourceCollected;
-        public static Action<int, int> OnColonyHPChanged; // current, max
         public static Action OnTurnEnded;
-        public static Action OnUndoPlacement;
-        public static Action OnGatheringComplete;
-        public static Action<List<CardDefinitionSO>> OnDeckBuildComplete;
-        public static Action<string, Color> OnGatheringNotification; // message, color
-        public static Action<string> OnTileHovered; // tooltip text
-        public static Action OnTileUnhovered;
-        public static Action<string> OnResourceTokenCollected; // token name
-        public static Action<bool> OnCardPlacementGameComplete; // heroesLost
-        public static Action<StepType> OnStepStarted;
-        public static Action<int, int> OnStageProgress; // currentStep, totalSteps
-        public static Action<StepType[]> OnStepChoicePresented;
-        public static Action<StepType> OnStepChosen;
 
-        // --- M1 Colony Draft events ---
-        public static Action<List<ColonyCardDefinitionSO>> OnColonyDraftComplete;
+        // ── Colony ─────────────────────────────────────────────────────
+        public static Action<ColonyCardDefinitionSO> OnColonyCardPlayed;
+        public static Action OnColonyProductionComplete;
 
-        // --- M1 Colony Management events ---
-        public static Action<ColonyConfig> OnColonyManagementComplete;
-        public static Action<List<CardDefinitionSO>> OnHeroDeckReady;
+        // ── Deployment ─────────────────────────────────────────────────
+        public static Action<HeroToken, int> OnHeroDeployed;
+        public static Action<CardDefinitionSO, HeroToken> OnEquipmentAttached;
+        public static Action<HeroToken, int> OnTargetAssigned;
 
-        // --- M1 Map events ---
-        public static Action OnMapReady;
-        public static Action<Map.MapNode> OnMapNodeSelected;
-        public static Action OnMapNodeComplete;
-        public static Action OnLevelComplete;
+        // ── Movement ───────────────────────────────────────────────────
+        public static Action<HeroToken, int, int> OnHeroMoved;
+        public static Action<int, int, int> OnEnemyMoved;
 
-        // --- M1 Encounter events ---
-        public static Action<EncounterResult> OnEncounterComplete;
-        public static Action OnRecallInitiated;
-        public static Action OnAutoDeployComplete;
-        public static Action OnEquipmentAssigned;
+        // ── Combat ─────────────────────────────────────────────────────
+        public static Action<int> OnCombatStarted;
+        public static Action<int, int, int, int> OnCombatRound;
+        public static Action<int, bool> OnCombatEnded;
+        public static Action<CardDefinitionSO> OnTacticalCardPlayed;
 
-        // --- M1 Boss events ---
-        public static Action<string> OnBossPhaseChanged;
-        public static Action<int, int> OnBossHPChanged; // current, max
-        public static Action OnBossDefeated;
+        // ── Resources ──────────────────────────────────────────────────
+        public static Action<HeroToken, ResourceType, int> OnResourceGathered;
+        public static Action<HeroToken, ResourceType, int> OnResourceDeposited;
+        public static Action<int, ResourceType, int> OnResourceDropped;
 
-        // --- M3 Achievement events ---
-        public static Action<string> OnAchievementUnlocked;
+        // ── Fog of War ─────────────────────────────────────────────────
+        public static Action<int> OnNodeRevealed;
+        public static Action<int> OnNodeHidden;
 
-        // --- M1 Run events ---
+        // ── Card Rewards ──────────────────────────────────────────────
+        public static Action<CardDefinitionSO> OnCardRewardSelected;
+        public static Action OnCardRewardSkipped;
+
+        // ── Pied Piper Countdown ─────────────────────────────────────
+        public static Action<int> OnPiperCountdownStarted;    // int = total turns
+        public static Action<int> OnPiperCountdownTick;       // int = turns remaining
+        public static Action OnPiperMarchesOnColony;
+
+        // ── Run ────────────────────────────────────────────────────────
         public static Action OnRunStarted;
-        public static Action<int> OnLevelStarted;
-        public static Action<int> OnFoodConsumed; // remaining food
-        public static Action<int> OnStarvationDamage; // damage amount
-        public static Action<bool> OnRunComplete_M1; // victory
-        public static Action<int> OnLevelAdvanced; // new level number
-        public static Action OnRunFailed_M1;
+        public static Action<bool> OnRunComplete;
+        public static Action<int> OnScoreCalculated;
 
-        // Legacy run events
-        public static Action OnRunComplete;
-        public static Action OnRunFailed;
+        // ── UI ─────────────────────────────────────────────────────────
+        public static Action<string, Color> OnNotification;
+        public static Action<string> OnTooltipShow;
+        public static Action OnTooltipHide;
 
-        // --- M1 Node handler events ---
-        public static Action OnShopComplete;
-        public static Action OnHealingComplete;
-        public static Action OnUpgradeComplete;
-        public static Action OnDraftComplete;
-        public static Action OnEventComplete;
-        public static Action OnRestComplete;
-
-        // --- M1 Card management events ---
-        public static Action<CardDefinitionSO> OnCardPurchased;
-        public static Action<CardDefinitionSO> OnCardDrafted;
-        public static Action<CardDefinitionSO> OnCardRemoved;
-        public static Action OnEventWoundHero;
-
-        // --- Scene transition events ---
-        public static Action OnEncounterResultDismissed;
+        // ── Scene ──────────────────────────────────────────────────────
         public static Action OnReturnToMainMenu;
 
+        // ── Achievements ───────────────────────────────────────────────
+        public static Action<string> OnAchievementUnlocked;
+
+        // ── Utility ────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Nulls every event delegate. Call on scene teardown to prevent stale subscriptions.
+        /// </summary>
         public static void Reset()
         {
             Debug.Log("[EventBus] Reset: clearing all event subscriptions");
+
+            OnTurnStarted = null;
             OnPhaseChanged = null;
-            OnCardDrawn = null;
-            OnCardPlaced = null;
+            OnTurnEnded = null;
+            OnColonyCardPlayed = null;
+            OnColonyProductionComplete = null;
+            OnHeroDeployed = null;
+            OnEquipmentAttached = null;
+            OnTargetAssigned = null;
             OnHeroMoved = null;
             OnEnemyMoved = null;
-            OnCombatResolved = null;
-            OnResourceCollected = null;
-            OnColonyHPChanged = null;
-            OnTurnEnded = null;
-            OnUndoPlacement = null;
-            OnGatheringComplete = null;
-            OnDeckBuildComplete = null;
-            OnGatheringNotification = null;
-            OnTileHovered = null;
-            OnTileUnhovered = null;
-            OnResourceTokenCollected = null;
-            OnCardPlacementGameComplete = null;
-            OnStepStarted = null;
-            OnStageProgress = null;
-            OnStepChoicePresented = null;
-            OnStepChosen = null;
-
-            // M1 events
-            OnColonyDraftComplete = null;
-            OnColonyManagementComplete = null;
-            OnHeroDeckReady = null;
-            OnMapReady = null;
-            OnMapNodeSelected = null;
-            OnMapNodeComplete = null;
-            OnLevelComplete = null;
-            OnEncounterComplete = null;
-            OnRecallInitiated = null;
-            OnAutoDeployComplete = null;
-            OnEquipmentAssigned = null;
-            OnBossPhaseChanged = null;
-            OnBossHPChanged = null;
-            OnBossDefeated = null;
+            OnCombatStarted = null;
+            OnCombatRound = null;
+            OnCombatEnded = null;
+            OnTacticalCardPlayed = null;
+            OnResourceGathered = null;
+            OnResourceDeposited = null;
+            OnResourceDropped = null;
+            OnNodeRevealed = null;
+            OnNodeHidden = null;
+            OnCardRewardSelected = null;
+            OnCardRewardSkipped = null;
+            OnPiperCountdownStarted = null;
+            OnPiperCountdownTick = null;
+            OnPiperMarchesOnColony = null;
             OnRunStarted = null;
-            OnLevelStarted = null;
-            OnFoodConsumed = null;
-            OnStarvationDamage = null;
-            OnRunComplete_M1 = null;
-            OnLevelAdvanced = null;
-            OnRunFailed_M1 = null;
             OnRunComplete = null;
-            OnRunFailed = null;
-            OnShopComplete = null;
-            OnHealingComplete = null;
-            OnUpgradeComplete = null;
-            OnDraftComplete = null;
-            OnEventComplete = null;
-            OnRestComplete = null;
-            OnCardPurchased = null;
-            OnCardDrafted = null;
-            OnCardRemoved = null;
-            OnEventWoundHero = null;
-            OnAchievementUnlocked = null;
-            OnEncounterResultDismissed = null;
+            OnScoreCalculated = null;
+            OnNotification = null;
+            OnTooltipShow = null;
+            OnTooltipHide = null;
             OnReturnToMainMenu = null;
+            OnAchievementUnlocked = null;
 
-            Debug.Log("[EventBus] Reset: complete — all events nulled");
+            Debug.Log("[EventBus] Reset: complete");
         }
 
+        /// <summary>
+        /// Logs the subscriber count for every event.
+        /// </summary>
         public static void LogSubscriberCounts()
         {
             int Count(Delegate d) => d?.GetInvocationList().Length ?? 0;
-            Debug.Log($"[EventBus] Subscriber counts: " +
+
+            Debug.Log("[EventBus] LogSubscriberCounts: Turn flow — " +
+                $"OnTurnStarted={Count(OnTurnStarted)}, " +
                 $"OnPhaseChanged={Count(OnPhaseChanged)}, " +
-                $"OnColonyManagementComplete={Count(OnColonyManagementComplete)}, " +
-                $"OnMapNodeSelected={Count(OnMapNodeSelected)}, " +
-                $"OnEncounterComplete={Count(OnEncounterComplete)}, " +
+                $"OnTurnEnded={Count(OnTurnEnded)}");
+
+            Debug.Log("[EventBus] LogSubscriberCounts: Colony — " +
+                $"OnColonyCardPlayed={Count(OnColonyCardPlayed)}, " +
+                $"OnColonyProductionComplete={Count(OnColonyProductionComplete)}");
+
+            Debug.Log("[EventBus] LogSubscriberCounts: Deployment — " +
+                $"OnHeroDeployed={Count(OnHeroDeployed)}, " +
+                $"OnEquipmentAttached={Count(OnEquipmentAttached)}, " +
+                $"OnTargetAssigned={Count(OnTargetAssigned)}");
+
+            Debug.Log("[EventBus] LogSubscriberCounts: Movement — " +
+                $"OnHeroMoved={Count(OnHeroMoved)}, " +
+                $"OnEnemyMoved={Count(OnEnemyMoved)}");
+
+            Debug.Log("[EventBus] LogSubscriberCounts: Combat — " +
+                $"OnCombatStarted={Count(OnCombatStarted)}, " +
+                $"OnCombatRound={Count(OnCombatRound)}, " +
+                $"OnCombatEnded={Count(OnCombatEnded)}, " +
+                $"OnTacticalCardPlayed={Count(OnTacticalCardPlayed)}");
+
+            Debug.Log("[EventBus] LogSubscriberCounts: Resources — " +
+                $"OnResourceGathered={Count(OnResourceGathered)}, " +
+                $"OnResourceDeposited={Count(OnResourceDeposited)}, " +
+                $"OnResourceDropped={Count(OnResourceDropped)}");
+
+            Debug.Log("[EventBus] LogSubscriberCounts: Fog — " +
+                $"OnNodeRevealed={Count(OnNodeRevealed)}, " +
+                $"OnNodeHidden={Count(OnNodeHidden)}");
+
+            Debug.Log("[EventBus] LogSubscriberCounts: Card Rewards — " +
+                $"OnCardRewardSelected={Count(OnCardRewardSelected)}, " +
+                $"OnCardRewardSkipped={Count(OnCardRewardSkipped)}");
+
+            Debug.Log("[EventBus] LogSubscriberCounts: Pied Piper — " +
+                $"OnPiperCountdownStarted={Count(OnPiperCountdownStarted)}, " +
+                $"OnPiperCountdownTick={Count(OnPiperCountdownTick)}, " +
+                $"OnPiperMarchesOnColony={Count(OnPiperMarchesOnColony)}");
+
+            Debug.Log("[EventBus] LogSubscriberCounts: Run — " +
                 $"OnRunStarted={Count(OnRunStarted)}, " +
-                $"OnLevelComplete={Count(OnLevelComplete)}");
+                $"OnRunComplete={Count(OnRunComplete)}, " +
+                $"OnScoreCalculated={Count(OnScoreCalculated)}");
+
+            Debug.Log("[EventBus] LogSubscriberCounts: UI — " +
+                $"OnNotification={Count(OnNotification)}, " +
+                $"OnTooltipShow={Count(OnTooltipShow)}, " +
+                $"OnTooltipHide={Count(OnTooltipHide)}");
+
+            Debug.Log("[EventBus] LogSubscriberCounts: Scene — " +
+                $"OnReturnToMainMenu={Count(OnReturnToMainMenu)}");
         }
     }
 }

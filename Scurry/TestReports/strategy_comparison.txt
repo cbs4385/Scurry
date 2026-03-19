@@ -1,0 +1,99 @@
+MULTI-STRATEGY BATCH SIMULATION REPORT
+Date: 2026-03-13 02:06:11
+Total runs: 500
+================================================================================
+
+Strategy 0: ColonyFirst
+--------------------------------------------------
+  Runs:          84
+  Win rate:      0.0% (0/84)
+  Turns:         avg=4.0, min=2, max=7, median=4
+  Enemies:       avg=5.3, min=1, max=11, total=449
+  Zone bosses:   7 (7 games)
+  Pied Piper:    0 defeats
+  Resources:     avg=4.0
+  Colony cards:  avg=4.0
+  Heroes:        avg=8.0
+  Deck size:     avg=18.0+12.0 colony
+  Score:         avg=693, min=585, max=810
+
+Strategy 1: ZergRush
+--------------------------------------------------
+  Runs:          84
+  Win rate:      0.0% (0/84)
+  Turns:         avg=5.2, min=2, max=9, median=5
+  Enemies:       avg=10.6, min=5, max=18, total=887
+  Zone bosses:   118 (80 games)
+  Pied Piper:    0 defeats
+  Resources:     avg=9.3
+  Colony cards:  avg=4.9
+  Heroes:        avg=16.0
+  Deck size:     avg=24.0+6.0 colony
+  Score:         avg=854, min=640, max=1060
+
+Strategy 2: SpeedScouts
+--------------------------------------------------
+  Runs:          83
+  Win rate:      0.0% (0/83)
+  Turns:         avg=3.5, min=1, max=6, median=4
+  Enemies:       avg=3.1, min=0, max=6, total=260
+  Zone bosses:   0 (0 games)
+  Pied Piper:    0 defeats
+  Resources:     avg=1.0
+  Colony cards:  avg=3.5
+  Heroes:        avg=8.0
+  Deck size:     avg=22.0+8.0 colony
+  Score:         avg=663, min=605, max=735
+
+Strategy 3: FortressColony
+--------------------------------------------------
+  Runs:          83
+  Win rate:      0.0% (0/83)
+  Turns:         avg=5.3, min=5, max=7, median=5
+  Enemies:       avg=3.7, min=1, max=6, total=308
+  Zone bosses:   3 (3 games)
+  Pied Piper:    0 defeats
+  Resources:     avg=1.6
+  Colony cards:  avg=5.3
+  Heroes:        avg=6.0
+  Deck size:     avg=14.0+16.0 colony
+  Score:         avg=613, min=520, max=705
+
+Strategy 4: PiperBeeline
+--------------------------------------------------
+  Runs:          83
+  Win rate:      0.0% (0/83)
+  Turns:         avg=3.6, min=1, max=6, median=4
+  Enemies:       avg=5.9, min=3, max=10, total=491
+  Zone bosses:   82 (72 games)
+  Pied Piper:    0 defeats
+  Resources:     avg=4.7
+  Colony cards:  avg=3.6
+  Heroes:        avg=10.0
+  Deck size:     avg=22.0+8.0 colony
+  Score:         avg=806, min=685, max=950
+
+Strategy 5: BalancedAdaptive
+--------------------------------------------------
+  Runs:          83
+  Win rate:      0.0% (0/83)
+  Turns:         avg=4.1, min=1, max=7, median=4
+  Enemies:       avg=4.4, min=0, max=9, total=368
+  Zone bosses:   9 (9 games)
+  Pied Piper:    0 defeats
+  Resources:     avg=1.1
+  Colony cards:  avg=4.1
+  Heroes:        avg=8.0
+  Deck size:     avg=20.0+10.0 colony
+  Score:         avg=668, min=595, max=750
+
+STRATEGY COMPARISON TABLE
+================================================================================
+Strategy              Runs   Win%  AvgTrn  AvgEnm  Bosses  AvgRes  AvgScr
+--------------------------------------------------------------------------------
+ColonyFirst             84   0.0%     4.0     5.3       7     4.0     693
+ZergRush                84   0.0%     5.2    10.6     118     9.3     854
+SpeedScouts             83   0.0%     3.5     3.1       0     1.0     663
+FortressColony          83   0.0%     5.3     3.7       3     1.6     613
+PiperBeeline            83   0.0%     3.6     5.9      82     4.7     806
+BalancedAdaptive        83   0.0%     4.1     4.4       9     1.1     668

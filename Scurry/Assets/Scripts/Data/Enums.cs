@@ -1,54 +1,94 @@
 namespace Scurry.Data
 {
-    // --- M1 GamePhase (new values used by EncounterManager) ---
-    // Old values kept for M0 compatibility until GameManager is rewritten in Phase B3
-    public enum GamePhase { DeckBuild, Draw, Deploy, Gather, Resolve, Setup, AutoBattle, Recall, Resolution }
+    public enum GamePhase { ColonyDeploy, Deploy, HeroMove, EnemyMove, Combat, Gather, Cleanup }
 
-    // --- M1 CardType (Hero stays, Resource removed from decks but kept for tile data) ---
-    public enum CardType { Hero, Resource, Equipment, Colony, ColonyBenefit, HeroBenefit }
+    public enum CardType { Hero, Colony, Equipment, Tactical }
 
-    // --- M1 ResourceType (Shelter and Equipment removed as card types; kept as legacy values until ColonyManager update) ---
-    public enum ResourceType { Food, Shelter, Equipment, Currency, Materials }
-
-    public enum TileType { Normal, ResourceNode, EnemyPatrol, Hazard }
-
-    public enum SpecialAbility { None, BonusFood, NoDamageOnWin, ExtraCarry, IgnoreFirstHazard, ShelterBoost, HealAlly, TrapDisarm, Frenzy, StealthMove, RallyAll }
+    public enum ResourceType { Food, Materials, Currency }
 
     public enum CardRarity { Common, Uncommon, Rare, Legendary }
 
-    // --- M1 NodeType (replaces StepType for branching map) ---
-    public enum NodeType { ResourceEncounter, EliteEncounter, Boss, Shop, HealingShrine, UpgradeShrine, CardDraft, Event, RestSite }
+    public enum HeroRole { Recon, Ranged, Fast, Melee, Tank, Gather, Support, Leader }
 
-    // Old StepType kept until RunManager rewrite in Phase B4
-    public enum StepType { CardPlacement, Shop, Healing, CardAddRemove, BossFight }
+    public enum SpecialAbility
+    {
+        None,
+        // Recon
+        ExtendedFogReveal,
+        MapOnMove,
+        ScoutReport,
+        Torchlight,
+        // Ranged
+        RangedStrike,
+        // Fast
+        SwiftDelivery,
+        // Melee
+        Riposte,
+        DualWield,
+        Cleave,
+        FirstStrike,
+        // Tank
+        Intercept,
+        Fortify,
+        Taunt,
+        // Gather
+        EfficientGather,
+        BulkHaul,
+        // Support
+        FieldMedic,
+        Tinker,
+        Inspire,
+        WiseCounsel,
+        // Leader
+        Rally,
+        BattleCry
+    }
 
-    public enum EncounterType { Resource, Elite, Boss }
+    public enum EquipmentSlot { Offensive, Defensive, Utility }
 
-    // --- M1 RunState (new values alongside old for transition) ---
-    public enum RunState { Draft, InStage, StepTransition, BossFight, RunComplete, GameOver, ColonyManagement, MapTraversal, InEncounter, InBoss, LevelComplete }
-
-    public enum RelicEffect { None, IgnoreFirstPatrol, ShopDiscount, BonusHP, BonusMove, BonusCombat }
-
-    public enum BossAbility { Swoop, Talons, AoEDamage, Summon, Stun }
-
-    public enum EnemyBehavior { Patrol, Chase, Ambush, Guard }
-
-    // --- New M1 enums ---
+    public enum ColonyTier { FoodStorage, StructureDefense, Advanced }
 
     public enum ColonyEffect
     {
-        IncreaseDeckSize,
-        ReduceConsumption,
-        HeroCombatBonus,
-        HeroMoveBonus,
-        HeroCarryBonus,
-        ReducePopulation,
-        BonusStartingFood
+        FoodProduction,
+        ResourceProtection,
+        FoodSpoilageImmunity,
+        MaxHeroDeployment,
+        HeroDeployNode,
+        BaseProduction,
+        DeployMoveBuff,
+        EquippedCombatBuff,
+        EquippedHPBuff,
+        ColonyDefenseWall,
+        FogReveal,
+        PitTrapDamage,
+        ColonyDefenseBonus,
+        Retarget,
+        HealInjured,
+        FirstCombatBuff,
+        AllHeroCombatBuff,
+        AllHeroMoveBuff,
+        DoubleProduction,
+        FoodStorageCapacity,
+        ImmediateHealReturn,
+        DoubleColonyCard,
+        ForwardDeploy,
+        MessengerRetarget,
+        EquippedWeaponBuff,
+        EquippedUtilityDouble,
+        FogRevealHeroes,
+        MushFoodProduction
     }
+
+    public enum TacticalType { CombatTactic, SupportTactic, PowerTactic }
 
     public enum PlacementRequirement { None, AdjacentTo, Edge, Corner, Center }
 
-    public enum EquipmentSlot { Combat, Movement, Carry, Special }
+    public enum NodeType { Wilderness, Farmland, Town, Colony, PiedPiper }
 
-    public enum BenefitTrigger { OnCombatStart, OnHeroWounded, OnFirstEnemyDefeated, OnEncounterStart, OnRecall }
+    public enum RunState { DeckConstruction, InRun, RunComplete, GameOver }
+
+    public enum EnemyBehavior { Patrol, Chase, Ambush, Guard }
+
+    public enum DifficultyLevel { Easy, Normal, Hard }
 }

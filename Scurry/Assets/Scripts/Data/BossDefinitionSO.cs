@@ -11,8 +11,6 @@ namespace Scurry.Data
         public int maxHP;
         public int baseAttack;
         public BossPhase[] phases;
-        public CardDefinitionSO[] rewardCards;
-        public RelicDefinitionSO rewardRelic;
         public Sprite artwork;
         public Color placeholderColor = new Color(0.6f, 0.2f, 0.8f);
     }
@@ -22,9 +20,9 @@ namespace Scurry.Data
     {
         [Tooltip("Phase activates when boss HP drops to or below this value")]
         public int hpThreshold;
-        public BossAbility ability;
+        [TextArea] public string abilityDescription;
         public int abilityValue;
-        [Tooltip("Localization key for phase description, e.g. 'boss.eldersilas.phase1'")]
+        [Tooltip("Localization key for phase description")]
         public string localizationKey;
     }
 }

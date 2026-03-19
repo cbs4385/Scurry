@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using Scurry.Core;
+using Scurry.Data;
 using Scurry.Interfaces;
 
 namespace Scurry.UI
@@ -11,30 +12,23 @@ namespace Scurry.UI
         private IRunManager runManager;
         private IMetaProgressionManager metaProgression;
 
-        private GameObject runStartPanel;
-        private GameObject levelTransitionPanel;
         private GameObject victoryPanel;
         private GameObject defeatPanel;
         private TextMeshProUGUI victoryStatsText;
         private TextMeshProUGUI defeatStatsText;
-        private TextMeshProUGUI levelTransitionText;
 
         private ScrapbookUI scrapbookUI;
 
         private void OnEnable()
         {
             Debug.Log("[RunScreenManager] OnEnable: subscribing to events");
-            EventBus.OnRunComplete_M1 += OnRunComplete;
-            EventBus.OnRunFailed_M1 += OnRunFailed;
-            EventBus.OnLevelAdvanced += OnLevelAdvanced;
+            EventBus.OnRunComplete += OnRunComplete;
         }
 
         private void OnDisable()
         {
             Debug.Log("[RunScreenManager] OnDisable: unsubscribing from events");
-            EventBus.OnRunComplete_M1 -= OnRunComplete;
-            EventBus.OnRunFailed_M1 -= OnRunFailed;
-            EventBus.OnLevelAdvanced -= OnLevelAdvanced;
+            EventBus.OnRunComplete -= OnRunComplete;
         }
 
         private void Awake()
@@ -43,7 +37,6 @@ namespace Scurry.UI
 
             BuildVictoryPanel();
             BuildDefeatPanel();
-            BuildLevelTransitionPanel();
             Debug.Log("[RunScreenManager] Awake: all panels built");
         }
 
@@ -52,19 +45,40 @@ namespace Scurry.UI
             runManager = ServiceLocator.Get<IRunManager>();
             metaProgression = ServiceLocator.Get<IMetaProgressionManager>();
             Debug.Log($"[RunScreenManager] Start: runManager={(runManager != null ? "OK" : "NULL")}, metaProgression={(metaProgression != null ? "OK" : "NULL")}");
+
+            // If the run already ended before this scene loaded, show the appropriate panel
+            if (runManager != null)
+            {
+                var rm = runManager as RunManager;
+                if (rm != null && rm.CurrentRunState == RunState.GameOver)
+                {
+                    Debug.Log("[RunScreenManager] Start: run already ended (GameOver) — showing defeat");
+                    OnRunFailed();
+                }
+                else if (rm != null && rm.CurrentRunState == RunState.RunComplete)
+                {
+                    Debug.Log("[RunScreenManager] Start: run already ended (RunComplete) — showing victory");
+                    OnRunComplete(true);
+                }
+            }
         }
 
         // --- Victory ---
 
         private void OnRunComplete(bool victory)
         {
-            if (!victory) return;
+            Debug.Log($"[RunScreenManager] OnRunComplete: victory={victory}");
+            if (!victory)
+            {
+                Debug.Log("[RunScreenManager] OnRunComplete: defeat — showing defeat screen");
+                OnRunFailed();
+                return;
+            }
             Debug.Log("[RunScreenManager] OnRunComplete: showing victory screen");
 
             string stats = "The Pack is Free!\n\n";
             if (runManager != null)
             {
-                stats += $"Level Reached: {runManager.CurrentLevel}\n";
                 stats += $"Food: {runManager.FoodStockpile}  Materials: {runManager.MaterialsStockpile}  Currency: {runManager.CurrencyStockpile}\n";
             }
             if (metaProgression != null)
@@ -84,7 +98,6 @@ namespace Scurry.UI
             string stats = "The Colony Has Fallen...\n\n";
             if (runManager != null)
             {
-                stats += $"Level Reached: {runManager.CurrentLevel}\n";
                 stats += $"Food: {runManager.FoodStockpile}  Materials: {runManager.MaterialsStockpile}  Currency: {runManager.CurrencyStockpile}\n";
             }
             if (metaProgression != null)
@@ -98,31 +111,8 @@ namespace Scurry.UI
 
         private int CalculateRepEarned(bool victory)
         {
-            int level = runManager != null ? runManager.CurrentLevel : 1;
-            int rep = level * 2;
-            if (victory) rep += 10;
+            int rep = victory ? 10 : 2;
             return rep;
-        }
-
-        // --- Level Transition ---
-
-        private void OnLevelAdvanced(int newLevel)
-        {
-            Debug.Log($"[RunScreenManager] OnLevelAdvanced: transitioning to level {newLevel}");
-            string[] levelNames = { "", "The Wilderness", "Rural Village", "The Town" };
-            string levelName = newLevel <= 3 ? levelNames[newLevel] : $"Level {newLevel}";
-
-            levelTransitionText.text = $"Level Complete!\n\nPreparing for:\n{levelName}\n\nExhausted heroes restored.\nColony rebuilding begins.";
-            levelTransitionPanel.SetActive(true);
-
-            // Auto-hide after a delay
-            Invoke(nameof(HideLevelTransition), 3f);
-        }
-
-        private void HideLevelTransition()
-        {
-            if (levelTransitionPanel != null)
-                levelTransitionPanel.SetActive(false);
         }
 
         // --- New Run ---
@@ -219,24 +209,6 @@ namespace Scurry.UI
 
             defeatPanel.SetActive(false);
             Debug.Log("[RunScreenManager] BuildDefeatPanel: complete");
-        }
-
-        private void BuildLevelTransitionPanel()
-        {
-            levelTransitionPanel = new GameObject("LevelTransitionPanel", typeof(RectTransform), typeof(Image));
-            levelTransitionPanel.transform.SetParent(transform, false);
-            var panelRect = levelTransitionPanel.GetComponent<RectTransform>();
-            panelRect.anchorMin = new Vector2(0.15f, 0.2f);
-            panelRect.anchorMax = new Vector2(0.85f, 0.8f);
-            panelRect.sizeDelta = Vector2.zero;
-            levelTransitionPanel.GetComponent<Image>().color = new Color(0.05f, 0.05f, 0.15f, 0.95f);
-
-            var textGO = CreateTMPText(levelTransitionPanel.transform, "TransitionText", "", 22, FontStyles.Normal,
-                Color.white, new Vector2(0.05f, 0.1f), new Vector2(0.95f, 0.9f));
-            levelTransitionText = textGO.GetComponent<TextMeshProUGUI>();
-
-            levelTransitionPanel.SetActive(false);
-            Debug.Log("[RunScreenManager] BuildLevelTransitionPanel: complete");
         }
 
         // --- Helpers ---

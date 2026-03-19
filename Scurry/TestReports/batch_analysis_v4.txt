@@ -1,0 +1,98 @@
+BATCH SIMULATION ANALYSIS — v4 (Fog Fix Applied)
+==================================================
+Date: 2026-03-12
+Runs: 500 games, batch mode
+Fix: Removed fog-state filters from hero targeting — all map nodes are visible
+     (fog only hides enemy/resource tokens per GDD, not the nodes themselves)
+
+RESULTS SUMMARY
+---------------
+Win rate:              0.0% (0/500)
+Avg turns survived:    3.9 (min=1, max=7, median=4)
+Avg enemies defeated:  5.2 (min=1, max=10)
+Total enemies:         2,593 across all 500 games
+Zone bosses defeated:  19 total (3.8% of games)
+Pied Piper defeated:   0
+Avg resources gathered: 2.6 per game
+Avg colony cards:      3.9 per game
+Avg score:             683
+
+COMPARISON ACROSS ALL VERSIONS
+-------------------------------
+v1 (deploy-all, no colony):   avg 3.2 turns, 0.0 enemies, 0% wins
+v2 (colony-first, food-cap):  avg 4.6 turns, 0.0 enemies, 0% wins
+v3 (+ retarget + tracking):   avg 4.6 turns, 0.0 enemies, 0% wins
+v4 (+ fog fix):               avg 3.9 turns, 5.2 enemies, 0% wins  *** BREAKTHROUGH ***
+
+v4 Change: +5.2 enemies per game (from 0), but turns dropped from 4.6 to 3.9
+
+TURN DISTRIBUTION
+-----------------
+Turn 1:    1 game  (0.2%)
+Turn 2:   13 games (2.6%)
+Turn 3:  161 games (32.2%)
+Turn 4:  218 games (43.6%)  <-- peak
+Turn 5:   89 games (17.8%)
+Turn 6:   14 games (2.8%)
+Turn 7:    4 games (0.8%)
+
+ENEMIES DEFEATED DISTRIBUTION
+------------------------------
+ 1 enemy:    2 games (0.4%)
+ 2 enemies:  15 games (3.0%)
+ 3 enemies:  53 games (10.6%)
+ 4 enemies: 107 games (21.4%)
+ 5 enemies: 108 games (21.6%)  <-- peak
+ 6 enemies: 116 games (23.2%)  <-- also peak
+ 7 enemies:  64 games (12.8%)
+ 8 enemies:  27 games (5.4%)
+ 9 enemies:   6 games (1.2%)
+10 enemies:   2 games (0.4%)
+
+ANALYSIS
+========
+
+WHAT'S WORKING:
+- Heroes now target and reach enemy-occupied nodes successfully
+- Average 5.2 enemies defeated per game is strong (likely 50-60% of spawned enemies)
+- 19 zone boss kills across 500 games (3.8%) shows heroes CAN beat bosses
+- Resource gathering operational (avg 2.6/game)
+- Colony card economy functional (avg 3.9 colony cards played)
+
+WHAT'S NOT WORKING:
+1. Heroes still die by turn 3-4 (avg 3.9 turns, down from 4.6 in v2/v3)
+   - Hypothesis: heroes now rush INTO combat and die there, whereas before
+     they wandered nearby nodes and died to starvation instead
+   - Trading starvation death for combat death — still dying too fast
+
+2. 0% win rate — Pied Piper is never reached
+   - Pied Piper is at the far end of the map (node ~30)
+   - Heroes need 8-10+ turns to reach it
+   - But average game lasts 3.9 turns
+
+3. Resources gathered dropped (2.6 vs 3.6 in v2/v3)
+   - Heroes gather on the way to combat but die in combat
+   - No heroes survive to return resources to colony
+
+4. Food economy still unsustainable
+   - Base 2 food feeds 2 heroes
+   - Colony cards ramp +1/turn
+   - But heroes die in combat before food economy matures
+
+REMAINING BALANCE ISSUES
+=========================
+
+PRIMARY: Heroes die too fast (turns 3-4 average game length)
+  Root causes:
+  a) Starvation weakens heroes before combat (1 HP/turn for unfed heroes)
+  b) Combat damage kills weakened heroes easily
+  c) All heroes rush to fight — no staggered deployment
+  d) No healing mechanic — damage is permanent
+
+RECOMMENDATIONS:
+1. INCREASE BASE FOOD: 2 → 6 (feed more heroes without starvation)
+2. INCREASE HERO HP: Scale all heroes +2-3 HP (more combat rounds survived)
+3. STAGGER DEPLOYMENT: Deploy scouts first, fighters later when food is ready
+4. HEALING AT COLONY: Heroes at colony node should regain 1-2 HP per turn
+5. RETREAT BEHAVIOR: Heroes below 50% HP should return to colony
+6. TACTICAL CARDS: Auto-play should use tactical cards in combat for burst damage

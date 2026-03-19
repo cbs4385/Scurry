@@ -13,6 +13,7 @@ namespace Scurry.UI
 
         private GameObject panel;
         private TextMeshProUGUI speedLabel;
+        private TextMeshProUGUI difficultyLabel;
         private TextMeshProUGUI colorBlindLabel;
         private TextMeshProUGUI textSizeLabel;
 
@@ -50,8 +51,15 @@ namespace Scurry.UI
 
         private void BuildPanel()
         {
-            var canvas = FindAnyObjectByType<Canvas>();
-            if (canvas == null) return;
+            // Parent to our own canvas — never search globally which could find DontDestroyOnLoad canvases
+            var canvas = GetComponentInParent<Canvas>();
+            if (canvas == null)
+                canvas = GetComponent<Canvas>();
+            if (canvas == null)
+            {
+                Debug.LogWarning("[SettingsUI] BuildPanel: no parent Canvas found — cannot create panel");
+                return;
+            }
 
             panel = new GameObject("SettingsPanel", typeof(RectTransform), typeof(Image));
             panel.transform.SetParent(canvas.transform, false);
@@ -76,6 +84,26 @@ namespace Scurry.UI
                 new Color(0.5f, 0.9f, 0.5f), new Vector2(0.5f, y), new Vector2(0.7f, y + rowH)).GetComponent<TextMeshProUGUI>();
             CreateBtn(panel.transform, "Cycle", () => {
                 if (settings != null) { settings.CycleBattleSpeed(); speedLabel.text = settings.BattleSpeedLabel; }
+            }, new Vector2(0.72f, y + 0.02f), new Vector2(0.92f, y + rowH - 0.02f));
+
+            y -= rowH + 0.02f;
+
+            // Difficulty
+            CreateTMP(panel.transform, "Difficulty:", 18, FontStyles.Normal, Color.white,
+                new Vector2(0.05f, y), new Vector2(0.45f, y + rowH));
+            var gsInit = settings as GameSettings;
+            string diffLabel = gsInit != null ? gsInit.Difficulty.ToString() : "Normal";
+            var diffColor = gsInit != null ? GetDifficultyColor(gsInit.Difficulty) : Color.white;
+            difficultyLabel = CreateTMP(panel.transform, diffLabel, 18, FontStyles.Bold,
+                diffColor,
+                new Vector2(0.5f, y), new Vector2(0.7f, y + rowH)).GetComponent<TextMeshProUGUI>();
+            CreateBtn(panel.transform, "Cycle", () => {
+                var gs = settings as GameSettings;
+                if (gs != null) {
+                    gs.CycleDifficulty();
+                    difficultyLabel.text = gs.Difficulty.ToString();
+                    difficultyLabel.color = GetDifficultyColor(gs.Difficulty);
+                }
             }, new Vector2(0.72f, y + 0.02f), new Vector2(0.92f, y + rowH - 0.02f));
 
             y -= rowH + 0.02f;
@@ -120,6 +148,17 @@ namespace Scurry.UI
             // Close button
             CreateBtn(panel.transform, "Close (Esc)", Close,
                 new Vector2(0.3f, 0.03f), new Vector2(0.7f, 0.12f));
+        }
+
+        private Color GetDifficultyColor(Scurry.Data.DifficultyLevel level)
+        {
+            switch (level)
+            {
+                case Scurry.Data.DifficultyLevel.Easy: return new Color(0.4f, 0.9f, 0.4f);
+                case Scurry.Data.DifficultyLevel.Normal: return new Color(0.9f, 0.8f, 0.2f);
+                case Scurry.Data.DifficultyLevel.Hard: return new Color(1f, 0.3f, 0.2f);
+                default: return Color.white;
+            }
         }
 
         private void UpdateTextSizeLabel(IGameSettings settings)

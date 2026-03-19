@@ -9,9 +9,8 @@ namespace Scurry.Interfaces
         int RelicCount { get; }
         void AddRelic(RelicDefinitionSO relic);
         bool HasRelic(string relicName);
-        int GetShopDiscount();
-        int GetCombatBonus();
-        int GetMoveBonus();
-        int GetHPBonus();
+        int GetRelicEffectValue(string relicName);
+        List<string> GetRelicNames();
+        void ClearRelics();
     }
 }

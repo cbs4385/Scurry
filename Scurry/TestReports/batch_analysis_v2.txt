@@ -1,0 +1,123 @@
+BATCH SIMULATION ANALYSIS — v2 Strategy (Colony-First Deck + Food-Limited Deploy)
+==================================================================================
+Date: 2026-03-12
+Runs: 500 games, batch mode, improved auto-play strategy
+Strategy: Colony cards first (10 slots), 8 heroes, food-limited deployment
+
+RESULTS SUMMARY
+---------------
+Win rate:           0.0% (0/500)
+Avg turns survived: 4.6 (min=2, max=9, median=5)
+Enemies defeated:   0 total across all 500 games
+Resources gathered: avg 3.6 per game
+Colony cards played: avg 4.6 per game (matches turns survived)
+Food stockpile:     0 (always consumed)
+
+TURN DISTRIBUTION
+-----------------
+Turn  2:  12 games (2.4%)
+Turn  3:  45 games (9.0%)
+Turn  4: 193 games (38.6%)  <-- peak
+Turn  5: 169 games (33.8%)
+Turn  6:  66 games (13.2%)
+Turn  7:  11 games (2.2%)
+Turn  8:   2 games (0.4%)
+Turn  9:   2 games (0.4%)
+
+COMPARISON WITH v1 STRATEGY (Deploy-All, No Colony Cards)
+---------------------------------------------------------
+v1: avg 3.2 turns, 0 enemies, 0% wins
+v2: avg 4.6 turns, 0 enemies, 0% wins
+Improvement: +1.4 turns average survival (+44%)
+But: still 0 enemies defeated, 0 wins
+
+DECK COMPOSITION
+----------------
+Colony cards: 12 (2 starters + 10 added)
+  - 4x FoodProduction (+1 each)
+  - 1x MushFoodProduction (+2)
+  - 1x DoubleProduction (2x multiplier)
+  - 1x FogReveal
+  - 1x FogRevealHeroes
+  - 1x AllHeroCombatBuff
+  - 1x FirstCombatBuff
+Heroes: 8 (highest combat selected)
+  - Knight (5 combat), Warrior (4), Commander (4), Assassin (4)
+  - Ranger (3), Guardian (3), Sentinel (3), Rogue (3)
+Equipment: ~6 cards
+Tactical: ~2 cards
+Total deck: ~28 cards
+
+FOOD PRODUCTION CURVE
+---------------------
+Turn 1: 2 food (base) → deploy 2 heroes
+Turn 2: 3 food (+Underground Storage) → deploy 1 more
+Turn 3: 4 food (+Berry Drying Racks) → deploy 1 more
+Turn 4: 5 food (+Cold Storage) → deploy 1 more
+Turn 5: 6 food (+Fresh Water Pool) → deploy 1 more
+Turn 6: 12 food (+DoubleProduction) → can feed all 8
+Turn 7+: 14+ food → surplus
+
+Problem: Food economy becomes healthy at turn 6, but heroes die by turn 4-5.
+The ramp-up is too slow — heroes starve in the early turns.
+
+ROOT CAUSE ANALYSIS
+===================
+
+1. COMBAT IS NEVER WON (Critical)
+   0 enemies defeated in 500 games means heroes never win a single fight.
+   Possible causes:
+   a) Heroes never reach enemy nodes (movement/pathing issue)
+   b) Combat is too lopsided (enemy strength >> hero strength)
+   c) Heroes die to starvation before combat occurs
+   d) Combat results aren't being tracked correctly
+
+2. FOOD RAMP IS TOO SLOW
+   With 1 colony card per turn and food cards producing +1 each,
+   it takes 6 turns to reach self-sufficiency. Meanwhile, heroes
+   deployed in turns 1-3 are starving.
+
+3. HERO DEPLOYMENT IS STILL SUBOPTIMAL
+   Deploying heroes before food economy is ready means they starve.
+   But NOT deploying means no map exploration and no progress.
+   This is a fundamental design tension.
+
+BALANCE RECOMMENDATIONS
+========================
+
+IMMEDIATE FIXES (No Design Changes Required):
+1. Increase base food production: 2 → 6
+   - Allows 6 heroes to be fed from turn 1
+   - Colony cards then push production to 10+ for full deployment
+
+2. Increase food production per card: +1 → +2 or +3
+   - Makes each colony card more impactful
+   - Faster ramp to self-sufficiency
+
+3. Remove or reduce starvation damage for first 3 turns
+   - Grace period while colony is being established
+   - Or: heroes carry 1 turn of rations when deployed
+
+DESIGN-LEVEL FIXES (May Require GDD Changes):
+4. Make colony cards playable from hand during Deploy phase
+   - Currently limited to 1 per Colony phase
+   - Allow 2-3 colony cards per turn for faster ramp
+
+5. Heroes should return to colony when low HP
+   - Auto-play (and real players) need a heal/retreat mechanic
+   - Currently heroes march forward until they die
+
+6. Consider removing the food-per-hero model entirely
+   - Replace with flat colony upkeep (e.g., 5 food/turn regardless)
+   - Focus food on healing and buffs instead
+
+7. Equipment should provide more survivability
+   - Current equipment barely helps against starvation
+   - Consider: equipment that reduces food requirement
+   - Or: equipment that provides passive healing
+
+INVESTIGATION NEEDED:
+- Why are 0 enemies being defeated? Need combat logs.
+- Are heroes reaching enemy-occupied nodes at all?
+- Is the combat resolver working correctly?
+- Are enemy positions and counts reasonable?

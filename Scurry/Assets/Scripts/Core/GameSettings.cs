@@ -16,6 +16,12 @@ namespace Scurry.Core
         [Range(0, 2)]
         [SerializeField] private int battleSpeed = 0;
 
+        [Header("Difficulty")]
+        [SerializeField] private Data.DifficultyLevel difficulty = Data.DifficultyLevel.Normal;
+
+        [Header("Tutorial")]
+        [SerializeField] private bool tutorialCompleted = false;
+
         [Header("Accessibility")]
         [SerializeField] private bool colorBlindMode = false;
         [SerializeField] private int textSizeModifier = 0; // -2 to +4
@@ -28,6 +34,8 @@ namespace Scurry.Core
         private static readonly string[] SpeedLabels = { "Normal", "Fast", "Instant" };
 
         // Public accessors
+        public Data.DifficultyLevel Difficulty => difficulty;
+        public bool TutorialCompleted => tutorialCompleted;
         public int BattleSpeed => battleSpeed;
         public string BattleSpeedLabel => SpeedLabels[Mathf.Clamp(battleSpeed, 0, 2)];
         public float BattleWaitMultiplier => SpeedMultipliers[Mathf.Clamp(battleSpeed, 0, 2)];
@@ -41,11 +49,12 @@ namespace Scurry.Core
         {
             if (instance != null && instance != this)
             {
-                Destroy(gameObject);
+                Destroy(this);
                 return;
             }
             instance = this;
-            DontDestroyOnLoad(gameObject);
+            if (gameObject.name == "PersistentManagers")
+                DontDestroyOnLoad(gameObject);
             ServiceLocator.Register<IGameSettings>(this);
             Load();
             Debug.Log($"[GameSettings] Awake: speed={BattleSpeedLabel}, colorBlind={colorBlindMode}, textMod={textSizeModifier}");
@@ -96,6 +105,29 @@ namespace Scurry.Core
             Save();
         }
 
+        public void SetDifficulty(Data.DifficultyLevel level)
+        {
+            difficulty = level;
+            Debug.Log($"[GameSettings] SetDifficulty: {level}");
+            // Sync to BalanceConfigSO
+            var config = Data.BalanceConfigSO.Instance;
+            if (config != null) config.difficulty = level;
+            Save();
+        }
+
+        public void CycleDifficulty()
+        {
+            int next = ((int)difficulty + 1) % 3;
+            SetDifficulty((Data.DifficultyLevel)next);
+        }
+
+        public void SetTutorialCompleted(bool completed)
+        {
+            tutorialCompleted = completed;
+            Debug.Log($"[GameSettings] SetTutorialCompleted: {completed}");
+            Save();
+        }
+
         // --- Color-blind safe colors ---
 
         public Color GetNodeColor(Data.NodeType nodeType, bool visited, bool available)
@@ -105,18 +137,13 @@ namespace Scurry.Core
 
             if (colorBlindMode)
             {
-                // Use shapes/patterns instead of color alone — use distinct value ranges
                 switch (nodeType)
                 {
-                    case Data.NodeType.ResourceEncounter: return new Color(0.2f, 0.4f, 0.8f); // Blue
-                    case Data.NodeType.EliteEncounter: return new Color(0.8f, 0.6f, 0.0f); // Orange
-                    case Data.NodeType.Boss: return new Color(0.8f, 0.2f, 0.2f); // Red
-                    case Data.NodeType.Shop: return new Color(0.9f, 0.9f, 0.2f); // Yellow
-                    case Data.NodeType.HealingShrine: return new Color(0.2f, 0.8f, 0.8f); // Cyan
-                    case Data.NodeType.UpgradeShrine: return new Color(0.6f, 0.3f, 0.8f); // Purple
-                    case Data.NodeType.CardDraft: return new Color(0.9f, 0.5f, 0.9f); // Pink
-                    case Data.NodeType.Event: return new Color(0.5f, 0.5f, 0.8f); // Light blue
-                    case Data.NodeType.RestSite: return new Color(0.3f, 0.7f, 0.3f); // Green
+                    case Data.NodeType.Wilderness: return new Color(0.2f, 0.4f, 0.8f); // Blue
+                    case Data.NodeType.Farmland: return new Color(0.8f, 0.6f, 0.0f); // Orange
+                    case Data.NodeType.Town: return new Color(0.9f, 0.9f, 0.2f); // Yellow
+                    case Data.NodeType.Colony: return new Color(0.2f, 0.8f, 0.8f); // Cyan
+                    case Data.NodeType.PiedPiper: return new Color(0.8f, 0.2f, 0.2f); // Red
                     default: return Color.white;
                 }
             }
@@ -124,15 +151,11 @@ namespace Scurry.Core
             {
                 switch (nodeType)
                 {
-                    case Data.NodeType.ResourceEncounter: return new Color(0.3f, 0.6f, 0.3f);
-                    case Data.NodeType.EliteEncounter: return new Color(0.8f, 0.5f, 0.2f);
-                    case Data.NodeType.Boss: return new Color(0.8f, 0.2f, 0.2f);
-                    case Data.NodeType.Shop: return new Color(0.9f, 0.8f, 0.2f);
-                    case Data.NodeType.HealingShrine: return new Color(0.3f, 0.8f, 0.3f);
-                    case Data.NodeType.UpgradeShrine: return new Color(0.5f, 0.3f, 0.8f);
-                    case Data.NodeType.CardDraft: return new Color(0.7f, 0.4f, 0.7f);
-                    case Data.NodeType.Event: return new Color(0.4f, 0.4f, 0.7f);
-                    case Data.NodeType.RestSite: return new Color(0.2f, 0.6f, 0.5f);
+                    case Data.NodeType.Wilderness: return new Color(0.3f, 0.6f, 0.3f);
+                    case Data.NodeType.Farmland: return new Color(0.8f, 0.7f, 0.2f);
+                    case Data.NodeType.Town: return new Color(0.5f, 0.4f, 0.7f);
+                    case Data.NodeType.Colony: return new Color(0.3f, 0.8f, 0.3f);
+                    case Data.NodeType.PiedPiper: return new Color(0.8f, 0.2f, 0.2f);
                     default: return Color.white;
                 }
             }
@@ -156,7 +179,9 @@ namespace Scurry.Core
                 textSizeModifier = textSizeModifier,
                 masterVolume = masterVolume,
                 musicVolume = musicVolume,
-                sfxVolume = sfxVolume
+                sfxVolume = sfxVolume,
+                difficulty = (int)difficulty,
+                tutorialCompleted = tutorialCompleted
             });
             PlayerPrefs.SetString(PREFS_KEY, json);
             PlayerPrefs.Save();
@@ -173,7 +198,12 @@ namespace Scurry.Core
                 masterVolume = data.masterVolume;
                 musicVolume = data.musicVolume;
                 sfxVolume = data.sfxVolume;
+                difficulty = (Data.DifficultyLevel)data.difficulty;
+                tutorialCompleted = data.tutorialCompleted;
                 AudioListener.volume = masterVolume;
+                // Sync difficulty to BalanceConfigSO
+                var config = Data.BalanceConfigSO.Instance;
+                if (config != null) config.difficulty = difficulty;
             }
         }
 
@@ -186,6 +216,8 @@ namespace Scurry.Core
             public float masterVolume;
             public float musicVolume;
             public float sfxVolume;
+            public int difficulty;
+            public bool tutorialCompleted;
         }
     }
 }

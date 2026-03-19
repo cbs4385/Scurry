@@ -12,7 +12,7 @@ namespace Scurry.Core
 
         private const string SAVE_KEY = "MetaProgression";
 
-        private MetaProgressionData data;
+        private MetaProgressionData data = new MetaProgressionData();
 
         // Reputation costs
         private const int RELIC_UNLOCK_COST = 10;
@@ -32,12 +32,14 @@ namespace Scurry.Core
         {
             if (_instance != null && _instance != this)
             {
-                Debug.Log("[MetaProgressionManager] Awake: duplicate instance — destroying self");
-                Destroy(gameObject);
+                ServiceLocator.Register<IMetaProgressionManager>(_instance);
+                Debug.Log("[MetaProgressionManager] Awake: duplicate instance — destroying component only");
+                Destroy(this);
                 return;
             }
             _instance = this;
-            DontDestroyOnLoad(gameObject);
+            if (gameObject.name == "PersistentManagers")
+                DontDestroyOnLoad(gameObject);
             ServiceLocator.Register<IMetaProgressionManager>(this);
             Debug.Log("[MetaProgressionManager] Awake: loading meta-progression data");
             Load();
@@ -47,16 +49,12 @@ namespace Scurry.Core
         {
             Debug.Log("[MetaProgressionManager] OnEnable: subscribing to events");
             EventBus.OnRunComplete += OnRunComplete;
-            EventBus.OnRunFailed += OnRunFailed;
-            EventBus.OnBossDefeated += OnBossDefeated;
         }
 
         private void OnDisable()
         {
             Debug.Log("[MetaProgressionManager] OnDisable: unsubscribing from events");
             EventBus.OnRunComplete -= OnRunComplete;
-            EventBus.OnRunFailed -= OnRunFailed;
-            EventBus.OnBossDefeated -= OnBossDefeated;
         }
 
         // --- Run End Processing ---
@@ -278,6 +276,25 @@ namespace Scurry.Core
             return data.unlockedColonyCards.Contains(cardName);
         }
 
+        // --- Last Deck Persistence ---
+
+        /// <summary>
+        /// Saves the last constructed deck card IDs so the next run can pre-populate.
+        /// </summary>
+        public void SaveLastDeck(List<int> deckCardIds, List<int> colonyDeckCardIds)
+        {
+            data.lastDeckCardIds = new List<int>(deckCardIds);
+            data.lastColonyDeckCardIds = new List<int>(colonyDeckCardIds);
+            Debug.Log($"[MetaProgressionManager] SaveLastDeck: saved deck={deckCardIds.Count}, colony={colonyDeckCardIds.Count}");
+            Save();
+        }
+
+        /// <summary>Returns the card IDs from the last constructed main deck.</summary>
+        public IReadOnlyList<int> LastDeckCardIds => data.lastDeckCardIds;
+
+        /// <summary>Returns the card IDs from the last constructed colony deck.</summary>
+        public IReadOnlyList<int> LastColonyDeckCardIds => data.lastColonyDeckCardIds;
+
         public bool IsEnemyDiscovered(string enemyName)
         {
             return data.discoveredEnemies.Contains(enemyName);
@@ -302,19 +319,9 @@ namespace Scurry.Core
 
         // --- Event Handlers ---
 
-        private void OnRunComplete()
+        private void OnRunComplete(bool victory)
         {
-            Debug.Log("[MetaProgressionManager] OnRunComplete: run completed — will be processed by RunManager calling ProcessRunEnd");
-        }
-
-        private void OnRunFailed()
-        {
-            Debug.Log("[MetaProgressionManager] OnRunFailed: run failed — will be processed by RunManager calling ProcessRunEnd");
-        }
-
-        private void OnBossDefeated()
-        {
-            Debug.Log("[MetaProgressionManager] OnBossDefeated: boss defeated event received");
+            Debug.Log($"[MetaProgressionManager] OnRunComplete: run completed (victory={victory}) — will be processed by RunManager calling ProcessRunEnd");
         }
 
         // --- Persistence ---
@@ -347,6 +354,18 @@ namespace Scurry.Core
             Debug.Log("[MetaProgressionManager] ResetAllProgress: clearing all meta-progression data");
             data = new MetaProgressionData();
             Save();
+        }
+
+        private void OnDestroy()
+        {
+            if (_instance != this)
+            {
+                Debug.Log($"[MetaProgressionManager] OnDestroy: duplicate instance destroyed, skipping unregister (self={GetInstanceID()})");
+                return;
+            }
+            _instance = null;
+            ServiceLocator.Unregister<IMetaProgressionManager>();
+            Debug.Log("[MetaProgressionManager] OnDestroy: unregistered from ServiceLocator");
         }
     }
 }

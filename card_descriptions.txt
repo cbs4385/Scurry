@@ -1,0 +1,120 @@
+001|nimble rat scout wearing a leaf cloak and acorn helmet, holding a sewing needle spear, standing alert on a mossy stone while scanning tall grass forest
+002|curious explorer rat studying a hand drawn map made from leaf parchment, surrounded by towering clover and mushrooms
+003|stealthy ranger rat with moss camouflage cloak drawing a thorn bow while hiding in tall grass
+004|swift rat messenger sprinting along a tree root carrying a satchel filled with scrolls
+005|battle ready rat warrior wearing bark armor and holding a needle sword and button shield
+006|sturdy rat guardian protecting a burrow entrance with a thimble shield and pin mace
+007|large armored rat holding an acorn shield standing in front of a wooden barricade
+008|stoic rat sentinel standing on a watch rock overlooking the meadow
+009|happy rat dragging a huge berry twice her size through tall grass
+010|gentle rat healer mixing glowing herbs and mushrooms in a tiny wooden bowl
+011|clever rat inventor building gadgets from gears buttons and springs on a tiny workbench
+012|playful rogue rat balancing on a mushroom while juggling shiny buttons
+013|heroic rat captain raising a cloth banner while rallying fellow rats on a tree root
+014|battle hardened rat commander leading a charge through tall grass battlefield
+015|wise elder rat seated in a hollow root surrounded by glowing mushrooms
+016|shadowy rat assassin leaping between tree roots holding twin pin daggers
+017|resourceful rat standing proudly in a granary chamber filled with acorns and seeds
+018|fast rat hero running with a glowing torch made from a twig and ember
+019|armored rat knight wielding a large thorn blade while standing on a mossy battlefield
+020|scholar rat surrounded by maps and scrolls studying exploration routes
+021|underground storage chamber filled with carefully stacked acorns and seeds in woven baskets
+022|rats hanging berries on wooden racks in sunlight clearing
+023|hidden chamber storing rare seeds in tiny jars and pouches
+024|cool underground tunnel storing vegetables and mushrooms
+025|hidden rat colony entrance beneath giant tree roots
+026|cozy sleeping burrow lined with moss feathers and soft grass
+027|young baby rats playing among seeds and straw bedding
+028|complex underground tunnels connecting chambers lit by bead lanterns
+029|rat engineers building tools from human scrap items
+030|rats sewing armor from cloth scraps using needles and thread
+031|small forge where rats heat metal needles into weapons
+032|organized crafting table filled with tiny tools and parts
+033|defensive wall made from thorn branches protecting colony
+034|stick tower lookout where rat sentries scan the meadow
+035|hidden pit traps and thorn snares in tall grass
+036|wooden gate blocking access to underground tunnels
+037|large underground room where rat leaders gather around stone table
+038|rats gathered around a warm campfire telling stories
+039|young rats practicing combat with sticks and shields
+040|hall decorated with battle banners made from cloth scraps
+041|rows of glowing mushrooms cultivated underground
+042|fresh water pool fed by dripping roots deep underground
+043|small forward camp hidden among tall grass
+044|communication hub where messenger rats prepare travel
+045|high tower built from sticks used to send signals
+046|massive underground rat city carved into tree roots
+047|huge chamber storing mountains of food supplies
+048|strategic planning room with maps and battle tokens
+049|shrine honoring legendary rat warriors
+050|royal chamber built beneath giant ancient tree roots
+051|Needle Sword – sword made from polished sewing needle
+052|Thorn Spear – spear crafted from sharp thorn branch
+053|Pin Dagger – small dagger made from sewing pin
+054|Splinter Staff – staff carved from wood splinter
+055|Needle Lance – long cavalry lance made from metal needle
+056|Pebble Sling – sling used to launch tiny stones
+057|Thorn Whip – whip made from flexible thorn vine
+058|Bone Knife – knife carved from small animal bone
+059|Razor Leaf Blade – blade made from sharp leaf edge
+060|Acorn Hammer – hammer crafted from acorn shell
+061|Thimble Helmet – helmet made from metal sewing thimble
+062|Button Shield – shield made from large wooden button
+063|Bark Armor – chest armor made from layered tree bark
+064|Moss Cloak – camouflage cloak woven from moss
+065|Feather Cape – light cape made from bird feathers
+066|Leaf Armor – armor crafted from overlapping leaves
+067|Beetle Shell Shield – shield made from shiny beetle shell
+068|Acorn Helm – helmet shaped from acorn cap
+069|Grapple Hook – climbing hook made from bent metal pin
+070|Thread Rope – rope made from twisted sewing thread
+071|Bead Lantern – lantern glowing inside glass bead
+072|Button Compass – navigation tool made from button and needle
+073|Cloth Satchel – travel bag made from cloth scrap
+074|Matchstick Ladder – ladder built from matchsticks
+075|Berry Basket – woven basket used to collect berries
+076|Map Scroll – hand drawn map on parchment leaf
+077|Healing Herb Kit – pouch of herbs and medicine tools
+078|Snail Shell Horn – horn used to signal allies
+079|Flint Firestarter – small kit used to start fire
+080|Climbing Claws – metal claws used for climbing bark
+081|Storm Needle – lightning enchanted needle sword
+082|Ember Torch – magical torch glowing with eternal flame
+083|Frost Thread Cloak – cloak that shimmers with frost magic
+084|Golden Acorn Charm – lucky charm shaped like golden acorn
+085|War Banner Pin – banner staff made from metal pin
+086|Thorn Crown – crown made of enchanted thorn vines
+087|Root Armor – living armor made from magical roots
+088|Moonlight Dagger – glowing dagger reflecting moonlight
+089|Lantern of the Deep Burrow – powerful glowing lantern
+090|Banner of the Rat Pack – legendary battle banner
+091|Pack Ambush – rats attacking enemies from tall grass
+092|Rally the Pack – captain inspiring warriors before battle
+093|Defensive Formation – rats forming shield wall
+094|Last Stand – lone rat hero holding ground heroically
+095|Rapid Strike – rat warrior delivering multiple attacks
+096|Tactical Retreat – rats escaping through secret tunnel
+097|Reinforcements – additional rat warriors arriving
+098|Hidden Tunnel – secret underground passage
+099|Map Advantage – scouts studying battlefield map
+100|Scout Ahead – rat scout observing enemy camp
+101|Gather Seeds – rats collecting seeds across meadow
+102|Harvest Bounty – rats gathering large berry harvest
+103|Emergency Rations – food supplies distributed to troops
+104|Salvage Scrap – rats collecting useful human debris
+105|Trade Caravan – traveling rat merchants exchanging goods
+106|Herbal Remedy – healer preparing herbal medicine
+107|Warm Burrow – wounded rats resting safely underground
+108|Rest and Recover – rats sleeping peacefully in nest
+109|Medic Call – healer rushing to aid injured warrior
+110|Renew Strength – tired rat drinking energizing potion
+111|Heroic Charge – entire rat army charging together
+112|Pack Unity – rats standing together under banner
+113|Burrow Defense – colony warriors defending tunnels
+114|Final Gambit – desperate last battle moment
+115|Hidden Kingdom – secret rat city revealed
+116|Surprise Raid – stealth raid at night
+117|Poison Thorn – poisoned thorn weapon strike
+118|Moonlight Strike – assassin attacking under moonlight
+119|Rat Swarm – swarm of rats overwhelming enemy
+120|Victory Feast – rats celebrating victory around campfire

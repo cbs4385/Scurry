@@ -2,7 +2,9 @@
     "name": "Scurry.Editor",
     "rootNamespace": "Scurry.Editor",
     "references": [
-        "Scurry"
+        "Scurry",
+        "Scurry.ML",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [
         "Editor"

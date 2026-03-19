@@ -1,0 +1,8 @@
+Episode: 71000
+Eval Best Fitness: 29720
+Eval Avg Fitness: 4908
+Eval Victories: 2/20
+Entropy: 14.75
+Avg Episode Reward: 1621
+Network: 38→64→32→16
+PPO: batch=256, lr=0.0003, clip=0.2, epochs=4, gamma=0.99, lambda=0.95

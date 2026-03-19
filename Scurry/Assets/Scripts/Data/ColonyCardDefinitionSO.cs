@@ -5,12 +5,18 @@ namespace Scurry.Data
     [CreateAssetMenu(fileName = "NewColonyCard", menuName = "Scurry/Colony Card Definition")]
     public class ColonyCardDefinitionSO : ScriptableObject
     {
+        [Header("Identity")]
+        public int cardId;
         public string cardName;
-        [Tooltip("Localization key prefix, e.g. 'colonycard.burrow'. Name = key+'.name', desc = key+'.desc'")]
+        [Tooltip("Localization key prefix, e.g. 'colony.underground_storage'")]
         public string localizationKey;
         [TextArea] public string description;
-
         public CardRarity rarity = CardRarity.Common;
+        [Tooltip("Deck cost: 1=up to 3 copies, 2=up to 2 copies, 3+=singleton")]
+        public int deckCost = 1;
+
+        [Header("Colony Tier")]
+        public ColonyTier colonyTier;
 
         [Header("Placement")]
         public PlacementRequirement placementRequirement = PlacementRequirement.None;
@@ -20,28 +26,12 @@ namespace Scurry.Data
         [Header("Colony Effect")]
         public ColonyEffect colonyEffect;
         public int effectValue;
-
-        [Header("Population")]
-        [Tooltip("Food consumption contribution when placed")]
-        public int populationCost = 1;
+        [Tooltip("Whether this is a starter card (free, always in deck)")]
+        public bool isStarter;
 
         [Header("Visuals")]
         public Sprite artwork;
         public Color placeholderColor = new Color(0.6f, 0.4f, 0.2f);
 
-        [Header("Upgrade State")]
-        public bool upgraded;
-
-        public void Upgrade()
-        {
-            if (upgraded)
-            {
-                Debug.Log($"[ColonyCardDefinitionSO] Upgrade: '{cardName}' already upgraded — skipping");
-                return;
-            }
-            upgraded = true;
-            effectValue += 1;
-            Debug.Log($"[ColonyCardDefinitionSO] Upgrade: '{cardName}' effectValue {effectValue - 1} -> {effectValue}");
-        }
     }
 }

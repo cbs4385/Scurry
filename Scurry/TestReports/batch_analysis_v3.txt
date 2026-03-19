@@ -1,0 +1,109 @@
+BATCH SIMULATION ANALYSIS — v3 (All Code Fixes Applied)
+=========================================================
+Date: 2026-03-12
+Runs: 500 games, batch mode
+Strategy: Colony cards first (10 slots), 8 heroes, food-limited deployment, hero retargeting
+Code Fixes: Enemy defeat tracking → RunManager, hero retargeting after reaching target,
+            ChooseNewTarget with enemy/frontier/colony priority
+
+RESULTS SUMMARY
+---------------
+Win rate:              0.0% (0/500)
+Avg turns survived:    4.6 (min=2, max=9, median=5)
+Enemies defeated:      0 total across all 500 games
+Zone bosses defeated:  0
+Pied Piper defeated:   0
+Resources gathered:    avg 3.6 per game
+Colony cards played:   avg 4.6 per game (matches turns survived)
+Deck size:             18 (all games identical)
+Colony deck size:      12 (all games identical)
+Heroes:                8 (all games identical)
+Avg score:             608
+
+TURN DISTRIBUTION
+-----------------
+Turn  2:   12 games (2.4%)
+Turn  3:   45 games (9.0%)
+Turn  4:  193 games (38.6%)  <-- peak
+Turn  5:  169 games (33.8%)
+Turn  6:   66 games (13.2%)
+Turn  7:   11 games (2.2%)
+Turn  8:    2 games (0.4%)
+Turn  9:    2 games (0.4%)
+
+COMPARISON: v1 → v2 → v3
+--------------------------
+v1 (deploy-all, no colony):  avg 3.2 turns, 0 enemies, 0% wins
+v2 (colony-first, food-cap): avg 4.6 turns, 0 enemies, 0% wins
+v3 (v2 + retarget + track):  avg 4.6 turns, 0 enemies, 0% wins
+Change v2→v3: IDENTICAL results — confirms this is a balance problem, not a code bug
+
+ROOT CAUSE: FUNDAMENTAL BALANCE ISSUE
+=======================================
+
+The code fixes (retargeting, enemy tracking) are working correctly — verified
+in single-game logged runs where 2 enemies were defeated. However, in the
+standard game flow, heroes NEVER reach enemy-occupied nodes because:
+
+1. FOOD BOTTLENECK (Primary)
+   - Base food production: 2/turn (from Basic Burrow)
+   - Only 2 heroes can deploy turn 1 (food-limited)
+   - Each colony card adds +1 food → +1 hero per subsequent turn
+   - By turn 5: 6 food, 6 heroes deployed... but heroes deployed on turns 1-2
+     have been starving for 3-4 turns and are at 1 HP or dead
+
+2. STARVATION DEATH SPIRAL
+   - Heroes deployed turn 1: 2 food, 2 heroes = OK
+   - Turn 2: 3 food, 3 heroes → 0 unfed (barely balanced)
+   - Turn 3: 4 food, 4 heroes → 0 unfed (still balanced IF food ramps)
+   - BUT: Food production only ramps if colony cards are DRAWN AND PLAYED
+   - Colony phase draws 1 card/turn from colony deck → random chance of food card
+   - If non-food colony card is drawn (FogReveal, CombatBuff), heroes starve
+
+3. HERO REACH DEFICIT
+   - Heroes have move 2-4 per turn
+   - First Wilderness enemies are 2-3 hops from colony
+   - A hero with move 2 needs 2 turns to reach first enemy
+   - But heroes at 2-3 HP die to 1 turn of starvation + any combat damage
+   - By the time heroes reach enemies, they're too weak to win
+
+4. DEPLOYMENT TIMING PARADOX
+   - Early deployment → heroes starve (not enough food)
+   - Late deployment → heroes never reach enemies (game too short)
+   - Optimal: deploy 2 scouts turn 1, add 1/turn → but 15-turn game means
+     heroes need to be surviving AND progressing, not just surviving
+
+BALANCE RECOMMENDATIONS (PRIORITY ORDER)
+==========================================
+
+1. INCREASE BASE FOOD PRODUCTION: 2 → 6
+   Why: Allows 6 heroes to deploy turn 1 without starvation
+   Impact: Heroes reach first enemies by turn 2, creating actual combat encounters
+   Risk: May make food-producing colony cards less valuable
+
+2. REDUCE STARVATION DAMAGE TO 0 FOR FIRST 3 TURNS
+   Why: Grace period while colony ramps up (like real ant colonies)
+   Impact: Early heroes survive to reach enemies
+   Alternative: Give each hero 2 "rations" when deployed
+
+3. INCREASE HERO BASE HP: minimum 3 HP for all heroes
+   Why: 2 HP heroes (Messenger, Assassin, Rogue) die to 2 turns of starvation
+   Impact: All heroes can survive at least 3 turns of starvation
+   Note: Already would be fixed by recommendation #1
+
+4. ALLOW MULTIPLE COLONY CARDS PER TURN (2-3)
+   Why: 1 colony card/turn means food ramps too slowly
+   Impact: Colony can reach self-sufficiency by turn 3 instead of turn 6
+
+5. CONSIDER FLAT FOOD COST (5/turn regardless of hero count)
+   Why: Eliminates the N*food scaling that makes large parties impossible
+   Impact: Colony management becomes about upgrades, not survival math
+   Risk: Changes strategic depth — may be too much of a design shift
+
+NEXT STEPS
+==========
+1. Implement recommendation #1 (increase base food to 6) — change in ColonyGraph
+2. Optionally implement recommendation #4 (2 colony cards/turn)
+3. Re-run 500-game batch
+4. If enemies still 0, add recommendation #2 (grace period)
+5. Target: >0 enemies defeated, 10%+ of games reaching turn 10+

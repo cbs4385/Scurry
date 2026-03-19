@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Scurry.Data;
 using Scurry.Core;
@@ -7,148 +8,475 @@ namespace Scurry.Cards
 {
     public class DeckManager : MonoBehaviour
     {
-        [SerializeField] private CardDefinitionSO[] allCards;
-        [SerializeField] private int handSize = 5;
-
-        private List<CardDefinitionSO> drawPile = new List<CardDefinitionSO>();
-        private List<CardDefinitionSO> discardPile = new List<CardDefinitionSO>();
+        // ── Singleton ──────────────────────────────────────────────────────
+        private static DeckManager _instance;
+        public static DeckManager Instance => _instance;
 
         private void Awake()
         {
-            Debug.Log($"[DeckManager] Awake: allCards count={allCards?.Length ?? 0}, handSize={handSize}");
-            if (allCards != null)
+            if (_instance != null && _instance != this)
             {
-                for (int i = 0; i < allCards.Length; i++)
-                    Debug.Log($"[DeckManager] Awake: allCards[{i}]={allCards[i]?.cardName ?? "NULL"}");
+                Debug.Log("[DeckManager] Awake: duplicate instance — destroying self");
+                Destroy(gameObject);
+                return;
             }
+
+            _instance = this;
+            transform.SetParent(null);
+            DontDestroyOnLoad(gameObject);
+            Debug.Log("[DeckManager] Awake: singleton set, DontDestroyOnLoad applied");
         }
 
-        public void InitializeDeck()
+        private void OnDestroy()
         {
-            Debug.Log($"[DeckManager] InitializeDeck: clearing piles and loading {allCards?.Length ?? 0} cards");
-            drawPile.Clear();
-            discardPile.Clear();
-            drawPile.AddRange(allCards);
-            Shuffle(drawPile);
-            Debug.Log($"[DeckManager] InitializeDeck: drawPile={drawPile.Count}, order=[{string.Join(", ", drawPile.ConvertAll(c => c.cardName))}]");
+            if (_instance == this) _instance = null;
         }
 
-        public void InitializeDeck(List<CardDefinitionSO> selectedCards)
-        {
-            Debug.Log($"[DeckManager] InitializeDeck(custom): clearing piles and loading {selectedCards.Count} selected cards");
-            drawPile.Clear();
-            discardPile.Clear();
-            drawPile.AddRange(selectedCards);
-            Shuffle(drawPile);
-            Debug.Log($"[DeckManager] InitializeDeck(custom): drawPile={drawPile.Count}, order=[{string.Join(", ", drawPile.ConvertAll(c => c.cardName))}]");
-        }
+        // ── Card pools (v2.0 state tracking) ─────────────────────────────
+        private List<CardDefinitionSO> availableHeroes = new List<CardDefinitionSO>();
+        private List<CardDefinitionSO> deployedHeroes = new List<CardDefinitionSO>();
+        private List<CardDefinitionSO> injuredHeroes = new List<CardDefinitionSO>();
+        private List<CardDefinitionSO> availableEquipment = new List<CardDefinitionSO>();
+        private List<CardDefinitionSO> deployedEquipment = new List<CardDefinitionSO>();
+        private List<CardDefinitionSO> availableTactical = new List<CardDefinitionSO>();
+        private List<CardDefinitionSO> usedTactical = new List<CardDefinitionSO>(); // removed from game
+        private List<ColonyCardDefinitionSO> availableColonyCards = new List<ColonyCardDefinitionSO>();
+        private List<ColonyCardDefinitionSO> playedColonyCards = new List<ColonyCardDefinitionSO>();
 
-        public List<CardDefinitionSO> DrawCards(int count)
+        // ── Public properties ────────────────────────────────────────────
+        public IReadOnlyList<CardDefinitionSO> AvailableHeroes => availableHeroes;
+        public IReadOnlyList<CardDefinitionSO> DeployedHeroes => deployedHeroes;
+        public IReadOnlyList<CardDefinitionSO> InjuredHeroes => injuredHeroes;
+        public IReadOnlyList<CardDefinitionSO> AvailableEquipment => availableEquipment;
+        public IReadOnlyList<CardDefinitionSO> DeployedEquipment => deployedEquipment;
+        public IReadOnlyList<CardDefinitionSO> AvailableTactical => availableTactical;
+        public IReadOnlyList<CardDefinitionSO> UsedTactical => usedTactical;
+        public IReadOnlyList<ColonyCardDefinitionSO> AvailableColonyCards => availableColonyCards;
+        public IReadOnlyList<ColonyCardDefinitionSO> PlayedColonyCards => playedColonyCards;
+        public int TotalDeckSize { get; private set; }
+
+        // ── Initialization ───────────────────────────────────────────────
+
+        /// <summary>
+        /// Initializes the deck from a constructed deck. Sorts cards into hero/equipment/tactical
+        /// pools based on cardType. Colony cards are handled separately.
+        /// </summary>
+        public void InitializeDeck(List<CardDefinitionSO> cards, List<ColonyCardDefinitionSO> colonyCards)
         {
-            Debug.Log($"[DeckManager] DrawCards: requested={count}, drawPile={drawPile.Count}, discardPile={discardPile.Count}");
-            var drawn = new List<CardDefinitionSO>();
-            for (int i = 0; i < count; i++)
+            Debug.Log($"[DeckManager] InitializeDeck: initializing v2.0 deck " +
+                      $"(cards={cards?.Count ?? 0}, colonyCards={colonyCards?.Count ?? 0})");
+
+            // Clear all pools
+            availableHeroes.Clear();
+            deployedHeroes.Clear();
+            injuredHeroes.Clear();
+            availableEquipment.Clear();
+            deployedEquipment.Clear();
+            availableTactical.Clear();
+            usedTactical.Clear();
+            availableColonyCards.Clear();
+            playedColonyCards.Clear();
+
+            int totalCards = 0;
+
+            // Sort cards into pools
+            if (cards != null)
             {
-                if (drawPile.Count == 0)
+                foreach (var card in cards)
                 {
-                    if (discardPile.Count == 0)
+                    if (card == null)
                     {
-                        Debug.LogWarning("[DeckManager] DrawCards: both piles empty — cannot draw more");
-                        break;
+                        Debug.LogWarning("[DeckManager] InitializeDeck: null card in list — skipping");
+                        continue;
                     }
-                    ReshuffleDiscard();
+
+                    totalCards++;
+
+                    switch (card.cardType)
+                    {
+                        case CardType.Hero:
+                            availableHeroes.Add(card);
+                            Debug.Log($"[DeckManager] InitializeDeck: added hero " +
+                                      $"(name={card.cardName}, combat={card.combat}, move={card.move}, " +
+                                      $"hp={card.hp}, carry={card.carry})");
+                            break;
+
+                        case CardType.Equipment:
+                            availableEquipment.Add(card);
+                            Debug.Log($"[DeckManager] InitializeDeck: added equipment " +
+                                      $"(name={card.cardName}, slot={card.equipmentSlot}, " +
+                                      $"effectValue1={card.effectValue1})");
+                            break;
+
+                        case CardType.Tactical:
+                            availableTactical.Add(card);
+                            Debug.Log($"[DeckManager] InitializeDeck: added tactical " +
+                                      $"(name={card.cardName}, type={card.tacticalType}, " +
+                                      $"effectValue1={card.effectValue1})");
+                            break;
+
+                        default:
+                            Debug.LogWarning($"[DeckManager] InitializeDeck: unexpected card type " +
+                                             $"(name={card.cardName}, type={card.cardType}) — adding to heroes as fallback");
+                            availableHeroes.Add(card);
+                            break;
+                    }
                 }
-                if (drawPile.Count > 0)
+            }
+
+            // Add colony cards
+            if (colonyCards != null)
+            {
+                foreach (var colonyCard in colonyCards)
                 {
-                    var card = drawPile[0];
-                    drawPile.RemoveAt(0);
-                    drawn.Add(card);
-                    Debug.Log($"[DeckManager] DrawCards: drew '{card.cardName}' (drawPile remaining={drawPile.Count})");
-                    EventBus.OnCardDrawn?.Invoke(card);
+                    if (colonyCard == null)
+                    {
+                        Debug.LogWarning("[DeckManager] InitializeDeck: null colony card — skipping");
+                        continue;
+                    }
+
+                    totalCards++;
+                    availableColonyCards.Add(colonyCard);
+                    Debug.Log($"[DeckManager] InitializeDeck: added colony card " +
+                              $"(name={colonyCard.cardName}, tier={colonyCard.colonyTier}, " +
+                              $"effect={colonyCard.colonyEffect}, effectValue={colonyCard.effectValue})");
                 }
             }
-            Debug.Log($"[DeckManager] DrawCards: total drawn={drawn.Count}, names=[{string.Join(", ", drawn.ConvertAll(c => c.cardName))}]");
-            return drawn;
+
+            TotalDeckSize = totalCards;
+
+            Debug.Log($"[DeckManager] InitializeDeck: complete " +
+                      $"(totalDeckSize={TotalDeckSize}, heroes={availableHeroes.Count}, " +
+                      $"equipment={availableEquipment.Count}, tactical={availableTactical.Count}, " +
+                      $"colony={availableColonyCards.Count})");
         }
 
-        public List<CardDefinitionSO> DrawHand()
-        {
-            Debug.Log($"[DeckManager] DrawHand: drawing {handSize} cards");
-            return DrawCards(handSize);
-        }
+        // ── Hero management ──────────────────────────────────────────────
 
-        public void DiscardCard(CardDefinitionSO card)
+        /// <summary>
+        /// Moves a hero from available to deployed pool.
+        /// </summary>
+        public void DeployHero(CardDefinitionSO hero)
         {
-            Debug.Log($"[DeckManager] DiscardCard: '{card?.cardName ?? "NULL"}' (discardPile size now={discardPile.Count + 1})");
-            discardPile.Add(card);
-        }
+            Debug.Log($"[DeckManager] DeployHero: deploying hero " +
+                      $"(name={hero?.cardName ?? "NULL"})");
 
-        public void ReturnToDeck(CardDefinitionSO card)
-        {
-            Debug.Log($"[DeckManager] ReturnToDeck: '{card?.cardName ?? "NULL"}' (drawPile size now={drawPile.Count + 1})");
-            drawPile.Add(card);
-        }
-
-        private void ReshuffleDiscard()
-        {
-            Debug.Log($"[DeckManager] ReshuffleDiscard: moving {discardPile.Count} cards from discard to draw pile");
-            drawPile.AddRange(discardPile);
-            discardPile.Clear();
-            Shuffle(drawPile);
-            Debug.Log($"[DeckManager] ReshuffleDiscard: drawPile now={drawPile.Count}");
-        }
-
-        private void Shuffle(List<CardDefinitionSO> list)
-        {
-            for (int i = list.Count - 1; i > 0; i--)
+            if (hero == null)
             {
-                int j = SeededRandom.Range(0, i + 1);
-                (list[i], list[j]) = (list[j], list[i]);
+                Debug.LogWarning("[DeckManager] DeployHero: hero is null — skipping");
+                return;
+            }
+
+            if (!availableHeroes.Remove(hero))
+            {
+                Debug.LogWarning($"[DeckManager] DeployHero: hero not found in available pool " +
+                                 $"(name={hero.cardName})");
+                return;
+            }
+
+            deployedHeroes.Add(hero);
+            Debug.Log($"[DeckManager] DeployHero: hero deployed " +
+                      $"(name={hero.cardName}, availableHeroes={availableHeroes.Count}, " +
+                      $"deployedHeroes={deployedHeroes.Count})");
+        }
+
+        /// <summary>
+        /// Returns a hero from deployed to available (or injured if isInjured).
+        /// </summary>
+        public void ReturnHero(CardDefinitionSO hero)
+        {
+            Debug.Log($"[DeckManager] ReturnHero: returning hero " +
+                      $"(name={hero?.cardName ?? "NULL"})");
+
+            if (hero == null)
+            {
+                Debug.LogWarning("[DeckManager] ReturnHero: hero is null — skipping");
+                return;
+            }
+
+            if (!deployedHeroes.Remove(hero))
+            {
+                Debug.LogWarning($"[DeckManager] ReturnHero: hero not found in deployed pool " +
+                                 $"(name={hero.cardName})");
+                return;
+            }
+
+            availableHeroes.Add(hero);
+            Debug.Log($"[DeckManager] ReturnHero: hero returned to available " +
+                      $"(name={hero.cardName}, availableHeroes={availableHeroes.Count}, " +
+                      $"deployedHeroes={deployedHeroes.Count})");
+        }
+
+        /// <summary>
+        /// Moves a hero to the injured pool. Removes from deployed if present.
+        /// </summary>
+        public void InjureHero(CardDefinitionSO hero)
+        {
+            Debug.Log($"[DeckManager] InjureHero: injuring hero " +
+                      $"(name={hero?.cardName ?? "NULL"})");
+
+            if (hero == null)
+            {
+                Debug.LogWarning("[DeckManager] InjureHero: hero is null — skipping");
+                return;
+            }
+
+            // Try to remove from deployed first, then available
+            bool removed = deployedHeroes.Remove(hero);
+            if (!removed)
+            {
+                removed = availableHeroes.Remove(hero);
+            }
+
+            if (!removed)
+            {
+                Debug.LogWarning($"[DeckManager] InjureHero: hero not found in any pool " +
+                                 $"(name={hero.cardName})");
+                return;
+            }
+
+            injuredHeroes.Add(hero);
+            Debug.Log($"[DeckManager] InjureHero: hero moved to injured " +
+                      $"(name={hero.cardName}, injuredHeroes={injuredHeroes.Count}, " +
+                      $"availableHeroes={availableHeroes.Count}, deployedHeroes={deployedHeroes.Count})");
+        }
+
+        /// <summary>
+        /// Recovers a hero from injured to available pool.
+        /// </summary>
+        public void RecoverHero(CardDefinitionSO hero)
+        {
+            Debug.Log($"[DeckManager] RecoverHero: recovering hero " +
+                      $"(name={hero?.cardName ?? "NULL"})");
+
+            if (hero == null)
+            {
+                Debug.LogWarning("[DeckManager] RecoverHero: hero is null — skipping");
+                return;
+            }
+
+            if (!injuredHeroes.Remove(hero))
+            {
+                Debug.LogWarning($"[DeckManager] RecoverHero: hero not found in injured pool " +
+                                 $"(name={hero.cardName})");
+                return;
+            }
+
+            availableHeroes.Add(hero);
+            Debug.Log($"[DeckManager] RecoverHero: hero recovered to available " +
+                      $"(name={hero.cardName}, availableHeroes={availableHeroes.Count}, " +
+                      $"injuredHeroes={injuredHeroes.Count})");
+        }
+
+        // ── Equipment management ─────────────────────────────────────────
+
+        /// <summary>
+        /// Moves equipment from available to deployed pool.
+        /// </summary>
+        public void AttachEquipment(CardDefinitionSO equip)
+        {
+            Debug.Log($"[DeckManager] AttachEquipment: attaching equipment " +
+                      $"(name={equip?.cardName ?? "NULL"})");
+
+            if (equip == null)
+            {
+                Debug.LogWarning("[DeckManager] AttachEquipment: equip is null — skipping");
+                return;
+            }
+
+            if (!availableEquipment.Remove(equip))
+            {
+                Debug.LogWarning($"[DeckManager] AttachEquipment: equipment not found in available pool " +
+                                 $"(name={equip.cardName})");
+                return;
+            }
+
+            deployedEquipment.Add(equip);
+            Debug.Log($"[DeckManager] AttachEquipment: equipment deployed " +
+                      $"(name={equip.cardName}, slot={equip.equipmentSlot}, " +
+                      $"availableEquipment={availableEquipment.Count}, " +
+                      $"deployedEquipment={deployedEquipment.Count})");
+        }
+
+        /// <summary>
+        /// Returns equipment from deployed to available pool.
+        /// </summary>
+        public void ReturnEquipment(CardDefinitionSO equip)
+        {
+            Debug.Log($"[DeckManager] ReturnEquipment: returning equipment " +
+                      $"(name={equip?.cardName ?? "NULL"})");
+
+            if (equip == null)
+            {
+                Debug.LogWarning("[DeckManager] ReturnEquipment: equip is null — skipping");
+                return;
+            }
+
+            if (!deployedEquipment.Remove(equip))
+            {
+                Debug.LogWarning($"[DeckManager] ReturnEquipment: equipment not found in deployed pool " +
+                                 $"(name={equip.cardName})");
+                return;
+            }
+
+            availableEquipment.Add(equip);
+            Debug.Log($"[DeckManager] ReturnEquipment: equipment returned " +
+                      $"(name={equip.cardName}, availableEquipment={availableEquipment.Count}, " +
+                      $"deployedEquipment={deployedEquipment.Count})");
+        }
+
+        // ── Colony card management ───────────────────────────────────────
+
+        /// <summary>
+        /// Moves a colony card from available to played pool. Permanent placement.
+        /// </summary>
+        public void PlayColonyCard(ColonyCardDefinitionSO card)
+        {
+            Debug.Log($"[DeckManager] PlayColonyCard: playing colony card " +
+                      $"(name={card?.cardName ?? "NULL"})");
+
+            if (card == null)
+            {
+                Debug.LogWarning("[DeckManager] PlayColonyCard: card is null — skipping");
+                return;
+            }
+
+            if (!availableColonyCards.Remove(card))
+            {
+                Debug.LogWarning($"[DeckManager] PlayColonyCard: card not found in available pool " +
+                                 $"(name={card.cardName})");
+                return;
+            }
+
+            playedColonyCards.Add(card);
+            Debug.Log($"[DeckManager] PlayColonyCard: colony card played " +
+                      $"(name={card.cardName}, tier={card.colonyTier}, effect={card.colonyEffect}, " +
+                      $"availableColony={availableColonyCards.Count}, playedColony={playedColonyCards.Count})");
+        }
+
+        // ── Tactical card management ─────────────────────────────────────
+
+        /// <summary>
+        /// Uses a tactical card. Moves from available to used (permanently removed from game).
+        /// </summary>
+        public void UseTacticalCard(CardDefinitionSO card)
+        {
+            Debug.Log($"[DeckManager] UseTacticalCard: using tactical card " +
+                      $"(name={card?.cardName ?? "NULL"})");
+
+            if (card == null)
+            {
+                Debug.LogWarning("[DeckManager] UseTacticalCard: card is null — skipping");
+                return;
+            }
+
+            if (!availableTactical.Remove(card))
+            {
+                Debug.LogWarning($"[DeckManager] UseTacticalCard: card not found in available pool " +
+                                 $"(name={card.cardName})");
+                return;
+            }
+
+            usedTactical.Add(card);
+            Debug.Log($"[DeckManager] UseTacticalCard: tactical card used (permanently removed) " +
+                      $"(name={card.cardName}, type={card.tacticalType}, " +
+                      $"availableTactical={availableTactical.Count}, usedTactical={usedTactical.Count})");
+        }
+
+        // ── Mid-run card acquisition (Phase 3) ───────────────────────────
+
+        /// <summary>
+        /// Adds a reward card to the appropriate pool. Used for mid-run card rewards.
+        /// </summary>
+        public void AddCardToPool(CardDefinitionSO card)
+        {
+            Debug.Log($"[DeckManager] AddCardToPool: adding card " +
+                      $"(name={card?.cardName ?? "NULL"}, type={card?.cardType})");
+
+            if (card == null)
+            {
+                Debug.LogWarning("[DeckManager] AddCardToPool: card is null — skipping");
+                return;
+            }
+
+            TotalDeckSize++;
+
+            switch (card.cardType)
+            {
+                case CardType.Hero:
+                    availableHeroes.Add(card);
+                    Debug.Log($"[DeckManager] AddCardToPool: added hero to available pool (name={card.cardName}, availableHeroes={availableHeroes.Count})");
+                    break;
+                case CardType.Equipment:
+                    availableEquipment.Add(card);
+                    Debug.Log($"[DeckManager] AddCardToPool: added equipment to available pool (name={card.cardName}, availableEquipment={availableEquipment.Count})");
+                    break;
+                case CardType.Tactical:
+                    availableTactical.Add(card);
+                    Debug.Log($"[DeckManager] AddCardToPool: added tactical to available pool (name={card.cardName}, availableTactical={availableTactical.Count})");
+                    break;
+                default:
+                    Debug.LogWarning($"[DeckManager] AddCardToPool: unexpected card type {card.cardType} for '{card.cardName}' — adding to heroes as fallback");
+                    availableHeroes.Add(card);
+                    break;
             }
         }
 
-        public void RestorePiles(List<CardDefinitionSO> draw, List<CardDefinitionSO> discard)
+        /// <summary>
+        /// Adds a colony card to the available pool. Used for mid-run card rewards.
+        /// </summary>
+        public void AddColonyCardToPool(ColonyCardDefinitionSO card)
         {
-            drawPile.Clear();
-            discardPile.Clear();
-            drawPile.AddRange(draw);
-            discardPile.AddRange(discard);
-            Debug.Log($"[DeckManager] RestorePiles: drawPile={drawPile.Count}, discardPile={discardPile.Count}");
-        }
+            Debug.Log($"[DeckManager] AddColonyCardToPool: adding colony card " +
+                      $"(name={card?.cardName ?? "NULL"})");
 
-        public CardDefinitionSO FindCardByName(string cardName)
-        {
-            foreach (var card in allCards)
+            if (card == null)
             {
-                if (card.cardName == cardName)
-                    return card;
+                Debug.LogWarning("[DeckManager] AddColonyCardToPool: card is null — skipping");
+                return;
             }
-            Debug.LogWarning($"[DeckManager] FindCardByName: card '{cardName}' not found in allCards");
-            return null;
+
+            TotalDeckSize++;
+            availableColonyCards.Add(card);
+            Debug.Log($"[DeckManager] AddColonyCardToPool: added colony card (name={card.cardName}, availableColonyCards={availableColonyCards.Count})");
         }
 
-        public bool HasHeroCards()
+        // ── Utility ──────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Logs the current state of all card pools for debugging.
+        /// </summary>
+        public void LogDeckState()
         {
-            foreach (var card in drawPile)
-                if (card.cardType == CardType.Hero) { Debug.Log($"[DeckManager] HasHeroCards: found '{card.cardName}' in drawPile"); return true; }
-            foreach (var card in discardPile)
-                if (card.cardType == CardType.Hero) { Debug.Log($"[DeckManager] HasHeroCards: found '{card.cardName}' in discardPile"); return true; }
-            Debug.Log("[DeckManager] HasHeroCards: no hero cards in deck");
-            return false;
-        }
+            Debug.Log($"[DeckManager] LogDeckState: === DECK STATE ===");
+            Debug.Log($"[DeckManager] LogDeckState: TotalDeckSize={TotalDeckSize}");
+            Debug.Log($"[DeckManager] LogDeckState: Heroes — available={availableHeroes.Count}, " +
+                      $"deployed={deployedHeroes.Count}, injured={injuredHeroes.Count}");
+            Debug.Log($"[DeckManager] LogDeckState: Equipment — available={availableEquipment.Count}, " +
+                      $"deployed={deployedEquipment.Count}");
+            Debug.Log($"[DeckManager] LogDeckState: Tactical — available={availableTactical.Count}, " +
+                      $"used={usedTactical.Count}");
+            Debug.Log($"[DeckManager] LogDeckState: Colony — available={availableColonyCards.Count}, " +
+                      $"played={playedColonyCards.Count}");
 
-        public bool CanDraw()
-        {
-            bool canDraw = drawPile.Count > 0 || discardPile.Count > 0;
-            Debug.Log($"[DeckManager] CanDraw: drawPile={drawPile.Count}, discardPile={discardPile.Count}, canDraw={canDraw}");
-            return canDraw;
+            foreach (var h in availableHeroes)
+                Debug.Log($"[DeckManager] LogDeckState: availableHero — {h.cardName}");
+            foreach (var h in deployedHeroes)
+                Debug.Log($"[DeckManager] LogDeckState: deployedHero — {h.cardName}");
+            foreach (var h in injuredHeroes)
+                Debug.Log($"[DeckManager] LogDeckState: injuredHero — {h.cardName}");
+            foreach (var e in availableEquipment)
+                Debug.Log($"[DeckManager] LogDeckState: availableEquip — {e.cardName} ({e.equipmentSlot})");
+            foreach (var e in deployedEquipment)
+                Debug.Log($"[DeckManager] LogDeckState: deployedEquip — {e.cardName} ({e.equipmentSlot})");
+            foreach (var t in availableTactical)
+                Debug.Log($"[DeckManager] LogDeckState: availableTactical — {t.cardName} ({t.tacticalType})");
+            foreach (var t in usedTactical)
+                Debug.Log($"[DeckManager] LogDeckState: usedTactical — {t.cardName} ({t.tacticalType})");
+            foreach (var c in availableColonyCards)
+                Debug.Log($"[DeckManager] LogDeckState: availableColony — {c.cardName} ({c.colonyEffect})");
+            foreach (var c in playedColonyCards)
+                Debug.Log($"[DeckManager] LogDeckState: playedColony — {c.cardName} ({c.colonyEffect})");
         }
-
-        public int DrawPileCount => drawPile.Count;
-        public int DiscardPileCount => discardPile.Count;
-        public int HandSize => handSize;
-        public CardDefinitionSO[] AllCards => allCards;
-        public List<CardDefinitionSO> DrawPile => drawPile;
-        public List<CardDefinitionSO> DiscardPile => discardPile;
     }
 }

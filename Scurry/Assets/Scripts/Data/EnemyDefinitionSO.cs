@@ -9,9 +9,12 @@ namespace Scurry.Data
         [Tooltip("Localization key prefix, e.g. 'enemy.fieldmouse'. Name = key+'.name'")]
         public string localizationKey;
         public int strength;
+        public int hp;
         public int speed;
         public EnemyBehavior behavior;
+        public NodeType homeZone;
         public Color tokenColor = new Color(1f, 0.2f, 0.2f);
         public Sprite artwork;
+        [TextArea] public string description;
     }
 }

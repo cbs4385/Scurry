@@ -13,15 +13,53 @@ namespace Scurry.Map
         private MapNode currentNode;
         private int currentRow = -1; // -1 = before first row (start)
 
+        // v2.0 graph-based map
+        private MapGraph mapGraph;
+
         public List<List<MapNode>> Map => map;
         public MapNode CurrentNode => currentNode;
         public int CurrentRow => currentRow;
         public MapConfigSO Config => config;
+        public MapGraph Graph => mapGraph;
 
         private void Awake()
         {
             ServiceLocator.Register<IMapManager>(this);
             Debug.Log("[MapManager] Awake: registered with ServiceLocator");
+        }
+
+        // ── IMapManager v2.0 interface methods ─────────────────────────
+
+        public void GenerateMap(int seed)
+        {
+            Debug.Log($"[MapManager] GenerateMap: generating v2.0 graph map (seed={seed})");
+            if (config == null)
+            {
+                config = ScriptableObject.CreateInstance<MapConfigSO>();
+                Debug.Log("[MapManager] GenerateMap: created default MapConfigSO");
+            }
+            mapGraph = MapGenerator.GenerateMap(config, seed);
+            Debug.Log($"[MapManager] GenerateMap: complete (nodeCount={mapGraph?.GetAllNodes()?.Count ?? 0})");
+        }
+
+        public MapNode GetNode(int nodeId)
+        {
+            if (mapGraph == null)
+            {
+                Debug.LogWarning($"[MapManager] GetNode: mapGraph is null (nodeId={nodeId})");
+                return null;
+            }
+            return mapGraph.GetNode(nodeId);
+        }
+
+        public List<int> GetPath(int fromId, int toId)
+        {
+            if (mapGraph == null)
+            {
+                Debug.LogWarning($"[MapManager] GetPath: mapGraph is null (from={fromId}, to={toId})");
+                return new List<int>();
+            }
+            return mapGraph.ShortestPath(fromId, toId);
         }
 
         public void InitializeMap(MapConfigSO mapConfig)
@@ -30,16 +68,20 @@ namespace Scurry.Map
             currentRow = -1;
             currentNode = null;
 
-            map = MapGenerator.GenerateMap(config);
+            int seed = UnityEngine.Random.Range(0, int.MaxValue);
+            mapGraph = MapGenerator.GenerateMap(config, seed);
 
-            if (!MapGenerator.ValidateMap(map))
+            if (!MapGenerator.ValidateMap(mapGraph))
             {
                 Debug.LogWarning("[MapManager] InitializeMap: map validation failed — regenerating");
-                map = MapGenerator.GenerateMap(config);
+                mapGraph = MapGenerator.GenerateMap(config, seed + 1);
             }
 
-            Debug.Log($"[MapManager] InitializeMap: map ready — {map.Count} rows, level={config.levelNumber}");
-            EventBus.OnMapReady?.Invoke();
+            // Build legacy row-based map from graph for v1.0 compatibility
+            map = new List<List<MapNode>>();
+            map.Add(new List<MapNode>(mapGraph.GetAllNodes()));
+
+            Debug.Log($"[MapManager] InitializeMap: map ready — {mapGraph.GetAllNodes().Count} nodes");
         }
 
         public List<MapNode> GetAvailableNodes()
@@ -101,7 +143,6 @@ namespace Scurry.Map
             currentRow = node.position.x;
 
             Debug.Log($"[MapManager] SelectNode: moved to row={currentRow}, type={node.nodeType}, difficulty={node.difficulty}");
-            EventBus.OnMapNodeSelected?.Invoke(node);
         }
 
         public void OnNodeComplete()
@@ -115,27 +156,71 @@ namespace Scurry.Map
             }
 
             // Check if boss was just defeated
-            if (currentNode != null && currentNode.nodeType == NodeType.Boss)
+            if (currentNode != null && currentNode.nodeType == NodeType.PiedPiper)
             {
-                Debug.Log("[MapManager] OnNodeComplete: boss defeated — level complete");
-                EventBus.OnLevelComplete?.Invoke();
+                Debug.Log("[MapManager] OnNodeComplete: Pied Piper defeated — run complete");
+                EventBus.OnRunComplete?.Invoke(true);
                 return;
             }
 
             // Check if we've reached the end of the map
             if (currentRow >= map.Count - 1)
             {
-                Debug.Log("[MapManager] OnNodeComplete: reached end of map — level complete");
-                EventBus.OnLevelComplete?.Invoke();
+                Debug.Log("[MapManager] OnNodeComplete: reached end of map — run complete");
+                EventBus.OnRunComplete?.Invoke(true);
                 return;
             }
 
-            EventBus.OnMapNodeComplete?.Invoke();
+            Debug.Log("[MapManager] OnNodeComplete: node complete, continuing");
         }
 
         public bool IsMapComplete()
         {
             return currentRow >= map.Count - 1;
         }
+
+        /// <summary>
+        /// Restore map state from a previously saved snapshot (used after Encounter scene transition).
+        /// </summary>
+        public void RestoreMapState(MapStateSnapshot snapshot)
+        {
+            if (snapshot == null)
+            {
+                Debug.LogWarning("[MapManager] RestoreMapState: snapshot is null");
+                return;
+            }
+            config = snapshot.config;
+            map = snapshot.map;
+            currentRow = snapshot.currentRow;
+            currentNode = snapshot.currentNode;
+            Debug.Log($"[MapManager] RestoreMapState: restored map — rows={map?.Count ?? 0}, currentRow={currentRow}, currentNode={currentNode?.nodeType}");
+        }
+
+        /// <summary>
+        /// Capture current map state for preservation across scene transitions.
+        /// </summary>
+        public MapStateSnapshot CaptureMapState()
+        {
+            var snapshot = new MapStateSnapshot
+            {
+                config = config,
+                map = map,
+                currentRow = currentRow,
+                currentNode = currentNode
+            };
+            Debug.Log($"[MapManager] CaptureMapState: captured map — rows={map?.Count ?? 0}, currentRow={currentRow}");
+            return snapshot;
+        }
+    }
+
+    /// <summary>
+    /// Holds map state for preservation across scene transitions.
+    /// </summary>
+    public class MapStateSnapshot
+    {
+        public MapConfigSO config;
+        public List<List<MapNode>> map;
+        public int currentRow;
+        public MapNode currentNode;
     }
 }

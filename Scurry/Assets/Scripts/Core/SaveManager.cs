@@ -10,35 +10,57 @@ namespace Scurry.Core
 
         public static void Save(RunSaveData data)
         {
+            Debug.Log($"[SaveManager] Save: serializing save data (turn={data.currentTurn}, seed={data.randomSeed}, state={data.runState})");
+
             string json = JsonUtility.ToJson(data, true);
             File.WriteAllText(SavePath, json);
-            Debug.Log($"[SaveManager] Save: saved to '{SavePath}' (level={data.currentLevel}, colonyHP={data.colonyHP}, " +
-                      $"heroDeck={data.heroDeckCardNames.Count}, wounded={data.woundedHeroNames.Count}, " +
-                      $"nodes={data.nodesVisited}, food={data.foodStockpile}, materials={data.materialsStockpile}, currency={data.currencyStockpile})");
+            Debug.Log($"[SaveManager] Save: saved to '{SavePath}' (turn={data.currentTurn}, " +
+                      $"deck={data.deckCardIds.Count}, colonyDeck={data.colonyDeckCardIds.Count}, " +
+                      $"heroes={data.deployedHeroes.Count}, enemies={data.enemies.Count}, " +
+                      $"food={data.foodStockpile}, materials={data.materialsStockpile}, currency={data.currencyStockpile}, " +
+                      $"mapNodes={data.mapNodes.Count})");
 
             // Sync to Steam Cloud
-            Steam.SteamManager.CloudSave("run_save.json", json);
+            try
+            {
+                Steam.SteamManager.CloudSave("run_save.json", json);
+                Debug.Log("[SaveManager] Save: synced to Steam Cloud");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"[SaveManager] Save: Steam Cloud sync failed — {e.Message}");
+            }
         }
 
         public static RunSaveData Load()
         {
+            Debug.Log($"[SaveManager] Load: attempting to load from '{SavePath}'");
+
             string json = null;
 
             if (File.Exists(SavePath))
             {
                 json = File.ReadAllText(SavePath);
-                Debug.Log($"[SaveManager] Load: loaded from local save at '{SavePath}'");
+                Debug.Log($"[SaveManager] Load: loaded from local save at '{SavePath}' (length={json.Length})");
             }
             else
             {
                 // Fallback to Steam Cloud if local save is missing
                 Debug.Log($"[SaveManager] Load: no local save at '{SavePath}' — trying Steam Cloud");
-                json = Steam.SteamManager.CloudLoad("run_save.json");
-                if (json != null)
+                try
                 {
-                    Debug.Log("[SaveManager] Load: restored from Steam Cloud");
-                    // Write cloud save to local disk for future loads
-                    File.WriteAllText(SavePath, json);
+                    json = Steam.SteamManager.CloudLoad("run_save.json");
+                    if (json != null)
+                    {
+                        Debug.Log("[SaveManager] Load: restored from Steam Cloud");
+                        // Write cloud save to local disk for future loads
+                        File.WriteAllText(SavePath, json);
+                        Debug.Log("[SaveManager] Load: wrote cloud save to local disk");
+                    }
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogWarning($"[SaveManager] Load: Steam Cloud load failed — {e.Message}");
                 }
             }
 
@@ -49,8 +71,10 @@ namespace Scurry.Core
             }
 
             var data = JsonUtility.FromJson<RunSaveData>(json);
-            Debug.Log($"[SaveManager] Load: parsed save (level={data.currentLevel}, colonyHP={data.colonyHP}, " +
-                      $"heroDeck={data.heroDeckCardNames.Count}, wounded={data.woundedHeroNames.Count}, nodes={data.nodesVisited})");
+            Debug.Log($"[SaveManager] Load: parsed save (turn={data.currentTurn}, seed={data.randomSeed}, state={data.runState}, " +
+                      $"deck={data.deckCardIds.Count}, colonyDeck={data.colonyDeckCardIds.Count}, " +
+                      $"heroes={data.deployedHeroes.Count}, enemies={data.enemies.Count}, " +
+                      $"mapNodes={data.mapNodes.Count})");
             return data;
         }
 

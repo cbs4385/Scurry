@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using Scurry.Data;
 using Scurry.Core;
@@ -20,32 +21,47 @@ namespace Scurry.Colony
         public int FoodStockpile { get; private set; }
         public int MaterialsStockpile { get; private set; }
 
+        // v2.0 colony graph for card placement and effects
+        private ColonyGraph colonyGraph;
+        public ColonyGraph Graph => colonyGraph;
+
         private void Awake()
         {
             if (_instance != null && _instance != this)
             {
-                Debug.Log("[ColonyManager] Awake: duplicate instance — destroying self");
-                Destroy(gameObject);
+                Debug.Log("[ColonyManager] Awake: duplicate instance — destroying component only");
+                Destroy(this);
                 return;
             }
             _instance = this;
-            DontDestroyOnLoad(gameObject);
+            if (gameObject.name == "PersistentManagers")
+                DontDestroyOnLoad(gameObject);
             ServiceLocator.Register<IColonyManager>(this);
             Debug.Log($"[ColonyManager] Awake: startingHP={startingHP}, maxHP={maxHP}");
         }
 
         private void OnEnable()
         {
-            Debug.Log("[ColonyManager] OnEnable: subscribing to EventBus.OnColonyHPChanged and OnResourceCollected");
-            EventBus.OnColonyHPChanged += HandleHPChange;
-            EventBus.OnResourceCollected += HandleResourceCollected;
+            Debug.Log("[ColonyManager] OnEnable");
         }
 
         private void OnDisable()
         {
-            Debug.Log("[ColonyManager] OnDisable: unsubscribing from EventBus events");
-            EventBus.OnColonyHPChanged -= HandleHPChange;
-            EventBus.OnResourceCollected -= HandleResourceCollected;
+            Debug.Log("[ColonyManager] OnDisable");
+        }
+
+        private void OnDestroy()
+        {
+            if (_instance != this)
+            {
+                Debug.Log($"[ColonyManager] OnDestroy: duplicate instance destroyed, skipping unregister (self={GetInstanceID()})");
+                return;
+            }
+            Debug.Log("[ColonyManager] OnDestroy: unregistering services");
+            _instance = null;
+            ServiceLocator.Unregister<IColonyManager>();
+            ServiceLocator.Unregister<IColonyGraph>();
+            Debug.Log("[ColonyManager] OnDestroy: services unregistered");
         }
 
         public void InitializeHP()
@@ -153,52 +169,76 @@ namespace Scurry.Colony
             BroadcastHP();
         }
 
-        private void HandleHPChange(int delta, int unused)
-        {
-            Debug.Log($"[ColonyManager] HandleHPChange: delta={delta}");
-            if (delta < 0)
-                TakeDamage(-delta);
-            else if (delta > 0)
-                Heal(delta);
-        }
-
-        private void HandleResourceCollected(ResourceType type, int value)
-        {
-            Debug.Log($"[ColonyManager] HandleResourceCollected: type={type}, value={value}");
-            switch (type)
-            {
-                case ResourceType.Food:
-                    int healAmount = value * 2;
-                    Debug.Log($"[ColonyManager] HandleResourceCollected: Food — healing {healAmount} HP");
-                    Heal(healAmount);
-                    int prevFood = FoodStockpile;
-                    FoodStockpile += value;
-                    Debug.Log($"[ColonyManager] HandleResourceCollected: Food — FoodStockpile {prevFood} -> {FoodStockpile}");
-                    break;
-                case ResourceType.Materials:
-                    int prevMat = MaterialsStockpile;
-                    MaterialsStockpile += value;
-                    Debug.Log($"[ColonyManager] HandleResourceCollected: Materials — stockpile {prevMat} -> {MaterialsStockpile}");
-                    break;
-                case ResourceType.Shelter:
-                    int shelterHeal = value;
-                    Debug.Log($"[ColonyManager] HandleResourceCollected: Shelter — healing {shelterHeal} HP (legacy)");
-                    Heal(shelterHeal);
-                    break;
-                case ResourceType.Equipment:
-                    Debug.Log($"[ColonyManager] HandleResourceCollected: Equipment — buff applied at hero level, no colony effect (legacy)");
-                    break;
-                case ResourceType.Currency:
-                    int oldCurrency = CurrencyStockpile;
-                    CurrencyStockpile += value;
-                    Debug.Log($"[ColonyManager] HandleResourceCollected: Currency — stockpile {oldCurrency} -> {CurrencyStockpile}");
-                    break;
-            }
-        }
 
         private void BroadcastHP()
         {
             Debug.Log($"[ColonyManager] BroadcastHP: currentHP={CurrentHP}, maxHP={maxHP}, isAlive={IsAlive}");
+        }
+
+        // ── IColonyManager v2.0 interface methods ──────────────────────
+
+        public void InitializeColonyGraph()
+        {
+            colonyGraph = new ColonyGraph();
+            ServiceLocator.Register<IColonyGraph>(colonyGraph);
+            Debug.Log("[ColonyManager] InitializeColonyGraph: created new ColonyGraph and registered IColonyGraph");
+        }
+
+        public void ProduceResources()
+        {
+            Debug.Log("[ColonyManager] ProduceResources: running colony production");
+            if (colonyGraph == null)
+            {
+                Debug.LogWarning("[ColonyManager] ProduceResources: colonyGraph is null — skipping");
+                return;
+            }
+
+            int foodProduction = colonyGraph.CalculateFoodProduction();
+            if (foodProduction > 0)
+            {
+                AddFood(foodProduction);
+                Debug.Log($"[ColonyManager] ProduceResources: produced {foodProduction} food");
+            }
+        }
+
+        public bool PlayColonyCard(ColonyCardDefinitionSO card, int targetNodeId)
+        {
+            Debug.Log($"[ColonyManager] PlayColonyCard: card={card?.cardName ?? "null"}, targetNodeId={targetNodeId}");
+            if (colonyGraph == null)
+            {
+                Debug.LogWarning("[ColonyManager] PlayColonyCard: colonyGraph is null — cannot place");
+                return false;
+            }
+
+            int result = colonyGraph.AddCard(card, targetNodeId);
+            bool success = result >= 0;
+            Debug.Log($"[ColonyManager] PlayColonyCard: result={success} (placedOnNode={result})");
+            return success;
+        }
+
+        public bool HasEffect(ColonyEffect effect)
+        {
+            if (colonyGraph == null) return false;
+            bool has = colonyGraph.HasEffect(effect);
+            Debug.Log($"[ColonyManager] HasEffect: effect={effect}, result={has}");
+            return has;
+        }
+
+        public int GetEffectValue(ColonyEffect effect)
+        {
+            if (colonyGraph == null) return 0;
+            int val = colonyGraph.GetEffectValue(effect);
+            Debug.Log($"[ColonyManager] GetEffectValue: effect={effect}, value={val}");
+            return val;
+        }
+
+        public List<ColonyEffect> GetActiveEffects()
+        {
+            if (colonyGraph == null) return new List<ColonyEffect>();
+            var effectDict = colonyGraph.GetActiveEffects();
+            var effects = new List<ColonyEffect>(effectDict.Keys);
+            Debug.Log($"[ColonyManager] GetActiveEffects: count={effects.Count}");
+            return effects;
         }
     }
 }

@@ -1,0 +1,794 @@
+{
+  "heroes": [
+    {
+      "cardId": 1, "cardName": "Scout", "role": "Recon", "rarity": "Common",
+      "combat": 3, "move": 3, "hp": 5, "carry": 1, "initiative": 7,
+      "deckCost": 1,
+      "specialAbility": "ExtendedFogReveal",
+      "specialAbilityDescription": "Reveals 1 extra node beyond normal visibility"
+    },
+    {
+      "cardId": 2, "cardName": "Explorer", "role": "Recon", "rarity": "Common",
+      "combat": 2, "move": 3, "hp": 5, "carry": 2, "initiative": 6,
+      "deckCost": 1,
+      "specialAbility": "MapOnMove",
+      "specialAbilityDescription": "Reveals all nodes along path when moving"
+    },
+    {
+      "cardId": 3, "cardName": "Ranger", "role": "Ranged", "rarity": "Uncommon",
+      "combat": 4, "move": 2, "hp": 5, "carry": 1, "initiative": 6,
+      "deckCost": 2,
+      "specialAbility": "RangedStrike",
+      "specialAbilityDescription": "Deals damage before melee round begins"
+    },
+    {
+      "cardId": 4, "cardName": "Messenger", "role": "Fast", "rarity": "Common",
+      "combat": 2, "move": 4, "hp": 4, "carry": 2, "initiative": 8,
+      "deckCost": 1,
+      "specialAbility": "SwiftDelivery",
+      "specialAbilityDescription": "Can deposit resources at colony without ending movement"
+    },
+    {
+      "cardId": 5, "cardName": "Warrior", "role": "Melee", "rarity": "Uncommon",
+      "combat": 5, "move": 2, "hp": 6, "carry": 1, "initiative": 4,
+      "deckCost": 2,
+      "specialAbility": "Riposte",
+      "specialAbilityDescription": "Deals 1 damage to attacker when hit"
+    },
+    {
+      "cardId": 6, "cardName": "Guardian", "role": "Tank", "rarity": "Uncommon",
+      "combat": 4, "move": 1, "hp": 7, "carry": 1, "initiative": 2,
+      "deckCost": 2,
+      "specialAbility": "Intercept",
+      "specialAbilityDescription": "Takes damage instead of an adjacent ally"
+    },
+    {
+      "cardId": 7, "cardName": "Bulwark", "role": "Tank", "rarity": "Rare",
+      "combat": 3, "move": 1, "hp": 8, "carry": 1, "initiative": 1,
+      "deckCost": 3,
+      "specialAbility": "Taunt",
+      "specialAbilityDescription": "Enemies must target this hero first"
+    },
+    {
+      "cardId": 8, "cardName": "Sentinel", "role": "Melee", "rarity": "Uncommon",
+      "combat": 4, "move": 2, "hp": 6, "carry": 1, "initiative": 4,
+      "deckCost": 2,
+      "specialAbility": "Fortify",
+      "specialAbilityDescription": "+2 HP when stationary for a full turn"
+    },
+    {
+      "cardId": 9, "cardName": "Forager", "role": "Gather", "rarity": "Common",
+      "combat": 2, "move": 2, "hp": 5, "carry": 4, "initiative": 7,
+      "deckCost": 1,
+      "specialAbility": "EfficientGather",
+      "specialAbilityDescription": "Gathers +1 resource per node"
+    },
+    {
+      "cardId": 10, "cardName": "Healer", "role": "Support", "rarity": "Uncommon",
+      "combat": 2, "move": 2, "hp": 5, "carry": 1, "initiative": 8,
+      "deckCost": 2,
+      "specialAbility": "FieldMedic",
+      "specialAbilityDescription": "Heals 1 HP to lowest-HP ally on same node each turn"
+    },
+    {
+      "cardId": 11, "cardName": "Inventor", "role": "Support", "rarity": "Uncommon",
+      "combat": 3, "move": 2, "hp": 5, "carry": 2, "initiative": 6,
+      "deckCost": 2,
+      "specialAbility": "Tinker",
+      "specialAbilityDescription": "Equipped utility items grant double effect"
+    },
+    {
+      "cardId": 12, "cardName": "Rogue", "role": "Melee", "rarity": "Uncommon",
+      "combat": 4, "move": 3, "hp": 4, "carry": 1, "initiative": 9,
+      "deckCost": 2,
+      "specialAbility": "DualWield",
+      "specialAbilityDescription": "+1 Combat per equipped offensive item"
+    },
+    {
+      "cardId": 13, "cardName": "Captain", "role": "Leader", "rarity": "Rare",
+      "combat": 4, "move": 2, "hp": 6, "carry": 1, "initiative": 5,
+      "deckCost": 3,
+      "specialAbility": "Rally",
+      "specialAbilityDescription": "All heroes on same node get +1 Combat"
+    },
+    {
+      "cardId": 14, "cardName": "Commander", "role": "Leader", "rarity": "Rare",
+      "combat": 5, "move": 2, "hp": 6, "carry": 1, "initiative": 4,
+      "deckCost": 3,
+      "specialAbility": "BattleCry",
+      "specialAbilityDescription": "All heroes on same node get +1 Move this turn"
+    },
+    {
+      "cardId": 15, "cardName": "Elder", "role": "Support", "rarity": "Rare",
+      "combat": 2, "move": 1, "hp": 6, "carry": 1, "initiative": 9,
+      "deckCost": 3,
+      "specialAbility": "WiseCounsel",
+      "specialAbilityDescription": "Reveals enemy stats before combat on this node"
+    },
+    {
+      "cardId": 16, "cardName": "Assassin", "role": "Melee", "rarity": "Rare",
+      "combat": 5, "move": 3, "hp": 4, "carry": 1, "initiative": 10,
+      "deckCost": 3,
+      "specialAbility": "FirstStrike",
+      "specialAbilityDescription": "Attacks before enemies in first round of combat"
+    },
+    {
+      "cardId": 17, "cardName": "Quartermaster", "role": "Gather", "rarity": "Uncommon",
+      "combat": 2, "move": 2, "hp": 5, "carry": 4, "initiative": 5,
+      "deckCost": 2,
+      "specialAbility": "BulkHaul",
+      "specialAbilityDescription": "+1 Carry when on Wilderness nodes"
+    },
+    {
+      "cardId": 18, "cardName": "Torchbearer", "role": "Recon", "rarity": "Common",
+      "combat": 3, "move": 3, "hp": 5, "carry": 1, "initiative": 6,
+      "deckCost": 1,
+      "specialAbility": "Torchlight",
+      "specialAbilityDescription": "Reveals fog 2 nodes in all directions"
+    },
+    {
+      "cardId": 19, "cardName": "Knight", "role": "Melee", "rarity": "Rare",
+      "combat": 6, "move": 1, "hp": 7, "carry": 1, "initiative": 3,
+      "deckCost": 3,
+      "specialAbility": "Cleave",
+      "specialAbilityDescription": "Deals 1 splash damage to all enemies on this node"
+    },
+    {
+      "cardId": 20, "cardName": "Scholar", "role": "Support", "rarity": "Uncommon",
+      "combat": 2, "move": 2, "hp": 5, "carry": 2, "initiative": 7,
+      "deckCost": 2,
+      "specialAbility": "ScoutReport",
+      "specialAbilityDescription": "Reveals enemy count on adjacent nodes"
+    }
+  ],
+  "colony": [
+    {
+      "cardId": 21, "cardName": "Underground Storage", "tier": "FoodStorage", "rarity": "Common",
+      "deckCost": 1,
+      "placementRequirement": "AdjacentTo", "adjacencyCardName": "Basic Burrow",
+      "colonyEffect": "FoodProduction", "effectValue": 4,
+      "description": "+4 food production per turn"
+    },
+    {
+      "cardId": 22, "cardName": "Berry Drying Racks", "tier": "FoodStorage", "rarity": "Common",
+      "deckCost": 1,
+      "placementRequirement": "AdjacentTo", "adjacencyCardName": "Colony Entrance",
+      "colonyEffect": "FoodProduction", "effectValue": 4,
+      "description": "+4 food production per turn"
+    },
+    {
+      "cardId": 23, "cardName": "Seed Vault", "tier": "FoodStorage", "rarity": "Uncommon",
+      "deckCost": 2,
+      "placementRequirement": "AdjacentTo", "adjacencyCardName": "Underground Storage",
+      "colonyEffect": "ResourceProtection", "effectValue": 1,
+      "description": "Stored resources cannot be lost if colony is attacked"
+    },
+    {
+      "cardId": 24, "cardName": "Cold Storage", "tier": "FoodStorage", "rarity": "Uncommon",
+      "deckCost": 2,
+      "placementRequirement": "AdjacentTo", "adjacencyCardName": "Seed Vault",
+      "colonyEffect": "FoodProduction", "effectValue": 4,
+      "description": "+4 food production per turn, food spoilage immunity"
+    },
+    {
+      "cardId": 25, "cardName": "Colony Entrance", "tier": "FoodStorage", "rarity": "Common",
+      "deckCost": 0, "isStarter": true,
+      "placementRequirement": "None",
+      "colonyEffect": "HeroDeployNode", "effectValue": 1,
+      "description": "Starter card (free). Required. Enables hero deployment."
+    },
+    {
+      "cardId": 26, "cardName": "Basic Burrow", "tier": "FoodStorage", "rarity": "Common",
+      "deckCost": 0, "isStarter": true,
+      "placementRequirement": "None",
+      "colonyEffect": "BaseProduction", "effectValue": 3,
+      "description": "Starter card (free). +3 food production per turn (base)."
+    },
+    {
+      "cardId": 27, "cardName": "Nursery", "tier": "FoodStorage", "rarity": "Uncommon",
+      "deckCost": 2,
+      "placementRequirement": "AdjacentTo", "adjacencyCardName": "Basic Burrow",
+      "colonyEffect": "MaxHeroDeployment", "effectValue": 1,
+      "description": "+1 max hero deployment per turn"
+    },
+    {
+      "cardId": 28, "cardName": "Tunnel Network", "tier": "FoodStorage", "rarity": "Uncommon",
+      "deckCost": 2,
+      "placementRequirement": "AdjacentTo", "adjacencyCardName": "Colony Entrance",
+      "colonyEffect": "DeployMoveBuff", "effectValue": 1,
+      "description": "Heroes deploying from colony get +1 Move on their first turn"
+    },
+    {
+      "cardId": 29, "cardName": "Workshop", "tier": "FoodStorage", "rarity": "Uncommon",
+      "deckCost": 2,
+      "placementRequirement": "AdjacentTo", "adjacencyCardName": "Training Ground",
+      "colonyEffect": "EquippedCombatBuff", "effectValue": 1,
+      "description": "Equipped heroes get +1 Combat"
+    },
+    {
+      "cardId": 30, "cardName": "Tailory", "tier": "FoodStorage", "rarity": "Uncommon",
+      "deckCost": 2,
+      "placementRequirement": "AdjacentTo", "adjacencyCardName": "Workshop",
+      "colonyEffect": "EquippedHPBuff", "effectValue": 1,
+      "description": "Equipped heroes get +1 HP"
+    },
+    {
+      "cardId": 31, "cardName": "Thorn Wall", "tier": "StructureDefense", "rarity": "Uncommon",
+      "deckCost": 2,
+      "placementRequirement": "AdjacentTo", "adjacencyCardName": "Wooden Gate",
+      "colonyEffect": "ColonyDefenseWall", "effectValue": 3,
+      "description": "Enemies attacking colony must defeat wall (3 Combat) first"
+    },
+    {
+      "cardId": 32, "cardName": "Watchtower", "tier": "StructureDefense", "rarity": "Uncommon",
+      "deckCost": 2,
+      "placementRequirement": "AdjacentTo", "adjacencyCardName": "Wooden Gate",
+      "colonyEffect": "FogReveal", "effectValue": 2,
+      "description": "Reveals all nodes within 2 edges of colony (pierces fog)"
+    },
+    {
+      "cardId": 33, "cardName": "Pit Traps", "tier": "StructureDefense", "rarity": "Uncommon",
+      "deckCost": 2,
+      "placementRequirement": "AdjacentTo", "adjacencyCardName": "Thorn Wall",
+      "colonyEffect": "PitTrapDamage", "effectValue": 2,
+      "description": "Enemies entering colony node take 2 damage before combat"
+    },
+    {
+      "cardId": 34, "cardName": "Wooden Gate", "tier": "StructureDefense", "rarity": "Uncommon",
+      "deckCost": 2,
+      "placementRequirement": "AdjacentTo", "adjacencyCardName": "Colony Entrance",
+      "colonyEffect": "ColonyDefenseBonus", "effectValue": 2,
+      "description": "+2 Combat to all heroes defending colony node"
+    },
+    {
+      "cardId": 35, "cardName": "Council Hall", "tier": "StructureDefense", "rarity": "Rare",
+      "deckCost": 3,
+      "placementRequirement": "AdjacentTo", "adjacencyCardName": "Tunnel Network",
+      "colonyEffect": "Retarget", "effectValue": 1,
+      "description": "Enables retargeting of deployed heroes anywhere on map"
+    },
+    {
+      "cardId": 36, "cardName": "Campfire", "tier": "StructureDefense", "rarity": "Common",
+      "deckCost": 1,
+      "placementRequirement": "AdjacentTo", "adjacencyCardName": "Council Hall",
+      "colonyEffect": "HealInjured", "effectValue": 1,
+      "description": "Injured heroes heal 1 HP per turn while in available pool"
+    },
+    {
+      "cardId": 37, "cardName": "Training Ground", "tier": "StructureDefense", "rarity": "Uncommon",
+      "deckCost": 2,
+      "placementRequirement": "AdjacentTo", "adjacencyCardName": "Tunnel Network",
+      "colonyEffect": "FirstCombatBuff", "effectValue": 1,
+      "description": "Newly deployed heroes get +1 Combat for their first combat"
+    },
+    {
+      "cardId": 38, "cardName": "War Hall", "tier": "StructureDefense", "rarity": "Rare",
+      "deckCost": 3,
+      "placementRequirement": "AdjacentTo", "adjacencyCardName": "Basic Burrow",
+      "colonyEffect": "AllHeroCombatBuff", "effectValue": 1,
+      "description": "+1 Combat to all hero tokens on the map"
+    },
+    {
+      "cardId": 39, "cardName": "Mushroom Farm", "tier": "StructureDefense", "rarity": "Common",
+      "deckCost": 1,
+      "placementRequirement": "AdjacentTo", "adjacencyCardName": "Cold Storage",
+      "colonyEffect": "MushFoodProduction", "effectValue": 3,
+      "description": "+3 food production per turn"
+    },
+    {
+      "cardId": 40, "cardName": "Fresh Water Pool", "tier": "StructureDefense", "rarity": "Uncommon",
+      "deckCost": 2,
+      "placementRequirement": "AdjacentTo", "adjacencyCardName": "Campfire",
+      "colonyEffect": "FoodProduction", "effectValue": 4,
+      "description": "+4 food production per turn, injured heroes heal +1 faster"
+    },
+    {
+      "cardId": 41, "cardName": "Signal Tower", "tier": "Advanced", "rarity": "Rare",
+      "deckCost": 3,
+      "placementRequirement": "None",
+      "colonyEffect": "FogRevealHeroes", "effectValue": 3,
+      "description": "Reveals all nodes within 3 edges of any hero token"
+    },
+    {
+      "cardId": 42, "cardName": "Great City", "tier": "Advanced", "rarity": "Legendary",
+      "deckCost": 3,
+      "placementRequirement": "None",
+      "colonyEffect": "DoubleProduction", "effectValue": 2,
+      "description": "All colony production effects doubled"
+    },
+    {
+      "cardId": 43, "cardName": "Grand Stores", "tier": "Advanced", "rarity": "Rare",
+      "deckCost": 3,
+      "placementRequirement": "None",
+      "colonyEffect": "FoodStorageCapacity", "effectValue": 5,
+      "description": "+5 food storage capacity (food carries over between turns)"
+    },
+    {
+      "cardId": 44, "cardName": "War Room", "tier": "Advanced", "rarity": "Rare",
+      "deckCost": 3,
+      "placementRequirement": "None",
+      "colonyEffect": "AllHeroMoveBuff", "effectValue": 1,
+      "description": "All hero tokens get +1 Move"
+    },
+    {
+      "cardId": 45, "cardName": "Shrine of Heroes", "tier": "Advanced", "rarity": "Rare",
+      "deckCost": 3,
+      "placementRequirement": "None",
+      "colonyEffect": "ImmediateHealReturn", "effectValue": 1,
+      "description": "Injured heroes return to available pool immediately (no turn delay)"
+    },
+    {
+      "cardId": 46, "cardName": "Throne Room", "tier": "Advanced", "rarity": "Legendary",
+      "deckCost": 3,
+      "placementRequirement": "None",
+      "colonyEffect": "DoubleColonyCard", "effectValue": 2,
+      "description": "Enables playing 2 colony cards per turn instead of 1"
+    },
+    {
+      "cardId": 47, "cardName": "Forward Camp", "tier": "Advanced", "rarity": "Rare",
+      "deckCost": 3,
+      "placementRequirement": "None",
+      "colonyEffect": "ForwardDeploy", "effectValue": 1,
+      "description": "Heroes can also deploy from the furthest-forward friendly node"
+    },
+    {
+      "cardId": 48, "cardName": "Messenger Post", "tier": "Advanced", "rarity": "Rare",
+      "deckCost": 3,
+      "placementRequirement": "None",
+      "colonyEffect": "MessengerRetarget", "effectValue": 1,
+      "description": "Enables retargeting of all heroes each turn (no Council Hall needed)"
+    },
+    {
+      "cardId": 49, "cardName": "Forge", "tier": "Advanced", "rarity": "Rare",
+      "deckCost": 3,
+      "placementRequirement": "None",
+      "colonyEffect": "EquippedWeaponBuff", "effectValue": 1,
+      "description": "Equipped weapons grant +1 additional Combat"
+    },
+    {
+      "cardId": 50, "cardName": "Crafting Table", "tier": "Advanced", "rarity": "Rare",
+      "deckCost": 3,
+      "placementRequirement": "None",
+      "colonyEffect": "EquippedUtilityDouble", "effectValue": 1,
+      "description": "Equipped utility items grant double effect"
+    }
+  ],
+  "equipment": {
+    "weapons": [
+      {
+        "cardId": 51, "cardName": "Needle Sword", "slot": "Offensive", "rarity": "Common",
+        "deckCost": 1,
+        "effectValue1": 1, "effectValue2": 0, "effectValue3": 0,
+        "description": "+1 Combat"
+      },
+      {
+        "cardId": 52, "cardName": "Thorn Spear", "slot": "Offensive", "rarity": "Common",
+        "deckCost": 1,
+        "effectValue1": 1, "effectValue2": 0, "effectValue3": 0,
+        "description": "+1 Combat, +1 range (can strike before melee)"
+      },
+      {
+        "cardId": 53, "cardName": "Pin Dagger", "slot": "Offensive", "rarity": "Common",
+        "deckCost": 1,
+        "effectValue1": 1, "effectValue2": 1, "effectValue3": 0,
+        "description": "+1 Combat, +1 Initiative"
+      },
+      {
+        "cardId": 54, "cardName": "Splinter Staff", "slot": "Offensive", "rarity": "Common",
+        "deckCost": 1,
+        "effectValue1": 1, "effectValue2": 0, "effectValue3": 0,
+        "description": "+1 Combat to all friendly tokens on same node"
+      },
+      {
+        "cardId": 55, "cardName": "Needle Lance", "slot": "Offensive", "rarity": "Uncommon",
+        "deckCost": 2,
+        "effectValue1": 2, "effectValue2": 0, "effectValue3": 0,
+        "description": "+2 Combat"
+      },
+      {
+        "cardId": 56, "cardName": "Pebble Sling", "slot": "Offensive", "rarity": "Uncommon",
+        "deckCost": 2,
+        "effectValue1": 1, "effectValue2": 0, "effectValue3": 0,
+        "description": "+1 Combat, ranged (strikes before melee round)"
+      },
+      {
+        "cardId": 57, "cardName": "Thorn Whip", "slot": "Offensive", "rarity": "Uncommon",
+        "deckCost": 2,
+        "effectValue1": 2, "effectValue2": 0, "effectValue3": 0,
+        "description": "+2 Combat, damages lowest-HP enemy first"
+      },
+      {
+        "cardId": 58, "cardName": "Bone Knife", "slot": "Offensive", "rarity": "Uncommon",
+        "deckCost": 2,
+        "effectValue1": 2, "effectValue2": 1, "effectValue3": 0,
+        "description": "+2 Combat, +1 Initiative"
+      },
+      {
+        "cardId": 59, "cardName": "Razor Leaf Blade", "slot": "Offensive", "rarity": "Rare",
+        "deckCost": 3,
+        "effectValue1": 3, "effectValue2": 0, "effectValue3": 0,
+        "description": "+3 Combat"
+      },
+      {
+        "cardId": 60, "cardName": "Acorn Hammer", "slot": "Offensive", "rarity": "Rare",
+        "deckCost": 3,
+        "effectValue1": 3, "effectValue2": 0, "effectValue3": 0,
+        "description": "+3 Combat, stuns target for 1 round"
+      }
+    ],
+    "armor": [
+      {
+        "cardId": 61, "cardName": "Thimble Helmet", "slot": "Defensive", "rarity": "Common",
+        "deckCost": 1,
+        "effectValue1": 1, "effectValue2": 0, "effectValue3": 0,
+        "description": "+1 HP"
+      },
+      {
+        "cardId": 62, "cardName": "Button Shield", "slot": "Defensive", "rarity": "Common",
+        "deckCost": 1,
+        "effectValue1": 1, "effectValue2": 1, "effectValue3": 0,
+        "description": "+1 HP, blocks 1 damage per round"
+      },
+      {
+        "cardId": 63, "cardName": "Bark Armor", "slot": "Defensive", "rarity": "Common",
+        "deckCost": 1,
+        "effectValue1": 2, "effectValue2": 0, "effectValue3": 0,
+        "description": "+2 HP"
+      },
+      {
+        "cardId": 64, "cardName": "Moss Cloak", "slot": "Defensive", "rarity": "Common",
+        "deckCost": 1,
+        "effectValue1": 0, "effectValue2": 0, "effectValue3": 0,
+        "description": "Enemies cannot target this hero first"
+      },
+      {
+        "cardId": 65, "cardName": "Feather Cape", "slot": "Defensive", "rarity": "Uncommon",
+        "deckCost": 2,
+        "effectValue1": 1, "effectValue2": 1, "effectValue3": 0,
+        "description": "+1 HP, +1 Move"
+      },
+      {
+        "cardId": 66, "cardName": "Leaf Armor", "slot": "Defensive", "rarity": "Uncommon",
+        "deckCost": 2,
+        "effectValue1": 2, "effectValue2": 1, "effectValue3": 0,
+        "description": "+2 HP, +1 Combat"
+      },
+      {
+        "cardId": 67, "cardName": "Beetle Shell Shield", "slot": "Defensive", "rarity": "Uncommon",
+        "deckCost": 2,
+        "effectValue1": 2, "effectValue2": 1, "effectValue3": 0,
+        "description": "+2 HP, blocks 1 damage per round"
+      },
+      {
+        "cardId": 68, "cardName": "Acorn Helm", "slot": "Defensive", "rarity": "Rare",
+        "deckCost": 3,
+        "effectValue1": 3, "effectValue2": 0, "effectValue3": 0,
+        "description": "+3 HP"
+      },
+      {
+        "cardId": 69, "cardName": "Grapple Hook", "slot": "Defensive", "rarity": "Rare",
+        "deckCost": 3,
+        "effectValue1": 1, "effectValue2": 0, "effectValue3": 0,
+        "description": "+1 HP, can traverse 2 edges as 1 Move"
+      },
+      {
+        "cardId": 70, "cardName": "Thread Rope", "slot": "Defensive", "rarity": "Rare",
+        "deckCost": 3,
+        "effectValue1": 1, "effectValue2": 0, "effectValue3": 0,
+        "description": "+1 HP, can pull 1 friendly token to same node"
+      }
+    ],
+    "utility": [
+      {
+        "cardId": 71, "cardName": "Bead Lantern", "slot": "Utility", "rarity": "Common",
+        "deckCost": 1,
+        "effectValue1": 1, "effectValue2": 0, "effectValue3": 0,
+        "description": "Reveals fog 1 additional node beyond this hero"
+      },
+      {
+        "cardId": 72, "cardName": "Button Compass", "slot": "Utility", "rarity": "Common",
+        "deckCost": 1,
+        "effectValue1": 1, "effectValue2": 0, "effectValue3": 0,
+        "description": "+1 Move"
+      },
+      {
+        "cardId": 73, "cardName": "Cloth Satchel", "slot": "Utility", "rarity": "Common",
+        "deckCost": 1,
+        "effectValue1": 2, "effectValue2": 0, "effectValue3": 0,
+        "description": "+2 Carry"
+      },
+      {
+        "cardId": 74, "cardName": "Matchstick Ladder", "slot": "Utility", "rarity": "Common",
+        "deckCost": 1,
+        "effectValue1": 0, "effectValue2": 0, "effectValue3": 0,
+        "description": "Ignores terrain movement penalties"
+      },
+      {
+        "cardId": 75, "cardName": "Berry Basket", "slot": "Utility", "rarity": "Uncommon",
+        "deckCost": 2,
+        "effectValue1": 3, "effectValue2": 0, "effectValue3": 0,
+        "description": "+3 Carry"
+      },
+      {
+        "cardId": 76, "cardName": "Map Scroll", "slot": "Utility", "rarity": "Uncommon",
+        "deckCost": 2,
+        "effectValue1": 0, "effectValue2": 0, "effectValue3": 0,
+        "description": "Reveals all nodes along hero's path to target"
+      },
+      {
+        "cardId": 77, "cardName": "Healing Herb Kit", "slot": "Utility", "rarity": "Uncommon",
+        "deckCost": 2,
+        "effectValue1": 1, "effectValue2": 0, "effectValue3": 0,
+        "description": "Heal 1 HP per turn while moving"
+      },
+      {
+        "cardId": 78, "cardName": "Snail Shell Horn", "slot": "Utility", "rarity": "Uncommon",
+        "deckCost": 2,
+        "effectValue1": 1, "effectValue2": 0, "effectValue3": 0,
+        "description": "Adjacent friendly heroes get +1 Combat"
+      },
+      {
+        "cardId": 79, "cardName": "Flint Firestarter", "slot": "Utility", "rarity": "Rare",
+        "deckCost": 3,
+        "effectValue1": 1, "effectValue2": 0, "effectValue3": 0,
+        "description": "Enemies on this node take 1 damage at start of combat"
+      },
+      {
+        "cardId": 80, "cardName": "Climbing Claws", "slot": "Utility", "rarity": "Rare",
+        "deckCost": 3,
+        "effectValue1": 2, "effectValue2": 0, "effectValue3": 0,
+        "description": "+2 Move, can traverse any edge regardless of restrictions"
+      }
+    ],
+    "legendary": [
+      {
+        "cardId": 81, "cardName": "Storm Needle", "slot": "Offensive", "rarity": "Legendary",
+        "deckCost": 3,
+        "effectValue1": 4, "effectValue2": 1, "effectValue3": 0,
+        "description": "+4 Combat, deals 1 splash damage to all enemies on node"
+      },
+      {
+        "cardId": 82, "cardName": "Ember Torch", "slot": "Offensive", "rarity": "Legendary",
+        "deckCost": 3,
+        "effectValue1": 3, "effectValue2": 2, "effectValue3": 0,
+        "description": "+3 Combat, reveals fog 2 nodes in all directions"
+      },
+      {
+        "cardId": 83, "cardName": "Frost Thread Cloak", "slot": "Defensive", "rarity": "Legendary",
+        "deckCost": 3,
+        "effectValue1": 3, "effectValue2": 1, "effectValue3": 0,
+        "description": "+3 HP, enemies on node lose 1 Combat"
+      },
+      {
+        "cardId": 84, "cardName": "Golden Acorn Charm", "slot": "Defensive", "rarity": "Legendary",
+        "deckCost": 3,
+        "effectValue1": 2, "effectValue2": 1, "effectValue3": 0,
+        "description": "+2 HP, +1 food production while hero is deployed"
+      },
+      {
+        "cardId": 85, "cardName": "War Banner Pin", "slot": "Offensive", "rarity": "Legendary",
+        "deckCost": 3,
+        "effectValue1": 2, "effectValue2": 0, "effectValue3": 0,
+        "description": "+2 Combat to all friendly tokens on this node"
+      },
+      {
+        "cardId": 86, "cardName": "Thorn Crown", "slot": "Offensive", "rarity": "Legendary",
+        "deckCost": 3,
+        "effectValue1": 3, "effectValue2": 1, "effectValue3": 0,
+        "description": "+3 Combat, takes 1 self-damage per round"
+      },
+      {
+        "cardId": 87, "cardName": "Root Armor", "slot": "Defensive", "rarity": "Legendary",
+        "deckCost": 3,
+        "effectValue1": 5, "effectValue2": -1, "effectValue3": 0,
+        "description": "+5 HP, -1 Move"
+      },
+      {
+        "cardId": 88, "cardName": "Moonlight Dagger", "slot": "Offensive", "rarity": "Legendary",
+        "deckCost": 3,
+        "effectValue1": 3, "effectValue2": 2, "effectValue3": 0,
+        "description": "+3 Combat, +2 Initiative, double damage from fog"
+      },
+      {
+        "cardId": 89, "cardName": "Lantern of the Deep", "slot": "Defensive", "rarity": "Legendary",
+        "deckCost": 3,
+        "effectValue1": 2, "effectValue2": 0, "effectValue3": 0,
+        "description": "+2 HP, reveals entire zone this hero is in"
+      },
+      {
+        "cardId": 90, "cardName": "Banner of the Rat Pack", "slot": "Offensive", "rarity": "Legendary",
+        "deckCost": 3,
+        "effectValue1": 2, "effectValue2": 0, "effectValue3": 0,
+        "description": "+2 Combat to ALL friendly tokens on the map"
+      }
+    ]
+  },
+  "tactical": {
+    "combatTactics": [
+      {
+        "cardId": 91, "cardName": "Pack Ambush", "type": "CombatTactic", "rarity": "Common",
+        "deckCost": 1,
+        "effectValue1": 2, "effectValue2": 1, "effectValue3": 0,
+        "description": "+2 Combat to all heroes on this node for 1 round"
+      },
+      {
+        "cardId": 92, "cardName": "Rally the Pack", "type": "CombatTactic", "rarity": "Common",
+        "deckCost": 1,
+        "effectValue1": 1, "effectValue2": 0, "effectValue3": 0,
+        "description": "+1 Combat to all heroes on this node for rest of combat"
+      },
+      {
+        "cardId": 93, "cardName": "Defensive Formation", "type": "CombatTactic", "rarity": "Common",
+        "deckCost": 1,
+        "effectValue1": 1, "effectValue2": 0, "effectValue3": 0,
+        "description": "All heroes on this node block 1 damage this round"
+      },
+      {
+        "cardId": 94, "cardName": "Last Stand", "type": "CombatTactic", "rarity": "Uncommon",
+        "deckCost": 2,
+        "effectValue1": 5, "effectValue2": 1, "effectValue3": 0,
+        "description": "One hero with 1 HP gets +5 Combat this round"
+      },
+      {
+        "cardId": 95, "cardName": "Rapid Strike", "type": "CombatTactic", "rarity": "Uncommon",
+        "deckCost": 2,
+        "effectValue1": 2, "effectValue2": 0, "effectValue3": 0,
+        "description": "One hero attacks twice this round"
+      },
+      {
+        "cardId": 96, "cardName": "Tactical Retreat", "type": "CombatTactic", "rarity": "Uncommon",
+        "deckCost": 2,
+        "effectValue1": 0, "effectValue2": 0, "effectValue3": 0,
+        "description": "Remove all heroes from this node (move to nearest friendly-occupied node; keep carried resources)"
+      },
+      {
+        "cardId": 97, "cardName": "Reinforcements", "type": "CombatTactic", "rarity": "Rare",
+        "deckCost": 3,
+        "effectValue1": 1, "effectValue2": 0, "effectValue3": 0,
+        "description": "Deploy 1 hero from available pool directly to this node"
+      },
+      {
+        "cardId": 98, "cardName": "Hidden Tunnel", "type": "CombatTactic", "rarity": "Rare",
+        "deckCost": 3,
+        "effectValue1": 0, "effectValue2": 0, "effectValue3": 0,
+        "description": "Move all heroes on this node to any adjacent node (escape or reposition)"
+      },
+      {
+        "cardId": 99, "cardName": "Map Advantage", "type": "CombatTactic", "rarity": "Rare",
+        "deckCost": 3,
+        "effectValue1": 2, "effectValue2": 0, "effectValue3": 0,
+        "description": "Reveal all enemies on the current zone; heroes on this node get +2 Combat"
+      },
+      {
+        "cardId": 100, "cardName": "Scout Ahead", "type": "CombatTactic", "rarity": "Common",
+        "deckCost": 1,
+        "effectValue1": 2, "effectValue2": 0, "effectValue3": 0,
+        "description": "Reveal all nodes within 2 edges of this combat; no combat effect"
+      }
+    ],
+    "supportTactics": [
+      {
+        "cardId": 101, "cardName": "Gather Seeds", "type": "SupportTactic", "rarity": "Common",
+        "deckCost": 1,
+        "effectValue1": 1, "effectValue2": 0, "effectValue3": 0,
+        "description": "Heroes on this node gather +1 resource from this node"
+      },
+      {
+        "cardId": 102, "cardName": "Harvest Bounty", "type": "SupportTactic", "rarity": "Common",
+        "deckCost": 1,
+        "effectValue1": 2, "effectValue2": 0, "effectValue3": 0,
+        "description": "Double resource gathering on this node this turn"
+      },
+      {
+        "cardId": 103, "cardName": "Emergency Rations", "type": "SupportTactic", "rarity": "Common",
+        "deckCost": 1,
+        "effectValue1": 0, "effectValue2": 0, "effectValue3": 0,
+        "description": "Feed all heroes on the map this turn (no food cost in cleanup)"
+      },
+      {
+        "cardId": 104, "cardName": "Salvage Scrap", "type": "SupportTactic", "rarity": "Uncommon",
+        "deckCost": 2,
+        "effectValue1": 0, "effectValue2": 0, "effectValue3": 0,
+        "description": "Recover resources from this node (even if previously gathered)"
+      },
+      {
+        "cardId": 105, "cardName": "Trade Caravan", "type": "SupportTactic", "rarity": "Uncommon",
+        "deckCost": 2,
+        "effectValue1": 3, "effectValue2": 3, "effectValue3": 0,
+        "description": "Convert 3 of any resource to 3 of any other resource"
+      },
+      {
+        "cardId": 106, "cardName": "Herbal Remedy", "type": "SupportTactic", "rarity": "Common",
+        "deckCost": 1,
+        "effectValue1": 2, "effectValue2": 0, "effectValue3": 0,
+        "description": "Heal 2 HP to one hero on this node"
+      },
+      {
+        "cardId": 107, "cardName": "Warm Burrow", "type": "SupportTactic", "rarity": "Uncommon",
+        "deckCost": 2,
+        "effectValue1": 0, "effectValue2": 0, "effectValue3": 0,
+        "description": "All injured heroes in available pool heal immediately"
+      },
+      {
+        "cardId": 108, "cardName": "Rest and Recover", "type": "SupportTactic", "rarity": "Common",
+        "deckCost": 1,
+        "effectValue1": 1, "effectValue2": 0, "effectValue3": 0,
+        "description": "Heal 1 HP to all heroes on this node"
+      },
+      {
+        "cardId": 109, "cardName": "Medic Call", "type": "SupportTactic", "rarity": "Uncommon",
+        "deckCost": 2,
+        "effectValue1": 3, "effectValue2": 0, "effectValue3": 0,
+        "description": "Heal 3 HP to one hero anywhere on the map"
+      },
+      {
+        "cardId": 110, "cardName": "Renew Strength", "type": "SupportTactic", "rarity": "Rare",
+        "deckCost": 3,
+        "effectValue1": 0, "effectValue2": 0, "effectValue3": 0,
+        "description": "Fully heal one hero on this node"
+      }
+    ],
+    "powerTactics": [
+      {
+        "cardId": 111, "cardName": "Heroic Charge", "type": "PowerTactic", "rarity": "Rare",
+        "deckCost": 3,
+        "effectValue1": 3, "effectValue2": 1, "effectValue3": 0,
+        "description": "All heroes on this node get +3 Combat and +1 Move this turn"
+      },
+      {
+        "cardId": 112, "cardName": "Pack Unity", "type": "PowerTactic", "rarity": "Rare",
+        "deckCost": 3,
+        "effectValue1": 1, "effectValue2": 0, "effectValue3": 0,
+        "description": "All heroes on the map get +1 Combat this turn"
+      },
+      {
+        "cardId": 113, "cardName": "Burrow Defense", "type": "PowerTactic", "rarity": "Uncommon",
+        "deckCost": 2,
+        "effectValue1": 5, "effectValue2": 0, "effectValue3": 0,
+        "description": "Colony node gets +5 Combat defense this turn"
+      },
+      {
+        "cardId": 114, "cardName": "Final Gambit", "type": "PowerTactic", "rarity": "Legendary",
+        "deckCost": 3,
+        "effectValue1": 10, "effectValue2": 0, "effectValue3": 0,
+        "description": "One hero gets +10 Combat this round; hero is injured after combat"
+      },
+      {
+        "cardId": 115, "cardName": "Hidden Kingdom", "type": "PowerTactic", "rarity": "Legendary",
+        "deckCost": 3,
+        "effectValue1": 0, "effectValue2": 0, "effectValue3": 0,
+        "description": "Reveal the entire map (all fog removed permanently)"
+      },
+      {
+        "cardId": 116, "cardName": "Surprise Raid", "type": "PowerTactic", "rarity": "Rare",
+        "deckCost": 3,
+        "effectValue1": 0, "effectValue2": 0, "effectValue3": 0,
+        "description": "One hero can move to any node on the map and attack this turn"
+      },
+      {
+        "cardId": 117, "cardName": "Poison Thorn", "type": "PowerTactic", "rarity": "Uncommon",
+        "deckCost": 2,
+        "effectValue1": 3, "effectValue2": 0, "effectValue3": 0,
+        "description": "Deal 3 damage to one enemy on this node before combat begins"
+      },
+      {
+        "cardId": 118, "cardName": "Moonlight Strike", "type": "PowerTactic", "rarity": "Rare",
+        "deckCost": 3,
+        "effectValue1": 2, "effectValue2": 0, "effectValue3": 0,
+        "description": "One hero deals double damage this round"
+      },
+      {
+        "cardId": 119, "cardName": "Rat Swarm", "type": "PowerTactic", "rarity": "Legendary",
+        "deckCost": 3,
+        "effectValue1": 0, "effectValue2": 0, "effectValue3": 0,
+        "description": "Deploy ALL available heroes to this node immediately"
+      },
+      {
+        "cardId": 120, "cardName": "Victory Feast", "type": "PowerTactic", "rarity": "Legendary",
+        "deckCost": 3,
+        "effectValue1": 0, "effectValue2": 2, "effectValue3": 0,
+        "description": "Heal all heroes to full HP; +2 food production this turn"
+      }
+    ]
+  }
+}

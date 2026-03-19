@@ -19,12 +19,14 @@ namespace Scurry.Core
         {
             if (_instance != null && _instance != this)
             {
-                Debug.Log("[RelicManager] Awake: duplicate instance — destroying self");
-                Destroy(gameObject);
+                ServiceLocator.Register<IRelicManager>(_instance);
+                Debug.Log("[RelicManager] Awake: duplicate instance — re-registered existing and destroying component only");
+                Destroy(this);
                 return;
             }
             _instance = this;
-            DontDestroyOnLoad(gameObject);
+            if (gameObject.name == "PersistentManagers")
+                DontDestroyOnLoad(gameObject);
             ServiceLocator.Register<IRelicManager>(this);
             Debug.Log("[RelicManager] Awake: initialized");
         }
@@ -44,7 +46,7 @@ namespace Scurry.Core
                 return;
             }
             activeRelics.Add(relic);
-            Debug.Log($"[RelicManager] AddRelic: added '{relic.relicName}' (effect={relic.effect}, value={relic.effectValue}), total relics={activeRelics.Count}");
+            Debug.Log($"[RelicManager] AddRelic: added '{relic.relicName}' (value={relic.effectValue}), total relics={activeRelics.Count}");
         }
 
         public bool HasRelic(string relicName)
@@ -56,50 +58,17 @@ namespace Scurry.Core
             return false;
         }
 
-        public bool HasRelicEffect(RelicEffect effect)
+        public int GetRelicEffectValue(string relicName)
         {
             foreach (var r in activeRelics)
             {
-                if (r.effect == effect) return true;
+                if (r.relicName == relicName)
+                {
+                    Debug.Log($"[RelicManager] GetRelicEffectValue: relic='{relicName}', value={r.effectValue}");
+                    return r.effectValue;
+                }
             }
-            return false;
-        }
-
-        public int GetEffectValue(RelicEffect effect)
-        {
-            int total = 0;
-            foreach (var r in activeRelics)
-            {
-                if (r.effect == effect)
-                    total += r.effectValue;
-            }
-            Debug.Log($"[RelicManager] GetEffectValue: effect={effect}, total={total}");
-            return total;
-        }
-
-        public int GetCombatBonus()
-        {
-            return GetEffectValue(RelicEffect.BonusCombat);
-        }
-
-        public int GetMoveBonus()
-        {
-            return GetEffectValue(RelicEffect.BonusMove);
-        }
-
-        public int GetHPBonus()
-        {
-            return GetEffectValue(RelicEffect.BonusHP);
-        }
-
-        public int GetShopDiscount()
-        {
-            return GetEffectValue(RelicEffect.ShopDiscount);
-        }
-
-        public bool CanIgnoreFirstPatrol()
-        {
-            return HasRelicEffect(RelicEffect.IgnoreFirstPatrol);
+            return 0;
         }
 
         public List<string> GetRelicNames()
@@ -128,6 +97,18 @@ namespace Scurry.Core
             }
 #endif
             Debug.Log($"[RelicManager] RestoreRelics: restored {activeRelics.Count} of {relicNames.Count} relics");
+        }
+
+        private void OnDestroy()
+        {
+            if (_instance != this)
+            {
+                Debug.Log($"[RelicManager] OnDestroy: duplicate instance destroyed, skipping unregister (self={GetInstanceID()})");
+                return;
+            }
+            _instance = null;
+            ServiceLocator.Unregister<IRelicManager>();
+            Debug.Log("[RelicManager] OnDestroy: unregistered from ServiceLocator");
         }
     }
 }

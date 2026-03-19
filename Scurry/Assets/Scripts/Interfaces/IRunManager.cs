@@ -10,7 +10,6 @@ namespace Scurry.Interfaces
         int MaterialsStockpile { get; }
         int CurrencyStockpile { get; }
         List<ColonyCardDefinitionSO> ColonyCardPool { get; }
-        ZoneSO CurrentZone { get; }
         int CurrentStageIndex { get; }
         int CurrentStepIndex { get; }
         RunState CurrentRunState { get; }

@@ -11,9 +11,6 @@ namespace Scurry.Core
         DefeatTobiasDuchess,
         DefeatAldricFenn,
         DefeatPiedPiper,
-        CompleteLevel1,
-        CompleteLevel2,
-        CompleteLevel3,
         FullRunComplete,
         Scrapbook25,
         Scrapbook50,
@@ -26,8 +23,6 @@ namespace Scurry.Core
         Collect500Resources,
         Defeat50Enemies,
         Defeat200Enemies,
-        Buy10ShopCards,
-        Upgrade10Cards,
         Complete10Runs,
         NoStarvationRun,
         PerfectBossKill,
@@ -53,12 +48,14 @@ namespace Scurry.Core
         {
             if (_instance != null && _instance != this)
             {
-                Debug.Log("[AchievementManager] Awake: duplicate instance — destroying self");
-                Destroy(gameObject);
+                Debug.Log("[AchievementManager] Awake: duplicate instance — destroying component only");
+                Destroy(this);
                 return;
             }
             _instance = this;
-            DontDestroyOnLoad(gameObject);
+            // Only DontDestroyOnLoad if on dedicated Bootstrap GO, not a shared scene GO
+            if (gameObject.name == "PersistentManagers")
+                DontDestroyOnLoad(gameObject);
             LoadAchievements();
             Debug.Log($"[AchievementManager] Awake: loaded {unlockedAchievements.Count} unlocked achievements");
         }
@@ -66,23 +63,13 @@ namespace Scurry.Core
         private void OnEnable()
         {
             Debug.Log("[AchievementManager] OnEnable: subscribing to events");
-            EventBus.OnBossDefeated += OnBossDefeated;
-            EventBus.OnRunComplete_M1 += OnRunComplete;
-            EventBus.OnStarvationDamage += OnStarvationDamage;
-            EventBus.OnCardPurchased += OnCardPurchased;
-            EventBus.OnUpgradeComplete += OnUpgradeComplete;
-            EventBus.OnResourceCollected += OnResourceCollected;
+            EventBus.OnRunComplete += OnRunComplete;
         }
 
         private void OnDisable()
         {
             Debug.Log("[AchievementManager] OnDisable: unsubscribing from events");
-            EventBus.OnBossDefeated -= OnBossDefeated;
-            EventBus.OnRunComplete_M1 -= OnRunComplete;
-            EventBus.OnStarvationDamage -= OnStarvationDamage;
-            EventBus.OnCardPurchased -= OnCardPurchased;
-            EventBus.OnUpgradeComplete -= OnUpgradeComplete;
-            EventBus.OnResourceCollected -= OnResourceCollected;
+            EventBus.OnRunComplete -= OnRunComplete;
         }
 
         public bool IsUnlocked(AchievementId id)
@@ -104,18 +91,28 @@ namespace Scurry.Core
             Steam.SteamManager.UnlockAchievement(key);
 
             EventBus.OnAchievementUnlocked?.Invoke(key);
+
+            // Route achievement notification through the per-scene NotificationStack
+            string displayName = FormatAchievementName(key);
+            EventBus.OnNotification?.Invoke($"Achievement Unlocked: {displayName}", new Color(1f, 0.85f, 0.3f));
+        }
+
+        private string FormatAchievementName(string key)
+        {
+            var sb = new System.Text.StringBuilder();
+            for (int i = 0; i < key.Length; i++)
+            {
+                if (i > 0 && char.IsUpper(key[i]) && !char.IsUpper(key[i - 1]))
+                    sb.Append(' ');
+                sb.Append(key[i]);
+            }
+            return sb.ToString();
         }
 
         public void OnRunStarted()
         {
             currentRunNoStarvation = true;
             Debug.Log("[AchievementManager] OnRunStarted: resetting per-run tracking (noStarvation=true)");
-        }
-
-        private void OnBossDefeated()
-        {
-            Debug.Log("[AchievementManager] OnBossDefeated: checking boss achievements");
-            TryUnlock(AchievementId.FirstVictory);
         }
 
         public void OnBossDefeatedByName(string bossName)
@@ -125,31 +122,17 @@ namespace Scurry.Core
             {
                 case "Elder Silas":
                     TryUnlock(AchievementId.DefeatElderSilas);
-                    TryUnlock(AchievementId.CompleteLevel1);
                     break;
                 case "Tobias & Duchess":
                     TryUnlock(AchievementId.DefeatTobiasDuchess);
-                    TryUnlock(AchievementId.CompleteLevel2);
                     break;
                 case "Guildmaster Aldric Fenn":
                     TryUnlock(AchievementId.DefeatAldricFenn);
-                    TryUnlock(AchievementId.CompleteLevel3);
                     break;
                 case "The Pied Piper":
                     TryUnlock(AchievementId.DefeatPiedPiper);
                     TryUnlock(AchievementId.FullRunComplete);
                     break;
-            }
-        }
-
-        public void OnLevelCompleted(int level)
-        {
-            Debug.Log($"[AchievementManager] OnLevelCompleted: level={level}");
-            switch (level)
-            {
-                case 1: TryUnlock(AchievementId.CompleteLevel1); break;
-                case 2: TryUnlock(AchievementId.CompleteLevel2); break;
-                case 3: TryUnlock(AchievementId.CompleteLevel3); break;
             }
         }
 
@@ -166,35 +149,28 @@ namespace Scurry.Core
             SaveStats();
         }
 
-        private void OnStarvationDamage(int damage)
+        public void OnResourceDeposited(int amount)
         {
-            currentRunNoStarvation = false;
-            Debug.Log($"[AchievementManager] OnStarvationDamage: damage={damage}, noStarvation now false");
-        }
-
-        private void OnCardPurchased(CardDefinitionSO card)
-        {
-            totalShopPurchases++;
-            Debug.Log($"[AchievementManager] OnCardPurchased: card='{card.cardName}', totalPurchases={totalShopPurchases}");
-            if (totalShopPurchases >= 10) TryUnlock(AchievementId.Buy10ShopCards);
-            SaveStats();
-        }
-
-        private void OnUpgradeComplete()
-        {
-            totalUpgrades++;
-            Debug.Log($"[AchievementManager] OnUpgradeComplete: totalUpgrades={totalUpgrades}");
-            if (totalUpgrades >= 10) TryUnlock(AchievementId.Upgrade10Cards);
-            SaveStats();
-        }
-
-        private void OnResourceCollected(ResourceType type, int value)
-        {
-            totalResourcesCollected += value;
-            Debug.Log($"[AchievementManager] OnResourceCollected: type={type}, value={value}, totalCollected={totalResourcesCollected}");
+            totalResourcesCollected += amount;
+            Debug.Log($"[AchievementManager] OnResourceDeposited: amount={amount}, totalCollected={totalResourcesCollected}");
             if (totalResourcesCollected >= 100) TryUnlock(AchievementId.Collect100Resources);
             if (totalResourcesCollected >= 500) TryUnlock(AchievementId.Collect500Resources);
             SaveStats();
+        }
+
+        public void OnEnemyDefeated()
+        {
+            totalEnemiesDefeated++;
+            Debug.Log($"[AchievementManager] OnEnemyDefeated: totalDefeated={totalEnemiesDefeated}");
+            if (totalEnemiesDefeated >= 50) TryUnlock(AchievementId.Defeat50Enemies);
+            if (totalEnemiesDefeated >= 200) TryUnlock(AchievementId.Defeat200Enemies);
+            SaveStats();
+        }
+
+        public void OnStarvationOccurred()
+        {
+            currentRunNoStarvation = false;
+            Debug.Log("[AchievementManager] OnStarvationOccurred: noStarvation now false");
         }
 
         public void CheckScrapbookCompletion(float percent)
@@ -260,6 +236,17 @@ namespace Scurry.Core
             PlayerPrefs.SetInt("Scurry_TotalUpgrades", totalUpgrades);
             PlayerPrefs.SetInt("Scurry_TotalRuns", totalRunsCompleted);
             PlayerPrefs.Save();
+        }
+
+        private void OnDestroy()
+        {
+            if (_instance != this)
+            {
+                Debug.Log($"[AchievementManager] OnDestroy: duplicate instance destroyed, skipping unregister (self={GetInstanceID()})");
+                return;
+            }
+            _instance = null;
+            Debug.Log("[AchievementManager] OnDestroy: singleton instance cleared");
         }
 
         [System.Serializable]
